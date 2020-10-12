@@ -6,24 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://m0d9.me">
-  <title>Fastjson&lt;1.2.60 Dos分析 | m0d9&#39;s blog</title>
+  <title>Java内存shell：Tomcat回显 | m0d9&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="fastjson&lt;1.2.60 发现https:&#x2F;&#x2F;github.com&#x2F;alibaba&#x2F;fastjson&#x2F;commit&#x2F;995845170527221ca0293cf290e33a7d6cb52bf7">
+  <meta name="description" content="Tomcat回显 与 Java内存shell有什么关系？ 在java漏洞利用中如何获取到执行结果？这是Tomcat回显的最原始需求，具体可以参考【4】中的许多手法，这里不展开 其中提到一种思路，获取response，然后直接操作response以http形式返回，而Java内存shell中，很重要的一点就是获取request从而获取上下文cotext，其中获取request的思路相似通用可借鉴。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Fastjson&lt;1.2.60 Dos分析">
-<meta property="og:url" content="http://m0d9.me/2019/09/06/Fastjson-1-2-60-Dos%E5%88%86%E6%9E%90/index.html">
+<meta property="og:title" content="Java内存shell：Tomcat回显">
+<meta property="og:url" content="http://m0d9.me/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/index.html">
 <meta property="og:site_name" content="m0d9&#39;s blog">
-<meta property="og:description" content="fastjson&lt;1.2.60 发现https:&#x2F;&#x2F;github.com&#x2F;alibaba&#x2F;fastjson&#x2F;commit&#x2F;995845170527221ca0293cf290e33a7d6cb52bf7">
+<meta property="og:description" content="Tomcat回显 与 Java内存shell有什么关系？ 在java漏洞利用中如何获取到执行结果？这是Tomcat回显的最原始需求，具体可以参考【4】中的许多手法，这里不展开 其中提到一种思路，获取response，然后直接操作response以http形式返回，而Java内存shell中，很重要的一点就是获取request从而获取上下文cotext，其中获取request的思路相似通用可借鉴。">
 <meta property="og:locale">
-<meta property="og:image" content="http://m0d9.me/images/pasted-3.png">
-<meta property="og:image" content="http://m0d9.me/images/pasted-4.png">
-<meta property="article:published_time" content="2019-09-06T02:59:00.000Z">
-<meta property="article:modified_time" content="2020-10-10T13:20:18.837Z">
+<meta property="og:image" content="http://m0d9.me/images/pasted-114.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-116.png">
+<meta property="article:published_time" content="2020-10-10T06:19:03.000Z">
+<meta property="article:modified_time" content="2020-10-10T14:04:30.639Z">
 <meta property="article:author" content="m0d9">
-<meta property="article:tag" content="Java">
-<meta property="article:tag" content="Fastjson">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://m0d9.me/images/pasted-3.png">
+<meta name="twitter:image" content="http://m0d9.me/images/pasted-114.png">
   
     <link rel="alternative" href="/atom.xml" title="m0d9&#39;s blog" type="application/atom+xml">
   
@@ -157,53 +155,72 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-Fastjson-1-2-60-Dos分析" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Java内存shell：Tomcat回显" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      Fastjson&lt;1.2.60 Dos分析
+      Java内存shell：Tomcat回显
     </h1>
   
 
         
-        <a href="/2019/09/06/Fastjson-1-2-60-Dos%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2019-09-06T02:59:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-09-06</time>
+        <a href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/" class="archive-article-date">
+  	<time datetime="2020-10-10T06:19:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-10</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>fastjson&lt;1.2.60</p>
-<h2 id="发现"><a href="#发现" class="headerlink" title="发现"></a>发现</h2><p><a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson/commit/995845170527221ca0293cf290e33a7d6cb52bf7">https://github.com/alibaba/fastjson/commit/995845170527221ca0293cf290e33a7d6cb52bf7</a></p>
-<p><img src="/images/pasted-3.png" alt="upload successful"></p>
+        <p>Tomcat回显 与 Java内存shell有什么关系？</p>
+<p>在java漏洞利用中如何获取到执行结果？这是Tomcat回显的最原始需求，具体可以参考【4】中的许多手法，这里不展开</p>
+<p>其中提到一种思路，获取response，然后直接操作response以http形式返回，而Java内存shell中，很重要的一点就是获取request从而获取上下文cotext，其中获取request的思路相似通用可借鉴。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>参考【1】中李三师傅总结了之前比较经典的tomcat回显方式，写的很好，直接复用：</p>
 <a id="more"></a>
 
+<ul>
+<li>《基于内存 Webshell 的无文件攻击技术研究》，观星大哥的文章，通杀spring，能解决实战只能够遇到的大部分情况了。</li>
+<li>《Tomcat中一种半通用回显方法》，kingkk师傅的，这篇文章讲了通过反射修改ApplicationFilterChain参数来让tomcat再下一次请求的时候在线程中缓存req和resp，不足之处在于shiro无法回显。</li>
+<li>《基于tomcat的内存 Webshell 无文件攻击技术》，threedr3am师傅的，通过上一篇的方法获取到req进一步获取context，然后动态注册filter，不足之处在于使用的是上一篇的获取req的思路所以也无法shiro回显。</li>
+<li>《基于全局储存的新思路 | Tomcat的一种通用回显方法研究》，这篇文章通过currentThread.getContextClassLoader()获取StandardContext，进一步获取到response，解决了shiro回显的问题，不足在于tomcat7中无法获取到StandardContext。</li>
+<li>《基于Tomcat无文件Webshell研究》，总结上面文章的方法，不足之处在于无法解决tomcat7+shiro的问题。</li>
+</ul>
+<p>而李三师傅再此基础上，提出了</p>
+<ul>
+<li>《tomcat不出网回显连续剧第六集》，通过registry的利用链，是目前见到更通用的方式了。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Registry.getRegistry(null, null).getMBeanServer() -&gt;</span><br><span class="line">JmxMBeanServer.mbsInterceptor -&gt;</span><br><span class="line">DefaultMBeanServerInterceptor.repository -&gt;</span><br><span class="line">Registory#query -&gt;</span><br><span class="line">RequestInfo -&gt;</span><br><span class="line">Http11Processor#getRequest() -&gt; </span><br><span class="line">AbstractProcessor#getRequest() -&gt;</span><br><span class="line">Request#getResponse() -&gt;</span><br><span class="line">Response#doWrite()</span><br></pre></td></tr></table></figure>
 
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>问题出现在<br>src/main/java/com/alibaba/fastjson/parser/JSONLexerBase.java</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">scanString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        np = bp;</span><br><span class="line">        hasSpecial = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">char</span> ch;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            ch = next();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (ch == <span class="string">&#x27;\&quot;&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (ch == EOI) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!isEOF()) &#123;</span><br><span class="line">                    putChar((<span class="keyword">char</span>) EOI);</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">&quot;unclosed string : &quot;</span> + ch);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">case</span> <span class="string">&#x27;x&#x27;</span>:</span><br><span class="line">                        <span class="keyword">char</span> x1 = ch = next();</span><br><span class="line">                        <span class="keyword">char</span> x2 = ch = next();</span><br><span class="line"></span><br><span class="line">                        <span class="keyword">int</span> x_val = digits[x1] * <span class="number">16</span> + digits[x2];</span><br><span class="line">                        <span class="keyword">char</span> x_char = (<span class="keyword">char</span>) x_val;</span><br><span class="line">                        putChar(x_char);</span><br><span class="line">                        <span class="keyword">break</span>;                    </span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>以下来复现分析这些文章提到的姿势</p>
+<h2 id="姿势"><a href="#姿势" class="headerlink" title="姿势"></a>姿势</h2><h3 id="1-ApplicationFilterChain利用链"><a href="#1-ApplicationFilterChain利用链" class="headerlink" title="1. ApplicationFilterChain利用链"></a>1. ApplicationFilterChain利用链</h3><p>这个应该是kingkk师傅首次在参考【5】中提到的方法，参考【6】中使用的也是这个方法</p>
+<p>其中涉及到的原理技术点</p>
+<ol>
+<li><p>ApplicationFilterChain有一个静态参数，lastServicedRequest，类型为ThreadLocal<br> <img src="/images/pasted-114.png" alt="upload successful"></p>
+</li>
+<li><p>使用Java反射更改私有静态final字段？，参考<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/ask/195780">https://cloud.tencent.com/developer/ask/195780</a></p>
+</li>
+</ol>
+<p>攻击流程</p>
+<ol>
+<li><p>反射修改ApplicationDispatcher.WRAP_SAME_OBJECT 为true</p>
+</li>
+<li><p>internalDoFilter进入else流程，初始化lastServicedRequest和lastServicedResponse两个变量</p>
+</li>
+<li><p>从lastServicedRequest中获取当前请求request，从而获取到context<br> <img src="/images/pasted-116.png" alt="upload successful"></p>
+</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li>[1] <a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7535">tomcat不出网回显连续剧第六集</a></li>
+<li>[2] <a target="_blank" rel="noopener" href="https://lucifaer.com/2020/05/12/Tomcat%E9%80%9A%E7%94%A8%E5%9B%9E%E6%98%BE%E5%AD%A6%E4%B9%A0/">Tomcat通用回显学习</a></li>
+<li>[3] <a target="_blank" rel="noopener" href="https://www.cnblogs.com/potatsoSec/p/13060261.html">tomcat结合shiro无文件webshell的技术研究以及检测方法</a></li>
+<li>[4] <a target="_blank" rel="noopener" href="https://l3yx.github.io/2020/03/31/Java-Web%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E%E5%9B%9E%E6%98%BE%E6%80%BB%E7%BB%93/">Java Web代码执行漏洞回显总结</a></li>
+<li>[5] <a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7348">Tomcat中一种半通用回显方法</a></li>
+<li>[6] <a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7388#toc-1">基于tomcat的内存 Webshell 无文件攻击技术</a></li>
+</ul>
 
-<p>问题产生很简单，解析十六进制时出问题了</p>
-<p>正常的\x十六进制写法应该是</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[&#123;&quot;a&quot;:&quot;a\xAA&quot;&#125;]</span><br></pre></td></tr></table></figure>
-<p>x1 = A</p>
-<p>x2 = A</p>
-<p>如果这么写呢</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[&#123;&quot;a&quot;:&quot;a\x]</span><br></pre></td></tr></table></figure>
-
-<p>x1 = ]</p>
-<p>x2 = EOI</p>
-<p>这个时候已经读完了，但是看看判断是否读完的isEOF实现：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public boolean isEOF() &#123;</span><br><span class="line">    return bp &#x3D;&#x3D; len || ch &#x3D;&#x3D; EOI &amp;&amp; bp + 1 &#x3D;&#x3D; len;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p><img src="/images/pasted-4.png" alt="upload successful"></p>
-<p>ch=EOI，只是这时候指针bp已经在max len之后一位了，isEOF 永为false</p>
-<p>所有会一直putChar((char) EOI)，直到产生OOM</p>
-<h2 id="POC"><a href="#POC" class="headerlink" title="POC"></a>POC</h2><figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</span><br><span class="line">decodeLog = <span class="string">&quot;[&#123;\&quot;a\&quot;:\&quot;a\\x]&quot;</span></span><br><span class="line">System.out.println(decodeLog);</span><br><span class="line">Object obj = JSON.parse(decodeLog);</span><br></pre></td></tr></table></figure>
       
 
       
@@ -211,21 +228,6 @@
     <div class="article-info article-info-index">
       
       
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Fastjson</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
       
 
       
@@ -239,18 +241,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2019/12/03/%E5%88%A9%E7%94%A8openssl%E5%8F%8D%E5%BC%B9shell/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          利用openssl反弹shell
-        
-      </div>
-    </a>
   
-  
-    <a href="/2019/07/24/lzma%E8%B8%A9%E5%9D%91%E8%AE%B0/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">lzma踩坑记</div>
+    <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Java内存shell：三方框架</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -277,7 +270,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%91%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">发现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#POC"><span class="toc-number">3.</span> <span class="toc-text">POC</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A7%BF%E5%8A%BF"><span class="toc-number">2.</span> <span class="toc-text">姿势</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-ApplicationFilterChain%E5%88%A9%E7%94%A8%E9%93%BE"><span class="toc-number">2.1.</span> <span class="toc-text">1. ApplicationFilterChain利用链</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
                     </div>
                 </span>
             </div>

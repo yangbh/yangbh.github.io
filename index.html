@@ -150,6 +150,71 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Java内存shell：Tomcat回显" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/">Java内存shell：Tomcat回显</a>
+    </h1>
+  
+
+        
+        <a href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/" class="archive-article-date">
+  	<time datetime="2020-10-10T06:19:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Tomcat回显 与 Java内存shell有什么关系？</p>
+<p>在java漏洞利用中如何获取到执行结果？这是Tomcat回显的最原始需求，具体可以参考【4】中的许多手法，这里不展开</p>
+<p>其中提到一种思路，获取response，然后直接操作response以http形式返回，而Java内存shell中，很重要的一点就是获取request从而获取上下文cotext，其中获取request的思路相似通用可借鉴。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>参考【1】中李三师傅总结了之前比较经典的tomcat回显方式，写的很好，直接复用：</p>
+        
+          <a class="article-more-a" href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Java内存shell：三方框架" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -540,109 +605,6 @@
 
 
   
-    <article id="post-RMI：绕过JEP290——下" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/29/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/">RMI：绕过JEP290——下</a>
-    </h1>
-  
-
-        
-        <a href="/2020/07/29/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/" class="archive-article-date">
-  	<time datetime="2020-07-29T03:52:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>前文留了个坑，8u231之后还出现了限制与绕过，填个坑</p>
-<p>本节的思路：</p>
-<ol>
-<li>回顾JEP290 bypass的原理</li>
-<li>8u231的限制，老的JRMP绕过方式为何不行了</li>
-<li>An Trinh的绕过方式</li>
-<li>8u241的限制</li>
-</ol>
-        
-          <a class="article-more-a" href="/2020/07/29/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">enableReplace</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
@@ -798,18 +760,6 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">内存she l l</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">javassist</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">javaagent</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">内存马</a>
               </li>
              
@@ -822,7 +772,15 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Spring</a>
+                <a href="javascript:void(0)" class="js-tag color5">内存she l l</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">javassist</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">javaagent</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -838,11 +796,15 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">lzma</a>
+                <a href="javascript:void(0)" class="js-tag color2">Spring</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">celery</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">lzma</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -851,6 +813,10 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">rq</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">openssl</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -867,10 +833,6 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">TemplatesImpl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">openssl</a>
               </li>
              
               <li class="article-tag-list-item">
