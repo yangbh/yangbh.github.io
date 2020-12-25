@@ -150,6 +150,124 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-pyAntiSSRF" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/12/25/pyAntiSSRF/">pyAntiSSRF：python SSRF开发防御</a>
+    </h1>
+  
+
+        
+        <a href="/2020/12/25/pyAntiSSRF/" class="archive-article-date">
+  	<time datetime="2020-12-25T02:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-12-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>发现居然没有特别好用的python防御ssrf好用的pip库，造个轮子</p>
+<ul>
+<li>支持pip简单安装</li>
+<li>支持 py2&amp;py3</li>
+<li>直接通过参数引用，直接hijack最常用的requests库，不引入第三方函数</li>
+<li>支持防御DNS rebinding</li>
+</ul>
+<h2 id="SSRF原理及防御"><a href="#SSRF原理及防御" class="headerlink" title="SSRF原理及防御"></a>SSRF原理及防御</h2><p>ssrf攻击及防御这里不延伸，可参考【1】，p神讲的挺明白了，提两点</p>
+<ol>
+<li>原文没涉及到dns rebinding的防御，其实防御思路也很简单，只进行1次dns请求即可</li>
+<li>循环hijack requests这个思路提到过，但是不是最优解，其实直接hijack requests.sessions.Session.request即可，所有的requests get/post最终都调用的这个函数</li>
+</ol>
+<p>具体没啥可说的，看代码【2】吧</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p><code>pip install pyAntiSSRF</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. import &amp; patch requests库</span></span><br><span class="line"><span class="keyword">import</span> pyAntiSSRF</span><br><span class="line">pyAntiSSRF.patchRequests()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 通过参数anti_ssrf（get/post/request函数都支持，默认不开启），控制是否开启ssrf防御，如果开启且目标ip是内网，则会抛出异常</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="comment"># custom requests usage</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># patch requests by hijack requests.sessions.Session.request, default disable</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>, anti_ssrf=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># raise Exception</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>, anti_ssrf=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+        
+          <a class="article-more-a" href="/2020/12/25/pyAntiSSRF/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">ssrf</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">anti</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">tools</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">pip</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Python安全//" class="article-tag-list-link color4">Python安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Python安全/工具//" class="article-tag-list-link color3">工具</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Java内存shell：Tomcat回显" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -395,15 +513,15 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">内存shell</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">javassist</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">javaagent</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">内存shell</a>
         		</li>
       		
 		</ul>
@@ -519,92 +637,6 @@
 		</ul>
 	</div>
 
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-工具分析：TemplatesImpl链与代码执行" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/">ysoserial工具分析：TemplatesImpl链与代码执行</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" class="archive-article-date">
-  	<time datetime="2020-09-25T02:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>ysoserial的payload只看过Groovy和CommonsCollections1，就一直以为ysoserial是简单的通过最终调用Runtime.getRuntime().exec(cmd)来实现各种利用链的命令执行的，太年轻。。。</p>
-<p>本文以CommonsCollections2为例，主要介绍：</p>
-<ol>
-<li>ysoserial通过TemplatesImpl实现的通用命令执行打包</li>
-<li>如何实现代码执行（非命令执行）</li>
-</ol>
-        
-          <a class="article-more-a" href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">ysoserial</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">TemplatesImpl</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
 
       
 
@@ -754,19 +786,19 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Java</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Fastjson</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">dns</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">tunnel</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Java</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">Fastjson</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -790,14 +822,6 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Tomcat</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">回显</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">内存马</a>
               </li>
              
@@ -807,10 +831,6 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">servlet</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">内存shell</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -826,15 +846,15 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Spring</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">SpringBoot</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">H2</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Spring</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -850,19 +870,19 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">pickle</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">反序列化</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">rq</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">openssl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">pickle</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">反序列化</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -875,6 +895,34 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">enableReplace</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Tomcat</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">回显</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">内存shell</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">ssrf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">anti</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">tools</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">pip</a>
               </li>
             
             <div class="clearfix"></div>
@@ -931,6 +979,22 @@ MathJax.Hub.Queue(function() {
           
             <li class="search-li">
               <a href="http://z1ng.net/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>Zing</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="http://www.leesec.com/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>Leesec</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="https://www.cnblogs.com/LittleHann/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>LittleHann</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="https://www.cdxy.me/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>cdxy</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="https://joychou.org/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>joychou</a>
             </li>
           
         </ul>
