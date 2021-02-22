@@ -16,7 +16,7 @@
 <meta property="og:description" content="lzma 是python3.3 之后引入的一个官方压缩库，但是在使用时候发现import error 1234567891011$ pythonPython 3.6.0 (default, Mar 10 2017, 10:08:04)[GCC 4.2.1 Compatible Apple LLVM 8.0.0 (clang-800.0.42.1)] on darwinType &quot;help">
 <meta property="og:locale">
 <meta property="article:published_time" content="2019-07-24T02:04:00.000Z">
-<meta property="article:modified_time" content="2020-10-10T13:20:18.824Z">
+<meta property="article:modified_time" content="2020-12-25T07:01:03.434Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="lzma">
 <meta name="twitter:card" content="summary">
@@ -200,8 +200,14 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$pyenv</span> <span class="built_in">local</span> 3.5.5</span><br><span class="line"><span class="variable">$python</span></span><br><span class="line">Python 3.5.5 (default, Jul 24 2019, 10:22:29)</span><br><span class="line">[GCC 4.2.1 Compatible Apple LLVM 10.0.1 (clang-1001.0.46.4)] on darwin</span><br><span class="line">Type <span class="string">&quot;help&quot;</span>, <span class="string">&quot;copyright&quot;</span>, <span class="string">&quot;credits&quot;</span> or <span class="string">&quot;license&quot;</span> <span class="keyword">for</span> more information.</span><br><span class="line">&gt;&gt;&gt; import lzma</span><br><span class="line">&gt;&gt;</span><br></pre></td></tr></table></figure>
 
 <p>成功，反思“定位到是python编译的时候依赖库问题”走了弯路，CFLAGS解决zlib时就应该想到</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a target="_blank" rel="noopener" href="https://github.com/pyenv/pyenv/issues/1219">https://github.com/pyenv/pyenv/issues/1219</a></li>
+</ol>
+<h1 id="20201225"><a href="#20201225" class="headerlink" title="20201225"></a>20201225</h1><p>pyenv macOS Big Sur 11.1安装问题，解决方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CFLAGS&#x3D;&quot;-I$(brew --prefix openssl)&#x2F;include -I$(brew --prefix bzip2)&#x2F;include -I$(brew --prefix readline)&#x2F;include -I$(xcrun --show-sdk-path)&#x2F;usr&#x2F;include&quot; LDFLAGS&#x3D;&quot;-L$(brew --prefix openssl)&#x2F;lib -L$(brew --prefix readline)&#x2F;lib -L$(brew --prefix zlib)&#x2F;lib -L$(brew --prefix bzip2)&#x2F;lib&quot; pyenv install --patch 2.7.15 &lt; &lt;(curl -sSL https:&#x2F;&#x2F;github.com&#x2F;python&#x2F;cpython&#x2F;commit&#x2F;8ea6353.patch\?full_index\&#x3D;1)</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考-1"><a href="#参考-1" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://github.com/pyenv/pyenv/issues/1643">https://github.com/pyenv/pyenv/issues/1643</a></li>
 </ol>
 
       
@@ -273,7 +279,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">1.</span> <span class="toc-text">参考</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">1.</span> <span class="toc-text">参考</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#20201225"><span class="toc-number"></span> <span class="toc-text">20201225</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83-1"><span class="toc-number">1.</span> <span class="toc-text">参考</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -303,7 +309,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2020 m0d9
+    		&copy; 2021 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -545,6 +551,14 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pip</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Drill</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2021-25646</a>
               </li>
             
             <div class="clearfix"></div>

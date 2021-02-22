@@ -150,6 +150,164 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Apache-Druid-CVE-2021-25646-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/">Apache Druid CVE-2021-25646 漏洞分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-02-19T03:16:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-02-19</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Litch1大佬的这个洞有意思，终于有时间分析下，记录下分析过程</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p><a target="_blank" rel="noopener" href="https://archive.apache.org/dist/druid/">https://archive.apache.org/dist/druid/</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$wget</span> https://archive.apache.org/dist/druid/0.20.0/apache-druid-0.20.0-bin.tar.gz &amp;&amp; tar -xzvf apache-druid-0.20.0-bin.tar.gz</span><br></pre></td></tr></table></figure>
+<p>根据参考，修改conf/druid/single-server/micro-quickstart/coordinator-overlord/jvm.config，末尾增加调试参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xdebug -Xnoagent -Djava.compiler&#x3D;NONE -Xrunjdwp:transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;n,address&#x3D;5005</span><br></pre></td></tr></table></figure>
+
+<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><h3 id="Jackson注解"><a href="#Jackson注解" class="headerlink" title="Jackson注解"></a>Jackson注解</h3><h4 id="name为空字符串的CreatorProperty"><a href="#name为空字符串的CreatorProperty" class="headerlink" title="name为空字符串的CreatorProperty"></a>name为空字符串的CreatorProperty</h4><p>作者给出这个漏洞的关键点解释</p>
+<blockquote>
+<p>漏洞的关键：<br>在于对用JsonCreator注解修饰的方法来说，方法的所有参数都会解析成CreatorProperty类型，对于没有使用JsonProperty注解修饰的参数来说,会创建一个name为””的CreatorProperty，在用户传入键为””的json对象时就会被解析到对应的参数上。</p>
+</blockquote>
+<h4 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h4><p>其中与该漏洞相关的注解如下</p>
+<ul>
+<li>JsonCreator</li>
+<li>JsonProperty</li>
+<li>JacksonInject</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person4</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> JavaScriptConfig config;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JsonCreator</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person4</span><span class="params">(<span class="meta">@JsonProperty(&quot;age&quot;)</span> <span class="keyword">int</span> age,</span></span></span><br><span class="line"><span class="function"><span class="params">                   <span class="meta">@JsonProperty(&quot;name&quot;)</span> String name,</span></span></span><br><span class="line"><span class="function"><span class="params">                   <span class="meta">@JacksonInject</span> JavaScriptConfig config)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.config = config;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;User [name=&quot;</span> + name + <span class="string">&quot;, age=&quot;</span> + age + <span class="string">&quot;, config=&quot;</span> + config.toString() + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String sp4 = <span class="string">&quot;&#123;\&quot;enabled\&quot;:true&#125;&quot;</span>;</span><br><span class="line">            ObjectMapper mapper4 = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">            JavaScriptConfig pp4 = mapper4.readValue(sp4, JavaScriptConfig.class);</span><br><span class="line">            System.out.println(pp4);</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;---------------------------&quot;</span>);</span><br><span class="line">            String sp5 = <span class="string">&quot;&#123;\&quot;age\&quot;:10,\&quot;name\&quot;:\&quot;m0d9\&quot;,\&quot;\&quot;:&#123;\&quot;enabled\&quot;:true&#125;&#125;&quot;</span>;</span><br><span class="line">            ObjectMapper mapper5 = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">            Person4 pp5 = mapper5.readValue(sp5, Person4.class);</span><br><span class="line">            System.out.println(pp5);</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (JsonProcessingException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>output 如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">JavaScriptConfig&#123;enabled&#x3D;true&#125;</span><br><span class="line">---------------------------</span><br><span class="line">User [name&#x3D;m0d9, age&#x3D;10, config&#x3D;JavaScriptConfig&#123;enabled&#x3D;true&#125;]</span><br></pre></td></tr></table></figure>
+<h4 id="Jackson反序列化流程跟踪"><a href="#Jackson反序列化流程跟踪" class="headerlink" title="Jackson反序列化流程跟踪"></a>Jackson反序列化流程跟踪</h4><p>的确如Litch1所言，key为””的value({“enabled”:true})被jackson反序列化之后赋值给config。为何如此？跟踪下Jackson JsonCreator的逻辑</p>
+<p>作者也有给出对应的关键过程</p>
+<blockquote>
+<p>com.fasterxml.jackson.databind.deser.BeanDeserializer#_deserializeUsingPropertyBased在解析的过程中，会拿解析到的json串中的“键名”去查找当前解析对象中对应的creatorProperty，这步对应的是findCreatorProperty方法，findCreatorProperty方法会去_propertyLookup 这个HashMap中查找”键名”对应的属性，在_propertyLookup中可以看到其中没有用JsonProperty注释修饰的JavaScriptConfig的键为””，要是json串中的键也为””，就能匹配上，取出JavaScriptConfig对应的creatorProperty</p>
+</blockquote>
+<p>简单而言，Jackson反序列化过程基本如下</p>
+<ol>
+<li>调用mapper.readValue(jsonString, DstClass.class)</li>
+<li>分析DstClass，有哪些属性Property，以及这些属性对应的set方法(creatorProperty)是什么</li>
+<li>依次读取jsonString key &amp; value，根据步骤2中key对应的set方法，调用并创建。</li>
+</ol>
+<p>其中，分析DstClass，在com.fasterxml.jackson.databind.deser.BeanDeserializer这个类中实现，步骤2中的结果保存在BeanDeserializer#_beanProperties Map类里面，之后通过PropertyBeanCreator转换为BeanDeserializer#_propertyLookup</p>
+<p><img src="/images/pasted-117.png" alt="upload successful"></p>
+<p><img src="/images/pasted-118.png" alt="upload successful"></p>
+<p><strong>可见config对应的CreatorProperty name为””，因此_propertyLookup生成了name为””,value为config赋值函数的一条记录</strong></p>
+<p>步骤3中属性赋值中，根据key找对应set方法，具体实现函数为findCreatorProperty，就是从_propertyLookup寻找的，然后实现属性赋值</p>
+<h3 id="Rhino"><a href="#Rhino" class="headerlink" title="Rhino"></a>Rhino</h3><p>javascript引擎，这里和前面比就简单了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Context cx = Context.enter();</span><br><span class="line">cx.setOptimizationLevel(<span class="number">9</span>);</span><br><span class="line">ScriptableObject scope = cx.initStandardObjects();</span><br><span class="line">String script = <span class="string">&quot;function(value) &#123;java.lang.Runtime.getRuntime().exec(&#x27;open -a calculator.app&#x27;)&#125;&quot;</span>;</span><br><span class="line">Function fnApply = cx.compileFunction(scope, script, <span class="string">&quot;script&quot;</span>, <span class="number">1</span>, <span class="keyword">null</span>);</span><br><span class="line">fnApply.call(cx,scope,scope,<span class="keyword">new</span> Object[]&#123;&#125;);</span><br><span class="line">Context.exit();</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>整个漏洞的精髓有两点</p>
+<h3 id="1-利用Jackson-JsonCreator注解特性，覆盖JavaScriptDimFilter-JavaScriptConfig-config属性，开启javascript功能"><a href="#1-利用Jackson-JsonCreator注解特性，覆盖JavaScriptDimFilter-JavaScriptConfig-config属性，开启javascript功能" class="headerlink" title="1. 利用Jackson JsonCreator注解特性，覆盖JavaScriptDimFilter JavaScriptConfig config属性，开启javascript功能"></a>1. 利用Jackson JsonCreator注解特性，覆盖JavaScriptDimFilter JavaScriptConfig config属性，开启javascript功能</h3><p>覆盖config过程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SamplerResource#SamplerResponse</span><br><span class="line">  IndexTaskSamplerSpec#IndexTaskSamplerSpec</span><br><span class="line">    IndexTask.IndexIngestionSpec#IndexIngestionSpec</span><br><span class="line">      DataSchema#DataSchema</span><br><span class="line">        TransformSpec#TransformSpec</span><br><span class="line">          JavaScriptDimFilter#JavaScriptDimFilter</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-JavaScriptDimFilter-toFilter-触发回溯"><a href="#2-JavaScriptDimFilter-toFilter-触发回溯" class="headerlink" title="2. JavaScriptDimFilter#toFilter 触发回溯"></a>2. JavaScriptDimFilter#toFilter 触发回溯</h3><p>作者给的poc是回溯到SamplerResource#post可用链，对应触发的调用栈如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">toFilter:149, JavaScriptDimFilter (org.apache.druid.query.filter)</span><br><span class="line">&lt;init&gt;:57, Transformer (org.apache.druid.segment.transform)</span><br><span class="line">toTransformer:126, TransformSpec (org.apache.druid.segment.transform)</span><br><span class="line">decorate:117, TransformSpec (org.apache.druid.segment.transform)</span><br><span class="line">buildReader:209, InputSourceSampler (org.apache.druid.indexing.overlord.sampler)</span><br><span class="line">sample:106, InputSourceSampler (org.apache.druid.indexing.overlord.sampler)</span><br><span class="line">sample:94, IndexTaskSamplerSpec (org.apache.druid.indexing.overlord.sampler)</span><br><span class="line">post:41, SamplerResource (org.apache.druid.indexing.overlord.sampler)</span><br></pre></td></tr></table></figure>
+
+<h2 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p>漏洞修复pr：<a target="_blank" rel="noopener" href="https://github.com/apache/druid/pull/10818/files/1f7fc3c929a3b03fed69a03d2f3f96898c74a6d0">https://github.com/apache/druid/pull/10818/files/1f7fc3c929a3b03fed69a03d2f3f96898c74a6d0</a></p>
+<p>其中最重要的修改在core/src/main/java/org/apache/druid/guice/GuiceAnnotationIntrospector.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> JsonIgnoreProperties.<span class="function">Value <span class="title">findPropertyIgnorals</span><span class="params">(Annotated ac)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// We should not allow empty names in any case. However, there is a known bug in Jackson deserializer</span></span><br><span class="line">  <span class="comment">// with ignorals (_arrayDelegateDeserializer is not copied when creating a contextual deserializer.</span></span><br><span class="line">  <span class="comment">// See https://github.com/FasterXML/jackson-databind/issues/3022 for more details), which makes array</span></span><br><span class="line">  <span class="comment">// deserialization failed even when the array is a valid field. To work around this bug, we return</span></span><br><span class="line">  <span class="comment">// an empty ignoral when the given Annotated is a parameter with JsonProperty that needs to be deserialized.</span></span><br><span class="line">  <span class="comment">// This is valid because every property with JsonProperty annoation should have a non-empty name.</span></span><br><span class="line">  <span class="comment">// We can simply remove the below check after the Jackson bug is fixed.</span></span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">  <span class="comment">// This check should be fine for so-called delegate creators that have only one argument without</span></span><br><span class="line">  <span class="comment">// JsonProperty annotation, because this method is not even called for the argument of</span></span><br><span class="line">  <span class="comment">// delegate creators. I&#x27;m not 100% sure why it&#x27;s not called, but guess it&#x27;s because the argument</span></span><br><span class="line">  <span class="comment">// is some Java type that Jackson already knows how to deserialize. Since there is only one argument,</span></span><br><span class="line">  <span class="comment">// Jackson perhaps is able to just deserialize it without introspection.</span></span><br><span class="line">  <span class="keyword">if</span> (ac <span class="keyword">instanceof</span> AnnotatedParameter) &#123;</span><br><span class="line">    <span class="keyword">final</span> AnnotatedParameter ap = (AnnotatedParameter) ac;</span><br><span class="line">    <span class="keyword">if</span> (ap.hasAnnotation(JsonProperty.class)) &#123;</span><br><span class="line">      <span class="keyword">return</span> JsonIgnoreProperties.Value.empty();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> JsonIgnoreProperties.Value.forIgnoredProperties(<span class="string">&quot;&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>非JsonProperty会在_propertyLookup表中生成一条记录name为””空的映射，此处直接将非JsonProperty的属性忽略，也就不会有后续的JavaScriptConfig反序列化</p>
+<h2 id="扩散思考"><a href="#扩散思考" class="headerlink" title="扩散思考"></a>扩散思考</h2><ol>
+<li><p>Jackson name为空字符串的CreatorProperty变量覆盖，是个通用问题，如何自动化发现</p>
+</li>
+<li><p>发现可覆盖的变量，如何判断是否可利用，甚至RCE？</p>
+</li>
+</ol>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文从漏洞产生的思路，简要分析了CVE-2021-25646形成的成因，即Jackson JsonCreator的特性，和Drill 支持Rhino引擎，导致最终覆盖javascriptconfig默认参数，可以执行RCE。其实和参考中的几篇分析文章相比没什么其他新的东西。</p>
+<p>从漏洞挖掘思路，猜测大佬事应该是先知道Jackson JsonCreator的这个特性的，然后盯着Rhino引擎搞事情，找出利用链。如果事先未知，从Rhino这点直接去啃Jackson，那就更加佩服了。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li>[1] <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/McAoLfyf_tgFIfGTAoRCiw">tomcat不出网回显连续剧第六集</a></li>
+<li>[2] <a target="_blank" rel="noopener" href="https://paper.seebug.org/1476/">漏洞复现: Apache Druid 远程代码执行漏洞 (CVE-2021-25646)</a></li>
+<li>[3] <a target="_blank" rel="noopener" href="https://paper.seebug.org/1481/">Apache Druid 远程代码执行漏洞分析(CVE-2021-25646)</a></li>
+<li>[4] <a target="_blank" rel="noopener" href="https://blog.csdn.net/zhaoruixiang1111/article/details/52972442">Guice之Servlet基础</a></li>
+<li>[5] <a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/263276.html">Apache Druid远程代码执行漏洞分析(CVE-2021-25646)</a></li>
+<li>[6] <a target="_blank" rel="noopener" href="https://blog.csdn.net/blwinner/article/details/98532847">Jackson之注解大全</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Drill</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">CVE-2021-25646</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-pyAntiSSRF" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -569,104 +727,6 @@
 
 
   
-    <article id="post-Java内存shell：servlet" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/">Java内存shell：servlet</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/" class="archive-article-date">
-  	<time datetime="2020-09-27T01:58:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近在学习Java内存shell相关知识，总结沉淀几篇文章，权当学习笔记了。</p>
-<h2 id="Java内存webshell史"><a href="#Java内存webshell史" class="headerlink" title="Java内存webshell史"></a>Java内存webshell史</h2><p>直接引用c0ny1师傅的总结，写的太好了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">其实内存马由来已久，早在17年n1nty师傅的《Tomcat源码调试笔记-看不见的shell》中已初见端倪，但一直不温不火。后经过rebeyong师傅使用agent技术加持后，拓展了内存马的使用场景，然终停留在奇技淫巧上。在各类hw洗礼之后，文件shell明显气数已尽。内存马以救命稻草的身份重回大众视野。特别是今年在shiro的回显研究之后，引发了无数安全研究员对内存webshell的研究，其中涌现出了LandGrey师傅构造的Spring controller内存马。至此内存马开枝散叶发展出了三大类型：</span><br><span class="line"></span><br><span class="line">1. servlet-api类</span><br><span class="line">	filter型</span><br><span class="line">	servlet型</span><br><span class="line">2. spring类</span><br><span class="line">	拦截器</span><br><span class="line">	controller型</span><br><span class="line">3. Java Instrumentation类</span><br><span class="line">	agent型</span><br><span class="line"></span><br><span class="line">内存马这坛深巷佳酒，一时间流行于市井与弄堂之间。上至安全研究员下至普通客户，人尽皆知。正值hw来临之际，不难推测届时必将是内存马横行天下之日。而各大安全厂商却迟迟未见动静。所谓表面风平浪静，实则暗流涌动。或许一场内存马的围剿计划正慢慢展开。作为攻击方向的研究人员，没有对手就制造对手,攻防互换才能提升内存马技术的发展。</span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">内存马</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">shell</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">servlet</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
@@ -681,7 +741,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2020 m0d9
+    		&copy; 2021 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -923,6 +983,14 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pip</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Drill</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2021-25646</a>
               </li>
             
             <div class="clearfix"></div>
