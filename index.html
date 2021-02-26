@@ -176,6 +176,7 @@
 <p>根据参考，修改conf/druid/single-server/micro-quickstart/coordinator-overlord/jvm.config，末尾增加调试参数</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xdebug -Xnoagent -Djava.compiler&#x3D;NONE -Xrunjdwp:transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;n,address&#x3D;5005</span><br></pre></td></tr></table></figure>
 
+
 <h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><h3 id="Jackson注解"><a href="#Jackson注解" class="headerlink" title="Jackson注解"></a>Jackson注解</h3><h4 id="name为空字符串的CreatorProperty"><a href="#name为空字符串的CreatorProperty" class="headerlink" title="name为空字符串的CreatorProperty"></a>name为空字符串的CreatorProperty</h4><p>作者给出这个漏洞的关键点解释</p>
 <blockquote>
 <p>漏洞的关键：<br>在于对用JsonCreator注解修饰的方法来说，方法的所有参数都会解析成CreatorProperty类型，对于没有使用JsonProperty注解修饰的参数来说,会创建一个name为””的CreatorProperty，在用户传入键为””的json对象时就会被解析到对应的参数上。</p>
@@ -238,6 +239,7 @@
 <li>[4] <a target="_blank" rel="noopener" href="https://blog.csdn.net/zhaoruixiang1111/article/details/52972442">Guice之Servlet基础</a></li>
 <li>[5] <a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/263276.html">Apache Druid远程代码执行漏洞分析(CVE-2021-25646)</a></li>
 <li>[6] <a target="_blank" rel="noopener" href="https://blog.csdn.net/blwinner/article/details/98532847">Jackson之注解大全</a></li>
+<li>[7] <a target="_blank" rel="noopener" href="https://druid.apache.org/docs/latest/development/javascript.html">JavaScript programming guide</a></li>
 </ul>
 
       
@@ -315,7 +317,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/12/25/pyAntiSSRF/">pyAntiSSRF：python SSRF开发防御</a>
+      <a class="article-title" href="/2020/12/25/pyAntiSSRF/">pyAntiSSRF：python SSRF防御SDK</a>
     </h1>
   
 
