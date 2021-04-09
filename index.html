@@ -152,6 +152,129 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-JackSon-CVE-2020-36179分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/04/09/JackSon-CVE-2020-36179%E5%88%86%E6%9E%90/">JackSon DriverAdapterCPDS gadget CVE-2020-36179分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/04/09/JackSon-CVE-2020-36179%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-04-09T04:30:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Day1发现有分析 jackson 的DriverAdapterCPDS 这个gadget</p>
+<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><p>其实是参考【1】大佬上报的CVE-2020-36179</p>
+<p>Gadget:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DriverAdapterCPDS</span><br><span class="line">    -&gt;seturl</span><br><span class="line">        -&gt;getPooledConnection</span><br><span class="line">            -&gt;DirverManager.getConnection(this.url,username,pass)</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>gadget流程很简单，但是在复现的时候发现卡在getParentLogger这里，不会执行到getPooledConnection</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Logger <span class="title">getParentLogger</span><span class="params">()</span> <span class="keyword">throws</span> SQLFeatureNotSupportedException </span>&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> SQLFeatureNotSupportedException();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见getParentLogger简单粗暴直接throw Exception，直接GG</p>
+<p>多次测试发现getParentLogger，getPooledConnection执行顺序并不是有序的，如下：</p>
+<p>失败<br><img src="/images/pasted-120.png" alt="upload successful"></p>
+<p>成功<br><img src="/images/pasted-119.png" alt="upload successful"></p>
+<h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><p>背景知识：jackson反序列化会执行部分getter</p>
+<p>getter的产生流程跟踪：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">_addMemberMethods:110, AnnotatedMethodCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">collect:42, AnnotatedMethodCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">collectMethods:33, AnnotatedMethodCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">_methods:365, AnnotatedClass (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">memberMethods:305, AnnotatedClass (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">_addMethods:525, POJOPropertiesCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">collectAll:309, POJOPropertiesCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">getPropertyMap:287, POJOPropertiesCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">getProperties:170, POJOPropertiesCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">_properties:164, BasicBeanDescription (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">findProperties:239, BasicBeanDescription (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">_findCreatorsFromProperties:361, BasicDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_constructDefaultValueInstantiator:345, BasicDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">findValueInstantiator:269, BasicDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">buildBeanDeserializer:214, BeanDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">createBeanDeserializer:137, BeanDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_createDeserializer2:411, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_createDeserializer:349, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_createAndCache2:264, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_createAndCacheValueDeserializer:244, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">findValueDeserializer:142, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">findContextualValueDeserializer:444, DeserializationContext (com.fasterxml.jackson.databind)</span><br><span class="line">_findDeserializer:194, TypeDeserializerBase (com.fasterxml.jackson.databind.jsontype.impl)</span><br><span class="line">_deserialize:97, AsArrayTypeDeserializer (com.fasterxml.jackson.databind.jsontype.impl)</span><br><span class="line">deserializeTypedFromAny:71, AsArrayTypeDeserializer (com.fasterxml.jackson.databind.jsontype.impl)</span><br><span class="line">deserializeWithType:712, UntypedObjectDeserializer$Vanilla (com.fasterxml.jackson.databind.deser.std)</span><br><span class="line">deserialize:68, TypeWrappedDeserializer (com.fasterxml.jackson.databind.deser.impl)</span><br><span class="line">_readMapAndClose:4014, ObjectMapper (com.fasterxml.jackson.databind)</span><br><span class="line">readValue:3005, ObjectMapper (com.fasterxml.jackson.databind)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>最终观察发现jackson通过 ClassUtil.getClassMethods(cls)获取所有的函数，最终调用的是getDeclaredMethods()，而getDeclaredMethods()返回数组中的元素没有排序，也没有任何特定的顺序，从而导致随机触发。</p>
+</blockquote>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>简单跟踪分析了CVE-2020-36179 这个链，发现2处有意思的点</p>
+<ol>
+<li>jdbc url 可控情况下，利用H2 sql可攻击h2 server（）</li>
+<li>getDeclaredMethods 随机特性</li>
+</ol>
+<p>拓展思考</p>
+<ol>
+<li>jdbc url可控是个通用问题</li>
+<li>getDeclaredMethods 随机特性有绕过方法吗？</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li>[1] <a target="_blank" rel="noopener" href="https://github.com/Al1ex/CVE-2020-36179">Al1ex/CVE-2020-36179</a></li>
+<li>[2] <a target="_blank" rel="noopener" href="http://www.h2database.com/html/features.html#execute_sql_on_connection">H2 feature</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Jackson</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Gadget</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Apache-Druid-CVE-2021-25646-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -629,112 +752,6 @@
 
 
   
-    <article id="post-Java内存shell：javaagent" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/">Java内存shell：javaagent</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/" class="archive-article-date">
-  	<time datetime="2020-09-27T02:05:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>rebeyond 师傅在参考【1】中提出利用javaagent 永久注入tomcat进程的方案，有几个重要的技术点</p>
-<ol>
-<li>javaagent技术</li>
-<li>javassist技术</li>
-<li>tomcat ApplicationFilterChain.internalDoFilter方法</li>
-<li>ShutdownHook 钩子</li>
-</ol>
-<h2 id="javassist技术"><a href="#javassist技术" class="headerlink" title="javassist技术"></a>javassist技术</h2><blockquote>
-<p>Java 字节码以二进制的形式存储在 .class 文件中，每一个 .class 文件包含一个 Java 类或接口。Javaassist 就是一个用来 处理 Java 字节码的类库。它可以在一个已经编译好的类中添加新的方法，或者是修改已有的方法，并且不需要对字节码方面有深入的了解。同时也可以去生成一个新的类对象，通过完全手动的方式。</p>
-</blockquote>
-<p>javassist 相关文档可以参考【2】和【3】，以简单的javassist demo<br>为例</p>
-        
-          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">javassist</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">javaagent</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">内存shell</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
@@ -992,6 +1009,14 @@ MathJax.Hub.Queue(function() {
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">CVE</a>
               </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">Jackson</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Gadget</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -1063,6 +1088,10 @@ MathJax.Hub.Queue(function() {
           
             <li class="search-li">
               <a href="https://joychou.org/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>joychou</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="https://threedr3am.github.io/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>threedr3am</a>
             </li>
           
         </ul>

@@ -152,6 +152,112 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Java内存shell：javaagent" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/">Java内存shell：javaagent</a>
+    </h1>
+  
+
+        
+        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/" class="archive-article-date">
+  	<time datetime="2020-09-27T02:05:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>rebeyond 师傅在参考【1】中提出利用javaagent 永久注入tomcat进程的方案，有几个重要的技术点</p>
+<ol>
+<li>javaagent技术</li>
+<li>javassist技术</li>
+<li>tomcat ApplicationFilterChain.internalDoFilter方法</li>
+<li>ShutdownHook 钩子</li>
+</ol>
+<h2 id="javassist技术"><a href="#javassist技术" class="headerlink" title="javassist技术"></a>javassist技术</h2><blockquote>
+<p>Java 字节码以二进制的形式存储在 .class 文件中，每一个 .class 文件包含一个 Java 类或接口。Javaassist 就是一个用来 处理 Java 字节码的类库。它可以在一个已经编译好的类中添加新的方法，或者是修改已有的方法，并且不需要对字节码方面有深入的了解。同时也可以去生成一个新的类对象，通过完全手动的方式。</p>
+</blockquote>
+<p>javassist 相关文档可以参考【2】和【3】，以简单的javassist demo<br>为例</p>
+        
+          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">javassist</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">javaagent</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">内存shell</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Java内存shell：servlet" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -538,105 +644,6 @@
 
 
   
-    <article id="post-RMI：绕过JEP290——中" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/16/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/">RMI：绕过JEP290——中</a>
-    </h1>
-  
-
-        
-        <a href="/2020/07/16/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/" class="archive-article-date">
-  	<time datetime="2020-07-16T03:35:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-16</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本节主要解释前文留下的问题：</p>
-<p>只是建立了恶意JRMP的连接，但是没执行bind，为什么可以打成功？</p>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>流程比较复杂，先直接给结论，绕过JEP290的原理是</p>
-<ol>
-<li>利用JEP290白名单内的类，覆盖掉registerRefs（此时未建立JRMP连接）</li>
-<li>Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求</li>
-<li>DGC底层使用的是StreamRemoteCall.executeCall进行io的传输，executeCall发送完之后，会根据对方的反馈进行不同的操作，当对方返回一定条件时（初步判断是对方RMI Exception），会直接序列化InputStream，造成反序列化漏洞</li>
-</ol>
-        
-          <a class="article-more-a" href="/2020/07/16/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">« Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">Next »</a>
@@ -894,6 +901,14 @@ MathJax.Hub.Queue(function() {
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">CVE</a>
               </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">Jackson</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Gadget</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -965,6 +980,10 @@ MathJax.Hub.Queue(function() {
           
             <li class="search-li">
               <a href="https://joychou.org/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>joychou</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="https://threedr3am.github.io/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>threedr3am</a>
             </li>
           
         </ul>
