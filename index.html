@@ -57,9 +57,9 @@
 	        
 				<li><a href="/categories">分类</a></li>
 	        
-				<li><a href="/tools/index.html">工具</a></li>
-	        
 				<li><a href="/archives/index.html">所有文章</a></li>
+	        
+				<li><a href="/tools/index.html">工具</a></li>
 	        
 				<li><a href="/about/index.html">关于我</a></li>
 	        
@@ -137,9 +137,9 @@
 		        
 					<li style="width: 20%"><a href="/categories">分类</a></li>
 		        
-					<li style="width: 20%"><a href="/tools/index.html">工具</a></li>
-		        
 					<li style="width: 20%"><a href="/archives/index.html">所有文章</a></li>
+		        
+					<li style="width: 20%"><a href="/tools/index.html">工具</a></li>
 		        
 					<li style="width: 20%"><a href="/about/index.html">关于我</a></li>
 		        
@@ -157,6 +157,198 @@
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-Jdbc-碎碎念二：MySQL-反序列化" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">Jdbc 碎碎念二：MySQL 反序列化</a>
+    </h1>
+  
+
+        
+        <a href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="archive-article-date">
+  	<time datetime="2021-04-20T08:08:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>参考【1】中四哥已经讲的很全面也很详细了，简单记录下复现过程吧</p>
+<h2 id="MySQL-反序列化"><a href="#MySQL-反序列化" class="headerlink" title="MySQL 反序列化"></a>MySQL 反序列化</h2><h3 id="autoDeserialize"><a href="#autoDeserialize" class="headerlink" title="autoDeserialize"></a>autoDeserialize</h3><p><img src="/images/pasted-125.png" alt="upload successful"></p>
+<p>如解释，mysql client会自动反序列化server端传回的BLOB类型</p>
+        
+          <a class="article-more-a" href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Jdbc</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Jdbc碎碎念" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/">Jdbc 碎碎念一：MySQL Client文件读取</a>
+    </h1>
+  
+
+        
+        <a href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/" class="archive-article-date">
+  	<time datetime="2021-04-20T03:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前Get了h2 initsql的骚姿势，于是想总结总结jdbc url可控情况下的利用方法，经典的场景就是jdbc mysql 文件读取和反序列化，正好前不久的Druid CVE-2021-26919的用的就是jdbc mysql反序列化漏洞，学习学习，居然踩一些坑，单独记录下来。</p>
+<p>mysql client任意文件读取漏洞历史悠久，参考【6】中有提到早在13年就有提出，但是作为mysql 正常功能一直保留。直到19年blackhat 张杨和可奕 大佬发现反序列化的利用场景（参考【5】），相关研究达到小高潮，不过多赘述。</p>
+<h2 id="MySQL-Client文件读取漏洞"><a href="#MySQL-Client文件读取漏洞" class="headerlink" title="MySQL Client文件读取漏洞"></a>MySQL Client文件读取漏洞</h2><h3 id="原理：load-local-data"><a href="#原理：load-local-data" class="headerlink" title="原理：load local data"></a>原理：load local data</h3><p>正常的load local data流程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">client：申请跑个sql，内容是&quot;load data local infile &quot;&#x2F;etc&#x2F;passwd&quot; into table test FIELDS TERMINATED BY &#39;\n&#39;;&quot;</span><br><span class="line">server：好的，（识别sql内容），那你把&#x2F;etc&#x2F;passwd文件读取传过来吧</span><br><span class="line">client：好的，（读取本地&#x2F;etc&#x2F;passwd），这是文件内容，请查收</span><br></pre></td></tr></table></figure>
+
+<p>攻击流程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">client：申请跑个sql，内容是&quot;***&quot;（jdbc-mysql-connector默认认证登录完成之后，会有show variables&#x2F;select 参数等行为）</span><br><span class="line">server：好的，（不管sql内容），那你把&#x2F;etc&#x2F;passwd文件读取传过来吧</span><br><span class="line">client：好的，（读取本地&#x2F;etc&#x2F;passwd），这是文件内容，请查收</span><br></pre></td></tr></table></figure>
+        
+          <a class="article-more-a" href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Jdbc</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Mysql</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
   
     <article id="post-JackSon-CVE-2020-36179分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -182,37 +374,9 @@
 <h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><p>其实是参考【1】大佬上报的CVE-2020-36179</p>
 <p>Gadget:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DriverAdapterCPDS</span><br><span class="line">    -&gt;seturl</span><br><span class="line">        -&gt;getPooledConnection</span><br><span class="line">            -&gt;DirverManager.getConnection(this.url,username,pass)</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>gadget流程很简单，但是在复现的时候发现卡在getParentLogger这里，不会执行到getPooledConnection</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Logger <span class="title">getParentLogger</span><span class="params">()</span> <span class="keyword">throws</span> SQLFeatureNotSupportedException </span>&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> SQLFeatureNotSupportedException();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可见getParentLogger简单粗暴直接throw Exception，直接GG</p>
-<p>多次测试发现getParentLogger，getPooledConnection执行顺序并不是有序的，如下：</p>
-<p>失败<br><img src="/images/pasted-120.png" alt="upload successful"></p>
-<p>成功<br><img src="/images/pasted-119.png" alt="upload successful"></p>
-<h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><p>背景知识：jackson反序列化会执行部分getter</p>
-<p>getter的产生流程跟踪：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">_addMemberMethods:110, AnnotatedMethodCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">collect:42, AnnotatedMethodCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">collectMethods:33, AnnotatedMethodCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">_methods:365, AnnotatedClass (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">memberMethods:305, AnnotatedClass (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">_addMethods:525, POJOPropertiesCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">collectAll:309, POJOPropertiesCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">getPropertyMap:287, POJOPropertiesCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">getProperties:170, POJOPropertiesCollector (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">_properties:164, BasicBeanDescription (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">findProperties:239, BasicBeanDescription (com.fasterxml.jackson.databind.introspect)</span><br><span class="line">_findCreatorsFromProperties:361, BasicDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_constructDefaultValueInstantiator:345, BasicDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">findValueInstantiator:269, BasicDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">buildBeanDeserializer:214, BeanDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">createBeanDeserializer:137, BeanDeserializerFactory (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_createDeserializer2:411, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_createDeserializer:349, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_createAndCache2:264, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">_createAndCacheValueDeserializer:244, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">findValueDeserializer:142, DeserializerCache (com.fasterxml.jackson.databind.deser)</span><br><span class="line">findContextualValueDeserializer:444, DeserializationContext (com.fasterxml.jackson.databind)</span><br><span class="line">_findDeserializer:194, TypeDeserializerBase (com.fasterxml.jackson.databind.jsontype.impl)</span><br><span class="line">_deserialize:97, AsArrayTypeDeserializer (com.fasterxml.jackson.databind.jsontype.impl)</span><br><span class="line">deserializeTypedFromAny:71, AsArrayTypeDeserializer (com.fasterxml.jackson.databind.jsontype.impl)</span><br><span class="line">deserializeWithType:712, UntypedObjectDeserializer$Vanilla (com.fasterxml.jackson.databind.deser.std)</span><br><span class="line">deserialize:68, TypeWrappedDeserializer (com.fasterxml.jackson.databind.deser.impl)</span><br><span class="line">_readMapAndClose:4014, ObjectMapper (com.fasterxml.jackson.databind)</span><br><span class="line">readValue:3005, ObjectMapper (com.fasterxml.jackson.databind)</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>最终观察发现jackson通过 ClassUtil.getClassMethods(cls)获取所有的函数，最终调用的是getDeclaredMethods()，而getDeclaredMethods()返回数组中的元素没有排序，也没有任何特定的顺序，从而导致随机触发。</p>
-</blockquote>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>简单跟踪分析了CVE-2020-36179 这个链，发现2处有意思的点</p>
-<ol>
-<li>jdbc url 可控情况下，利用H2 sql可攻击h2 server（）</li>
-<li>getDeclaredMethods 随机特性</li>
-</ol>
-<p>拓展思考</p>
-<ol>
-<li>jdbc url可控是个通用问题</li>
-<li>getDeclaredMethods 随机特性有绕过方法吗？</li>
-</ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li>[1] <a target="_blank" rel="noopener" href="https://github.com/Al1ex/CVE-2020-36179">Al1ex/CVE-2020-36179</a></li>
-<li>[2] <a target="_blank" rel="noopener" href="http://www.h2database.com/html/features.html#execute_sql_on_connection">H2 feature</a></li>
-</ul>
-
+        
+          <a class="article-more-a" href="/2021/04/09/JackSon-CVE-2020-36179%E5%88%86%E6%9E%90/#more">more >></a>
+        
       
 
       
@@ -310,73 +474,9 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$wget</span> https://archive.apache.org/dist/druid/0.20.0/apache-druid-0.20.0-bin.tar.gz &amp;&amp; tar -xzvf apache-druid-0.20.0-bin.tar.gz</span><br></pre></td></tr></table></figure>
 <p>根据参考，修改conf/druid/single-server/micro-quickstart/coordinator-overlord/jvm.config，末尾增加调试参数</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xdebug -Xnoagent -Djava.compiler&#x3D;NONE -Xrunjdwp:transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;n,address&#x3D;5005</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><h3 id="Jackson注解"><a href="#Jackson注解" class="headerlink" title="Jackson注解"></a>Jackson注解</h3><h4 id="name为空字符串的CreatorProperty"><a href="#name为空字符串的CreatorProperty" class="headerlink" title="name为空字符串的CreatorProperty"></a>name为空字符串的CreatorProperty</h4><p>作者给出这个漏洞的关键点解释</p>
-<blockquote>
-<p>漏洞的关键：<br>在于对用JsonCreator注解修饰的方法来说，方法的所有参数都会解析成CreatorProperty类型，对于没有使用JsonProperty注解修饰的参数来说,会创建一个name为””的CreatorProperty，在用户传入键为””的json对象时就会被解析到对应的参数上。</p>
-</blockquote>
-<h4 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h4><p>其中与该漏洞相关的注解如下</p>
-<ul>
-<li>JsonCreator</li>
-<li>JsonProperty</li>
-<li>JacksonInject</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person4</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> JavaScriptConfig config;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JsonCreator</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person4</span><span class="params">(<span class="meta">@JsonProperty(&quot;age&quot;)</span> <span class="keyword">int</span> age,</span></span></span><br><span class="line"><span class="function"><span class="params">                   <span class="meta">@JsonProperty(&quot;name&quot;)</span> String name,</span></span></span><br><span class="line"><span class="function"><span class="params">                   <span class="meta">@JacksonInject</span> JavaScriptConfig config)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.config = config;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;User [name=&quot;</span> + name + <span class="string">&quot;, age=&quot;</span> + age + <span class="string">&quot;, config=&quot;</span> + config.toString() + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String sp4 = <span class="string">&quot;&#123;\&quot;enabled\&quot;:true&#125;&quot;</span>;</span><br><span class="line">            ObjectMapper mapper4 = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">            JavaScriptConfig pp4 = mapper4.readValue(sp4, JavaScriptConfig.class);</span><br><span class="line">            System.out.println(pp4);</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;---------------------------&quot;</span>);</span><br><span class="line">            String sp5 = <span class="string">&quot;&#123;\&quot;age\&quot;:10,\&quot;name\&quot;:\&quot;m0d9\&quot;,\&quot;\&quot;:&#123;\&quot;enabled\&quot;:true&#125;&#125;&quot;</span>;</span><br><span class="line">            ObjectMapper mapper5 = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">            Person4 pp5 = mapper5.readValue(sp5, Person4.class);</span><br><span class="line">            System.out.println(pp5);</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (JsonProcessingException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>output 如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">JavaScriptConfig&#123;enabled&#x3D;true&#125;</span><br><span class="line">---------------------------</span><br><span class="line">User [name&#x3D;m0d9, age&#x3D;10, config&#x3D;JavaScriptConfig&#123;enabled&#x3D;true&#125;]</span><br></pre></td></tr></table></figure>
-<h4 id="Jackson反序列化流程跟踪"><a href="#Jackson反序列化流程跟踪" class="headerlink" title="Jackson反序列化流程跟踪"></a>Jackson反序列化流程跟踪</h4><p>的确如Litch1所言，key为””的value({“enabled”:true})被jackson反序列化之后赋值给config。为何如此？跟踪下Jackson JsonCreator的逻辑</p>
-<p>作者也有给出对应的关键过程</p>
-<blockquote>
-<p>com.fasterxml.jackson.databind.deser.BeanDeserializer#_deserializeUsingPropertyBased在解析的过程中，会拿解析到的json串中的“键名”去查找当前解析对象中对应的creatorProperty，这步对应的是findCreatorProperty方法，findCreatorProperty方法会去_propertyLookup 这个HashMap中查找”键名”对应的属性，在_propertyLookup中可以看到其中没有用JsonProperty注释修饰的JavaScriptConfig的键为””，要是json串中的键也为””，就能匹配上，取出JavaScriptConfig对应的creatorProperty</p>
-</blockquote>
-<p>简单而言，Jackson反序列化过程基本如下</p>
-<ol>
-<li>调用mapper.readValue(jsonString, DstClass.class)</li>
-<li>分析DstClass，有哪些属性Property，以及这些属性对应的set方法(creatorProperty)是什么</li>
-<li>依次读取jsonString key &amp; value，根据步骤2中key对应的set方法，调用并创建。</li>
-</ol>
-<p>其中，分析DstClass，在com.fasterxml.jackson.databind.deser.BeanDeserializer这个类中实现，步骤2中的结果保存在BeanDeserializer#_beanProperties Map类里面，之后通过PropertyBeanCreator转换为BeanDeserializer#_propertyLookup</p>
-<p><img src="/images/pasted-117.png" alt="upload successful"></p>
-<p><img src="/images/pasted-118.png" alt="upload successful"></p>
-<p><strong>可见config对应的CreatorProperty name为””，因此_propertyLookup生成了name为””,value为config赋值函数的一条记录</strong></p>
-<p>步骤3中属性赋值中，根据key找对应set方法，具体实现函数为findCreatorProperty，就是从_propertyLookup寻找的，然后实现属性赋值</p>
-<h3 id="Rhino"><a href="#Rhino" class="headerlink" title="Rhino"></a>Rhino</h3><p>javascript引擎，这里和前面比就简单了</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Context cx = Context.enter();</span><br><span class="line">cx.setOptimizationLevel(<span class="number">9</span>);</span><br><span class="line">ScriptableObject scope = cx.initStandardObjects();</span><br><span class="line">String script = <span class="string">&quot;function(value) &#123;java.lang.Runtime.getRuntime().exec(&#x27;open -a calculator.app&#x27;)&#125;&quot;</span>;</span><br><span class="line">Function fnApply = cx.compileFunction(scope, script, <span class="string">&quot;script&quot;</span>, <span class="number">1</span>, <span class="keyword">null</span>);</span><br><span class="line">fnApply.call(cx,scope,scope,<span class="keyword">new</span> Object[]&#123;&#125;);</span><br><span class="line">Context.exit();</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>整个漏洞的精髓有两点</p>
-<h3 id="1-利用Jackson-JsonCreator注解特性，覆盖JavaScriptDimFilter-JavaScriptConfig-config属性，开启javascript功能"><a href="#1-利用Jackson-JsonCreator注解特性，覆盖JavaScriptDimFilter-JavaScriptConfig-config属性，开启javascript功能" class="headerlink" title="1. 利用Jackson JsonCreator注解特性，覆盖JavaScriptDimFilter JavaScriptConfig config属性，开启javascript功能"></a>1. 利用Jackson JsonCreator注解特性，覆盖JavaScriptDimFilter JavaScriptConfig config属性，开启javascript功能</h3><p>覆盖config过程</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SamplerResource#SamplerResponse</span><br><span class="line">  IndexTaskSamplerSpec#IndexTaskSamplerSpec</span><br><span class="line">    IndexTask.IndexIngestionSpec#IndexIngestionSpec</span><br><span class="line">      DataSchema#DataSchema</span><br><span class="line">        TransformSpec#TransformSpec</span><br><span class="line">          JavaScriptDimFilter#JavaScriptDimFilter</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="2-JavaScriptDimFilter-toFilter-触发回溯"><a href="#2-JavaScriptDimFilter-toFilter-触发回溯" class="headerlink" title="2. JavaScriptDimFilter#toFilter 触发回溯"></a>2. JavaScriptDimFilter#toFilter 触发回溯</h3><p>作者给的poc是回溯到SamplerResource#post可用链，对应触发的调用栈如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">toFilter:149, JavaScriptDimFilter (org.apache.druid.query.filter)</span><br><span class="line">&lt;init&gt;:57, Transformer (org.apache.druid.segment.transform)</span><br><span class="line">toTransformer:126, TransformSpec (org.apache.druid.segment.transform)</span><br><span class="line">decorate:117, TransformSpec (org.apache.druid.segment.transform)</span><br><span class="line">buildReader:209, InputSourceSampler (org.apache.druid.indexing.overlord.sampler)</span><br><span class="line">sample:106, InputSourceSampler (org.apache.druid.indexing.overlord.sampler)</span><br><span class="line">sample:94, IndexTaskSamplerSpec (org.apache.druid.indexing.overlord.sampler)</span><br><span class="line">post:41, SamplerResource (org.apache.druid.indexing.overlord.sampler)</span><br></pre></td></tr></table></figure>
-
-<h2 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p>漏洞修复pr：<a target="_blank" rel="noopener" href="https://github.com/apache/druid/pull/10818/files/1f7fc3c929a3b03fed69a03d2f3f96898c74a6d0">https://github.com/apache/druid/pull/10818/files/1f7fc3c929a3b03fed69a03d2f3f96898c74a6d0</a></p>
-<p>其中最重要的修改在core/src/main/java/org/apache/druid/guice/GuiceAnnotationIntrospector.java</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> JsonIgnoreProperties.<span class="function">Value <span class="title">findPropertyIgnorals</span><span class="params">(Annotated ac)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// We should not allow empty names in any case. However, there is a known bug in Jackson deserializer</span></span><br><span class="line">  <span class="comment">// with ignorals (_arrayDelegateDeserializer is not copied when creating a contextual deserializer.</span></span><br><span class="line">  <span class="comment">// See https://github.com/FasterXML/jackson-databind/issues/3022 for more details), which makes array</span></span><br><span class="line">  <span class="comment">// deserialization failed even when the array is a valid field. To work around this bug, we return</span></span><br><span class="line">  <span class="comment">// an empty ignoral when the given Annotated is a parameter with JsonProperty that needs to be deserialized.</span></span><br><span class="line">  <span class="comment">// This is valid because every property with JsonProperty annoation should have a non-empty name.</span></span><br><span class="line">  <span class="comment">// We can simply remove the below check after the Jackson bug is fixed.</span></span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">  <span class="comment">// This check should be fine for so-called delegate creators that have only one argument without</span></span><br><span class="line">  <span class="comment">// JsonProperty annotation, because this method is not even called for the argument of</span></span><br><span class="line">  <span class="comment">// delegate creators. I&#x27;m not 100% sure why it&#x27;s not called, but guess it&#x27;s because the argument</span></span><br><span class="line">  <span class="comment">// is some Java type that Jackson already knows how to deserialize. Since there is only one argument,</span></span><br><span class="line">  <span class="comment">// Jackson perhaps is able to just deserialize it without introspection.</span></span><br><span class="line">  <span class="keyword">if</span> (ac <span class="keyword">instanceof</span> AnnotatedParameter) &#123;</span><br><span class="line">    <span class="keyword">final</span> AnnotatedParameter ap = (AnnotatedParameter) ac;</span><br><span class="line">    <span class="keyword">if</span> (ap.hasAnnotation(JsonProperty.class)) &#123;</span><br><span class="line">      <span class="keyword">return</span> JsonIgnoreProperties.Value.empty();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> JsonIgnoreProperties.Value.forIgnoredProperties(<span class="string">&quot;&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>非JsonProperty会在_propertyLookup表中生成一条记录name为””空的映射，此处直接将非JsonProperty的属性忽略，也就不会有后续的JavaScriptConfig反序列化</p>
-<h2 id="扩散思考"><a href="#扩散思考" class="headerlink" title="扩散思考"></a>扩散思考</h2><ol>
-<li><p>Jackson name为空字符串的CreatorProperty变量覆盖，是个通用问题，如何自动化发现</p>
-</li>
-<li><p>发现可覆盖的变量，如何判断是否可利用，甚至RCE？</p>
-</li>
-</ol>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文从漏洞产生的思路，简要分析了CVE-2021-25646形成的成因，即Jackson JsonCreator的特性，和Drill 支持Rhino引擎，导致最终覆盖javascriptconfig默认参数，可以执行RCE。其实和参考中的几篇分析文章相比没什么其他新的东西。</p>
-<p>从漏洞挖掘思路，猜测大佬事应该是先知道Jackson JsonCreator的这个特性的，然后盯着Rhino引擎搞事情，找出利用链。如果事先未知，从Rhino这点直接去啃Jackson，那就更加佩服了。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li>[1] <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/McAoLfyf_tgFIfGTAoRCiw">tomcat不出网回显连续剧第六集</a></li>
-<li>[2] <a target="_blank" rel="noopener" href="https://paper.seebug.org/1476/">漏洞复现: Apache Druid 远程代码执行漏洞 (CVE-2021-25646)</a></li>
-<li>[3] <a target="_blank" rel="noopener" href="https://paper.seebug.org/1481/">Apache Druid 远程代码执行漏洞分析(CVE-2021-25646)</a></li>
-<li>[4] <a target="_blank" rel="noopener" href="https://blog.csdn.net/zhaoruixiang1111/article/details/52972442">Guice之Servlet基础</a></li>
-<li>[5] <a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/263276.html">Apache Druid远程代码执行漏洞分析(CVE-2021-25646)</a></li>
-<li>[6] <a target="_blank" rel="noopener" href="https://blog.csdn.net/blwinner/article/details/98532847">Jackson之注解大全</a></li>
-<li>[7] <a target="_blank" rel="noopener" href="https://druid.apache.org/docs/latest/development/javascript.html">JavaScript programming guide</a></li>
-</ul>
-
+        
+          <a class="article-more-a" href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/#more">more >></a>
+        
       
 
       
@@ -567,204 +667,9 @@
 
 
   
-    <article id="post-Java内存shell：Tomcat回显" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/">Java内存shell：Tomcat回显</a>
-    </h1>
-  
-
-        
-        <a href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/" class="archive-article-date">
-  	<time datetime="2020-10-10T06:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Tomcat回显 与 Java内存shell有什么关系？</p>
-<p>在java漏洞利用中如何获取到执行结果？这是Tomcat回显的最原始需求，具体可以参考【4】中的许多手法，这里不展开</p>
-<p>其中提到一种思路，获取response，然后直接操作response以http形式返回。而Java内存shell中，很重要的一点就是获取request从而获取上下文cotext，其中获取request的思路相似通用可借鉴。</p>
-<h2 id="历史背景"><a href="#历史背景" class="headerlink" title="历史背景"></a>历史背景</h2><p>参考【1】中李三师傅总结了之前比较经典的tomcat回显方式，写的很好，直接复用：</p>
-        
-          <a class="article-more-a" href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Tomcat</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">回显</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Java内存shell：三方框架" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/">Java内存shell：三方框架</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/" class="archive-article-date">
-  	<time datetime="2020-09-27T02:06:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>前文tomcat的通用servlet内存马已经基本可以覆盖大部分的情况，针对第三方框架，思路也是一样的，姿势不同。观星实验室的师傅们在参考【1】中提到了关于Sping的姿势，这里学习记录下。</p>
-<h2 id="Spring"><a href="#Spring" class="headerlink" title="Spring"></a>Spring</h2><p>具体的背景不赘述，详见参考【1】，几个重点的步骤</p>
-<ol>
-<li>获得当前代码运行时的上下文环境</li>
-<li>手动注册 controller</li>
-<li>controller 中的 Webshell 逻辑</li>
-</ol>
-<p>文中师傅没有给出直接运行的poc，这里给一下</p>
-<h3 id="Show-me-the-code"><a href="#Show-me-the-code" class="headerlink" title="Show me the code"></a>Show me the code</h3>
-        
-          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">内存马</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Spring</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
     </nav>
   
 
@@ -1026,6 +931,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Gadget</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Jdbc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Mysql</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
             
             <div class="clearfix"></div>
