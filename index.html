@@ -158,6 +158,106 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Apache-Druid-CVE-2021-26919-漏洞分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">Apache Druid CVE-2021-26919 漏洞分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-04-21T13:08:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>CVE-2021-26919是一个jdbc 反序列化类型漏洞，用作之前两篇jdbc mysql学习的练手，分析分析。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>已知是jdbc mysql反序列化的问题，可以直接看看官方的修复</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/apache/druid/compare/druid-0.20.1...druid-0.20.2">https://github.com/apache/druid/compare/druid-0.20.1...druid-0.20.2</a><br><img src="/images/pasted-129.png" alt="upload successful"></p>
+<p>具体在这个commit里<br><a target="_blank" rel="noopener" href="https://github.com/apache/druid/commit/48953e3508967f5156c69676432b5d4dd25ea678">https://github.com/apache/druid/commit/48953e3508967f5156c69676432b5d4dd25ea678</a></p>
+<p>代码就不贴了，主要功能是设置了jdbc:mysql &amp; jdbc:postgresql两类driver和对应的参数白名单</p>
+        
+          <a class="article-more-a" href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Druid</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Apache</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Jdbc-碎碎念二：MySQL-反序列化" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -549,124 +649,6 @@
 
 
   
-    <article id="post-pyAntiSSRF" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/12/25/pyAntiSSRF/">pyAntiSSRF：python SSRF防御SDK</a>
-    </h1>
-  
-
-        
-        <a href="/2020/12/25/pyAntiSSRF/" class="archive-article-date">
-  	<time datetime="2020-12-25T02:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-12-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>发现居然没有特别好用的python防御ssrf好用的pip库，造个轮子</p>
-<ul>
-<li>支持pip简单安装</li>
-<li>支持 py2&amp;py3</li>
-<li>直接通过参数引用，直接hijack最常用的requests库，不引入第三方函数</li>
-<li>支持防御DNS rebinding</li>
-</ul>
-<h2 id="SSRF原理及防御"><a href="#SSRF原理及防御" class="headerlink" title="SSRF原理及防御"></a>SSRF原理及防御</h2><p>ssrf攻击及防御这里不延伸，可参考【1】，p神讲的挺明白了，提两点</p>
-<ol>
-<li>原文没涉及到dns rebinding的防御，其实防御思路也很简单，只进行1次dns请求即可</li>
-<li>循环hijack requests这个思路提到过，但是不是最优解，其实直接hijack requests.sessions.Session.request即可，所有的requests get/post最终都调用的这个函数</li>
-</ol>
-<p>具体没啥可说的，看代码【2】吧</p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p><code>pip install pyAntiSSRF</code></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. import &amp; patch requests库</span></span><br><span class="line"><span class="keyword">import</span> pyAntiSSRF</span><br><span class="line">pyAntiSSRF.patchRequests()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 通过参数anti_ssrf（get/post/request函数都支持，默认不开启），控制是否开启ssrf防御，如果开启且目标ip是内网，则会抛出异常</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="comment"># custom requests usage</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># patch requests by hijack requests.sessions.Session.request, default disable</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>, anti_ssrf=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># raise Exception</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>, anti_ssrf=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2020/12/25/pyAntiSSRF/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">ssrf</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">anti</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">tools</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">pip</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Python安全//" class="article-tag-list-link color4">Python安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Python安全/工具//" class="article-tag-list-link color3">工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
@@ -939,6 +921,14 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Druid</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Apache</a>
               </li>
             
             <div class="clearfix"></div>
