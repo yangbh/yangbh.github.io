@@ -171,6 +171,106 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-celery" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/06/celery/">celery 笔记</a>
+    </h1>
+  
+
+        
+        <a href="/2017/01/06/celery/" class="archive-article-date">
+  	<time datetime="2017-01-06T09:32:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-01-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>[TOC]</p>
+<h1 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h1><h2 id="Queue，exchange，routing-key"><a href="#Queue，exchange，routing-key" class="headerlink" title="Queue，exchange，routing_key"></a>Queue，exchange，routing_key</h2><h1 id="广播消息-Broadcast"><a href="#广播消息-Broadcast" class="headerlink" title="广播消息 Broadcast"></a>广播消息 Broadcast</h1><p><a target="_blank" rel="noopener" href="http://docs.celeryproject.org/en/4.0/userguide/routing.html#broadcast">http://docs.celeryproject.org/en/4.0/userguide/routing.html#broadcast</a></p>
+<h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> kombu.common <span class="keyword">import</span> Broadcast</span><br><span class="line"></span><br><span class="line">app.conf.task_queues = (Broadcast(<span class="string">&#x27;broadcast_tasks&#x27;</span>),)</span><br><span class="line">app.conf.task_routes = &#123;<span class="string">&#x27;tasks.reload_cache&#x27;</span>: &#123;<span class="string">&#x27;queue&#x27;</span>: <span class="string">&#x27;broadcast_tasks&#x27;</span>&#125;&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>4.*版本不能够写入rabbitmq</li>
+<li>3.*测试成功</li>
+</ul>
+<h1 id="自定义control命令"><a href="#自定义control命令" class="headerlink" title="自定义control命令"></a>自定义control命令</h1><ul>
+<li>支持命令 <a target="_blank" rel="noopener" href="http://docs.celeryproject.org/en/latest/internals/reference/celery.worker.control.html#module-celery.worker.control">http://docs.celeryproject.org/en/latest/internals/reference/celery.worker.control.html#module-celery.worker.control</a></li>
+<li>自定义 <a target="_blank" rel="noopener" href="http://docs.celeryproject.org/en/3.1/userguide/workers.html#writing-your-own-remote-control-commands">http://docs.celeryproject.org/en/3.1/userguide/workers.html#writing-your-own-remote-control-commands</a></li>
+</ul>
+<ol>
+<li>定义<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> celery.worker.control <span class="keyword">import</span> Panel</span><br><span class="line"></span><br><span class="line"><span class="meta">@Panel.register</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">increase_prefetch_count</span>(<span class="params">state, n=<span class="number">1</span></span>):</span></span><br><span class="line">    state.consumer.qos.increment_eventually(n)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&#x27;ok&#x27;</span>: <span class="string">&#x27;prefetch count incremented&#x27;</span>&#125;</span><br></pre></td></tr></table></figure></li>
+<li>调用<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app.control.broadcast(<span class="string">&#x27;checkVersion&#x27;</span>,kwargs=kwargs,destination=destination)</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h1 id="事件处理event"><a href="#事件处理event" class="headerlink" title="事件处理event"></a>事件处理event</h1><h2 id="flower-event"><a href="#flower-event" class="headerlink" title="flower event"></a>flower event</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">logging.info(<span class="string">&#x27;start moniter celery event&#x27;</span>)</span><br><span class="line">connection = BrokerConnection(celeryconfig.BROKER_URL)</span><br><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_event</span>(<span class="params">event</span>):</span></span><br><span class="line">    logging.info(<span class="string">&#x27;on event&#x27;</span>)</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> connection <span class="keyword">as</span> conn:</span><br><span class="line">            recv = EventReceiver(conn,</span><br><span class="line">                                handlers=&#123;</span><br><span class="line">                                    <span class="string">&#x27;task-failed&#x27;</span> : on_task_failed,</span><br><span class="line">                                    <span class="string">&#x27;task-succeeded&#x27;</span> : on_task_succeeded,</span><br><span class="line">                                    <span class="string">&#x27;task-sent&#x27;</span> : on_task_sent,</span><br><span class="line">                                    <span class="string">&#x27;task-received&#x27;</span> : on_task_received,</span><br><span class="line">                                    <span class="string">&#x27;task-revoked&#x27;</span> : on_task_revoked,</span><br><span class="line">                                    <span class="string">&#x27;task-started&#x27;</span> : on_task_started,</span><br><span class="line">                                    <span class="string">&#x27;task-custom&#x27;</span> : on_task_custom,</span><br><span class="line">                                    <span class="comment"># &#x27;*&#x27; : on_event,</span></span><br><span class="line">                                    <span class="string">&#x27;worker-heartbeat&#x27;</span>: on_worker_heartbeat,</span><br><span class="line">                                    <span class="string">&#x27;worker-online&#x27;</span>: on_worker_online,</span><br><span class="line">                                    <span class="string">&#x27;worker-offline&#x27;</span>: on_worker_offline,</span><br><span class="line">                                    <span class="comment"># self</span></span><br><span class="line">                                    <span class="string">&#x27;worker-reg&#x27;</span>:on_worker_reg,</span><br><span class="line">                                    <span class="string">&#x27;task-log&#x27;</span> : on_event,</span><br><span class="line">                                &#125;)</span><br><span class="line">            recv.capture(limit=<span class="literal">None</span>, timeout=<span class="literal">None</span>)</span><br><span class="line">    <span class="keyword">except</span> (KeyboardInterrupt, SystemExit):</span><br><span class="line">        print(<span class="string">&#x27;EXCEPTION KEYBOARD INTERRUPT&#x27;</span>)</span><br><span class="line">        sys.exit()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><h2 id="1-rabbitmq-unack-message"><a href="#1-rabbitmq-unack-message" class="headerlink" title="1. rabbitmq unack message"></a>1. rabbitmq unack message</h2><p>rabbitmq消息量过大，可能导致</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a target="_blank" rel="noopener" href="http://lsq.me/2013/12/20/python/celery-manual-routing/">Celery 如何手动路由任务</a></li>
+<li><a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/4763072/why-cant-it-find-my-celery-config-file">celery multi config</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">celery</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-DNS-trick" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -584,6 +684,14 @@ MathJax.Hub.Queue(function() {
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">XStream</a>
               </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">冰蝎</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Attach</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -667,6 +775,10 @@ MathJax.Hub.Queue(function() {
           
             <li class="search-li">
               <a href="https://0range228.github.io/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>0range228</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="https://b1ue.cn/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>浅蓝</a>
             </li>
           
         </ul>
