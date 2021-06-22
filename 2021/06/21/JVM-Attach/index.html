@@ -18,7 +18,7 @@
 <meta property="og:image" content="http://m0d9.me/images/pasted-146.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-145.png">
 <meta property="article:published_time" content="2021-06-21T09:24:00.000Z">
-<meta property="article:modified_time" content="2021-06-22T10:10:52.579Z">
+<meta property="article:modified_time" content="2021-06-22T10:30:39.338Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="冰蝎">
@@ -251,12 +251,12 @@ ga('send', 'pageview');
 <h3 id="VirtualMachine-attach"><a href="#VirtualMachine-attach" class="headerlink" title="VirtualMachine.attach"></a>VirtualMachine.attach</h3><p><img src="/images/pasted-145.png" alt="upload successful"><br>此流程图需要搭配参考【3】中的调试过程，分析得出</p>
 <p>JVM 流程</p>
 <ol>
-<li>init, 等待SINQUIT（也是SINBREAK）</li>
+<li>init, 等待SIGQUIT（也是SIGBREAK）</li>
 <li>收到SINQUIT，attach_pid验证（这个不是很重要）</li>
 <li>判断是否有对应java_pid socket文件，没有则创建</li>
 <li>建立unix socket tcp server ,绑定java_pid socket通道</li>
 <li>进入循环，响应attach client</li>
-<li>新SINQUIT，验证attach_pid(不重要), 进入5（重点，并不会重新建server）</li>
+<li>新SIGQUIT，验证attach_pid(不重要), 进入5（重点，并不会重新建server）</li>
 </ol>
 <p>在步骤5完成之后，删除掉java_pid socket文件，会怎样？可恢复吗？</p>
 <ol>
