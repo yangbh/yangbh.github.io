@@ -18,7 +18,7 @@
 <meta property="og:image" content="http://m0d9.me/images/pasted-146.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-145.png">
 <meta property="article:published_time" content="2021-06-21T09:24:00.000Z">
-<meta property="article:modified_time" content="2021-06-24T06:34:59.464Z">
+<meta property="article:modified_time" content="2021-06-24T07:15:51.920Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="冰蝎">
@@ -284,6 +284,13 @@ ga('send', 'pageview');
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文复现了冰蝎为防止常见内存马检测antiAgent的功能（不得不膜拜beyond大佬，对Java实在是熟悉），在此基础上分析其实现原理，得出无法绕过的悲情结论。</p>
 <p>不过无法Attach本身就是一个强特征（虽然有些/tmp目录清理会导致误报），也使得antiAgent有利有弊，攻击者也需要斟酌而用。</p>
 <p>水平有限，如有疏漏，恳请告知。</p>
+<p>———–20210624补充————</p>
+<p>参考【11】中带头大哥 补充了关于冰蝎3.0beta8版本windows的实现，AntiAttach原理是通过关闭sun.tools.attach.WindowsVirtualMachine pipe，带头大哥 通过分析WindowsVirtualMachine JNI的实现得出：</p>
+<blockquote>
+<p>WindowsVirtualMachine是通过向目标JVM注入shellcode来执行我们与目标JVM的通信指令。Pipe只是一种通信手段，关闭pipe并不能影响我们向目标JVM加载javaagent。</p>
+</blockquote>
+<p>大哥66的</p>
+<p>在linux侧，转化为的问题是：UnixSocket文件删除之后如何恢复原有的server连接？本文只尝试了新建同名socket文件，或者还有其他方式？这块还是菜🐔，求知道的大佬们指点。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
 <li>[1]<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/542e50edc8e3">Java Attach机制</a></li>
 <li>[2]<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/5e1d3dab8534">RASP研发踩坑之attach失败</a></li>
@@ -295,6 +302,7 @@ ga('send', 'pageview');
 <li>[8]<a target="_blank" rel="noopener" href="https://paper.seebug.org/1381/">Tomcat 内存马检测</a></li>
 <li>[9]<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1768499">杂谈Java内存Webshell的攻与防</a></li>
 <li>[10]<a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/476186">Java动态调试技术原理及实践</a></li>
+<li>[11]<a target="_blank" rel="noopener" href="https://forum.butian.net/share/142">冰蝎beta8内存马防查杀破解</a></li>
 </ul>
 
       
