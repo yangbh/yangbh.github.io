@@ -8,19 +8,19 @@
   <link rel="dns-prefetch" href="http://m0d9.me">
   <title>OpenRASP学习笔记（一） | m0d9&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="RASP（Runtime Application self-protection）技术自Gartner在2014年提出，已经有挺长一段时间了。大厂们现在基本也都有自研的RASP、IASP产品。在开源RASP中，应以OpenRASP起步最早，应用也最广。不过因为性能原因，在实际攻防中覆盖面还是有限。 RASP算是Java安全绕不开的一个技术点，有兴趣对此学习研究一番。参考文章中threedr3am、">
+  <meta name="description" content="RASP（Runtime Application self-protection）技术自Gartner在2014年提出，已经有挺长一段时间了。大厂们现在基本也都有自研的RASP、IAST产品。在开源RASP中，应以OpenRASP起步最早，应用也最广。不过因为性能原因，在实际攻防中覆盖面还是有限。 RASP算是Java安全绕不开的一个技术点，有兴趣对此学习研究一番。参考文章中threedr3am、">
 <meta property="og:type" content="article">
 <meta property="og:title" content="OpenRASP学习笔记（一）">
 <meta property="og:url" content="http://m0d9.me/2021/07/13/OpenRASP%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/index.html">
 <meta property="og:site_name" content="m0d9&#39;s blog">
-<meta property="og:description" content="RASP（Runtime Application self-protection）技术自Gartner在2014年提出，已经有挺长一段时间了。大厂们现在基本也都有自研的RASP、IASP产品。在开源RASP中，应以OpenRASP起步最早，应用也最广。不过因为性能原因，在实际攻防中覆盖面还是有限。 RASP算是Java安全绕不开的一个技术点，有兴趣对此学习研究一番。参考文章中threedr3am、">
+<meta property="og:description" content="RASP（Runtime Application self-protection）技术自Gartner在2014年提出，已经有挺长一段时间了。大厂们现在基本也都有自研的RASP、IAST产品。在开源RASP中，应以OpenRASP起步最早，应用也最广。不过因为性能原因，在实际攻防中覆盖面还是有限。 RASP算是Java安全绕不开的一个技术点，有兴趣对此学习研究一番。参考文章中threedr3am、">
 <meta property="og:locale">
 <meta property="og:image" content="http://m0d9.me/images/pasted-147.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-148.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-149.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-150.png">
 <meta property="article:published_time" content="2021-07-13T10:23:00.000Z">
-<meta property="article:modified_time" content="2021-07-15T02:33:22.793Z">
+<meta property="article:modified_time" content="2021-07-16T05:43:00.954Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="OpenRASP">
 <meta property="article:tag" content="RASP">
@@ -200,7 +200,7 @@ ga('send', 'pageview');
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>RASP（Runtime Application self-protection）技术自Gartner在2014年提出，已经有挺长一段时间了。大厂们现在基本也都有自研的RASP、IASP产品。在开源RASP中，应以OpenRASP起步最早，应用也最广。不过因为性能原因，在实际攻防中覆盖面还是有限。</p>
+        <p>RASP（Runtime Application self-protection）技术自Gartner在2014年提出，已经有挺长一段时间了。大厂们现在基本也都有自研的RASP、IAST产品。在开源RASP中，应以OpenRASP起步最早，应用也最广。不过因为性能原因，在实际攻防中覆盖面还是有限。</p>
 <p>RASP算是Java安全绕不开的一个技术点，有兴趣对此学习研究一番。参考文章中threedr3am、tr1ple、c0d3p1ut0s几个师傅们对于OpenRASP的原理、技术点都有跟踪和解释，因此本文不再多做类似的阐释，主要针对自己的一些知识盲点、兴趣点，做做研究与笔记。</p>
 <h2 id="OpenRASP的Hook"><a href="#OpenRASP的Hook" class="headerlink" title="OpenRASP的Hook"></a>OpenRASP的Hook</h2><p>关注两点：</p>
 <ol>
