@@ -33,7 +33,7 @@
 <meta property="og:image" content="http://m0d9.me/images/pasted-168.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-169.png">
 <meta property="article:published_time" content="2021-08-29T09:03:00.000Z">
-<meta property="article:modified_time" content="2021-08-30T12:52:59.700Z">
+<meta property="article:modified_time" content="2021-08-30T12:56:31.928Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="Gadget">
 <meta property="article:tag" content="Tabby">
@@ -220,6 +220,9 @@ ga('send', 'pageview');
 <p>Neo4j 查询比较吃cpu，小本本加上idea同时跑吃力，搞台vps跑比较好，但是tabby是通过apoc.load.csv file写Neo4j数据的，相当于限制了本机，因此给下整库的dump和load（当然，直接整个在vps上操作也是ok的）。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dump neo4j database</span></span><br><span class="line">neo4j-admin dump --to /tmp/neo4j.dump --database neo4j</span><br><span class="line"><span class="comment"># scp dump file to vps</span></span><br></pre></td></tr></table></figure>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># load neo4j dump file</span></span><br><span class="line">./bin/neo4j stop</span><br><span class="line">./bin/neo4j-admin load --from=/root/neo4j.dump --database=neo4j --force</span><br><span class="line">./bin/neo4j start</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
 
 <h2 id="Gadgets结构"><a href="#Gadgets结构" class="headerlink" title="Gadgets结构"></a>Gadgets结构</h2><p>前文的众多的RCE Gadgets分析中发现Gadgets的结构大致分为：</p>
 <p><strong>Bullet：</strong><br>实现最终的RCE</p>
