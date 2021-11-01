@@ -171,30 +171,36 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-JNDI：JNDI-RMI 注入及绕过JDK高版本限制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-RMI：绕过JEP290——下" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/11/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/">JNDI：JNDI-RMI 注入及绕过JDK高版本限制</a>
+      <a class="article-title" href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/">RMI：绕过JEP290——下</a>
     </h1>
   
 
         
-        <a href="/2020/07/11/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2020-07-11T12:47:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-11</time>
+        <a href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/" class="archive-article-date">
+  	<time datetime="2020-07-15T03:52:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-15</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>fastjson 配合jndi注入攻击，现在已经是很常见的姿势了。前文RMI 1中略微提到jndi-rmi 攻击client的思路，这里详细补充下。</p>
-<p>其实JNDI-RMI注入的核心是JNDI注入，RMI协议只是jndi支持的其中一种，其他还有很多。这里不做深入JNDI安全背景解释，只是因为和RMI略有关系，所以作为RMI系列只是简要跟进分析下。</p>
+        <p>前文留了个坑，8u231之后还出现了限制与绕过，填个坑</p>
+<p>本节的思路：</p>
+<ol>
+<li>回顾JEP290 bypass的原理</li>
+<li>8u231的限制，老的JRMP绕过方式为何不行了</li>
+<li>An Trinh的绕过方式</li>
+<li>8u241的限制</li>
+</ol>
         
-          <a class="article-more-a" href="/2020/07/11/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/#more">more >></a>
+          <a class="article-more-a" href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/#more">more >></a>
         
       
 
@@ -212,11 +218,114 @@ ga('send', 'pageview');
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">enableReplace</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-RMI：绕过JEP290——中" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/">RMI：绕过JEP290——中</a>
+    </h1>
+  
+
+        
+        <a href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/" class="archive-article-date">
+  	<time datetime="2020-07-11T03:35:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本节主要解释前文留下的问题：</p>
+<p>只是建立了恶意JRMP的连接，但是没执行bind，为什么可以打成功？</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>流程比较复杂，先直接给结论，绕过JEP290的原理是</p>
+<ol>
+<li>利用JEP290白名单内的类，覆盖掉registerRefs（此时未建立JRMP连接）</li>
+<li>Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求</li>
+<li>DGC底层使用的是StreamRemoteCall.executeCall进行io的传输，executeCall发送完之后，会根据对方的反馈进行不同的操作，当对方返回一定条件时（初步判断是对方RMI Exception），会直接序列化InputStream，造成反序列化漏洞</li>
+</ol>
+        
+          <a class="article-more-a" href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
         		</li>
       		
 		</ul>
@@ -472,91 +581,6 @@ ga('send', 'pageview');
 <p>参考【1】, 很多文章介绍Java反序列化都是用的commons-connection1利用链，但是这条利用链对于新手来说不太友好，重点不在反序列化，而在于commons-connection1本身LazyMap这条链上。这里以ysoserial Groovy1为例分析下原理。</p>
         
           <a class="article-more-a" href="/2020/06/15/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9AGroovy%E5%88%A9%E7%94%A8%E9%93%BE/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Java反序列化：基础（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/06/15/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9A%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/">Java反序列化：基础（一）</a>
-    </h1>
-  
-
-        
-        <a href="/2020/06/15/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9A%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2020-06-15T06:29:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>已知python反序列化漏洞原因为__reduce__魔术方法，而Java并没有__reduce__魔术方法，那为何会反序列化漏洞呢？</p>
-<h2 id="Show-me-the-code"><a href="#Show-me-the-code" class="headerlink" title="Show me the code"></a>Show me the code</h2><h3 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h3>
-        
-          <a class="article-more-a" href="/2020/06/15/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9A%E5%9F%BA%E7%A1%80%EF%BC%88%E4%B8%80%EF%BC%89/#more">more >></a>
         
       
 
@@ -885,6 +909,10 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Mysql</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
@@ -922,6 +950,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">RASP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">XXE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Fabric</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">CodeQL</a>
               </li>
             
             <div class="clearfix"></div>

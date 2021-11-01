@@ -171,6 +171,111 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-CodeQL-CVE-2021-2471" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/11/01/CodeQL-CVE-2021-2471/">CodeQL with CVE-2021-2471</a>
+    </h1>
+  
+
+        
+        <a href="/2021/11/01/CodeQL-CVE-2021-2471/" class="archive-article-date">
+  	<time datetime="2021-11-01T13:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>pyn3rd师傅的《Make JDBC Attack Brilliant Again》中有一个0day是mysql jdbc xxe，thread3am师傅也早就复现出来了，而且还发现了h2的xxe。膜一个，师傅们都太🐂🍺了。很多师傅们也复现了，再讲也没啥意思了，用CodeQL整点新的吧。</p>
+<ol>
+<li><p>CVE-2021-2471 mysql jdbc xxe在HITB ppt里面，没有讲DOMSource XXE这一部分，原因应该是pyn3rd师傅提漏洞还未公开，没写在ppt里面。所以这个洞有两个东西：</p>
+<p> a. DOMSource XXE, 影响所有版本，官方8.0.27中修复掉了</p>
+<p> b. Fabric XXE, 影响5.x, 在5.1.49中修复</p>
+</li>
+<li><p>CodeQL CWE-611有XXE的检测poc，不过source源不支持mysql。</p>
+</li>
+</ol>
+<h2 id="CVE-2021-2471"><a href="#CVE-2021-2471" class="headerlink" title="CVE-2021-2471"></a>CVE-2021-2471</h2><h3 id="DOMSource-XXE"><a href="#DOMSource-XXE" class="headerlink" title="DOMSource XXE"></a>DOMSource XXE</h3><p>漏洞代码在 com.mysql.cj.jdbc.MysqlSQLXML#getSource</p>
+        
+          <a class="article-more-a" href="/2021/11/01/CodeQL-CVE-2021-2471/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Mysql</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XXE</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Fabric</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-XStream反序列化（三）——Tabby CVE之旅" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -574,96 +679,6 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-Xstream反序列化详解（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/">XStream反序列化详解（一）</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2021-05-08T09:17:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>XStream 反序列化问题由来已久，从&lt;=1.4.6版本之下的EventHandler利用方式，到20年的CVE-2020-26217，再到21年钟师傅、threedr3am、whit3p1g师傅们不要钱似的6个CVE。它的成因不同于fastjson之类，也有异于原生Java反序列化，很有特点，值得学习。</p>
-<p>本节其实算是Wh1t3p1g师傅《回顾XStream反序列化漏洞》的学习笔记，也试着解释师傅没提到的一些细节问题。</p>
-<h2 id="1-XStream-原理解析"><a href="#1-XStream-原理解析" class="headerlink" title="1. XStream 原理解析"></a>1. XStream 原理解析</h2><h3 id="1-1-源码解析"><a href="#1-1-源码解析" class="headerlink" title="1.1 源码解析"></a>1.1 源码解析</h3><p>参考【3】<br><img src="/images/pasted-136.png" alt="upload successful"></p>
-        
-          <a class="article-more-a" href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">XStream</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
@@ -931,6 +946,10 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Mysql</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
@@ -968,6 +987,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">RASP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">XXE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Fabric</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">CodeQL</a>
               </li>
             
             <div class="clearfix"></div>

