@@ -6,11 +6,11 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://m0d9.me">
-  <title>JNDI：JNDI-LDAP 注入及高版本JDK限制——上 | m0d9&#39;s blog</title>
+  <title>JNDI：JNDI-LDAP 注入及高版本JDK限制 | m0d9&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="引用参考【1】  除了RMI服务之外，JNDI还可以对接LDAP服务，LDAP也能返回JNDI Reference对象，利用过程与上面RMI Reference基本一致，只是lookup()中的URL为一个LDAP地址：ldap:&#x2F;&#x2F;xxx&#x2F;xxx，由攻击者控制的LDAP服务端返回一个恶意的JNDI Reference对象。并且LDAP服务的Reference远程加载Factory类不受上一点中">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JNDI：JNDI-LDAP 注入及高版本JDK限制——上">
+<meta property="og:title" content="JNDI：JNDI-LDAP 注入及高版本JDK限制">
 <meta property="og:url" content="http://m0d9.me/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/index.html">
 <meta property="og:site_name" content="m0d9&#39;s blog">
 <meta property="og:description" content="引用参考【1】  除了RMI服务之外，JNDI还可以对接LDAP服务，LDAP也能返回JNDI Reference对象，利用过程与上面RMI Reference基本一致，只是lookup()中的URL为一个LDAP地址：ldap:&#x2F;&#x2F;xxx&#x2F;xxx，由攻击者控制的LDAP服务端返回一个恶意的JNDI Reference对象。并且LDAP服务的Reference远程加载Factory类不受上一点中">
@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://m0d9.me/images/pasted-93.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-95.png">
 <meta property="article:published_time" content="2020-07-23T02:43:00.000Z">
-<meta property="article:modified_time" content="2020-10-10T13:20:18.835Z">
+<meta property="article:modified_time" content="2021-12-17T06:10:09.065Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JNDI">
@@ -187,7 +187,7 @@ ga('send', 'pageview');
         
   
     <h1 class="article-title" itemprop="name">
-      JNDI：JNDI-LDAP 注入及高版本JDK限制——上
+      JNDI：JNDI-LDAP 注入及高版本JDK限制
     </h1>
   
 
@@ -406,7 +406,7 @@ ga('send', 'pageview');
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2021 m0d9
+    		&copy; 2022 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -499,15 +499,11 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">java</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">JDNI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">dns</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">tunnel</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -572,10 +568,6 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Spring</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">celery</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -713,6 +705,10 @@ MathJax.Hub.Queue(function() {
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">CodeQL</a>
               </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">Groovy1</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -764,6 +760,10 @@ MathJax.Hub.Queue(function() {
           
             <li class="search-li">
               <a href="https://pyn3rd.github.io/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>pyn3rd</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="http://yzddmr6.com/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>yzddmr6</a>
             </li>
           
             <li class="search-li">

