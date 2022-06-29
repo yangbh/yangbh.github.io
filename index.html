@@ -171,6 +171,159 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Confluence-CVE-2022-26134-OGNL-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/">Confluence CVE-2022-26134 OGNL 分析</a>
+    </h1>
+  
+
+        
+        <a href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2022-06-10T06:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-06-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <!-- 日拱一卒，功不唐捐。-->
+
+<p>发现半年没写文章了。。。</p>
+<h2 id="0x01-环境搭建"><a href="#0x01-环境搭建" class="headerlink" title="0x01 环境搭建"></a>0x01 环境搭建</h2><p>P🐮的Vulhub 有镜像了，不过调试接口没有开出来，这里稍微补充下。</p>
+<p>在vulhub/confluence/CVE2022-26134 目录下</p>
+<ol>
+<li>新建Dockerfile</li>
+</ol>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> vulhub/confluence:<span class="number">7.13</span>.<span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed <span class="string">&quot;106 iCATALINA_OPTS=\&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \$\&#123;CATALINA_OPTS\&#125;\&quot;&quot;</span> -i /opt/atlassian/confluence/bin/setenv.sh</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>更新docker-compose.yml</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">build:</span> <span class="string">.</span></span><br><span class="line"><span class="comment"># image: vulhub/confluence:7.13.6</span></span><br><span class="line"><span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;8090:8090&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;5005:5005&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x02-漏洞分析"><a href="#0x02-漏洞分析" class="headerlink" title="0x02 漏洞分析"></a>0x02 漏洞分析</h2><p>Y4er 师傅关于漏洞的总结得挺好的，漏洞复现这块已经没什么好讲的了。</p>
+<ul>
+<li>漏洞的调用栈</li>
+<li>黑白名单的绕过</li>
+</ul>
+<p><code>POC: curl -v &quot;http://192.168.1.112:8090/%24%7B1+1%7D/&quot;</code></p>
+<p>最终的调用栈如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">findValue:129, OgnlValueStack (com.opensymphony.xwork.util)</span><br><span class="line">translateVariables:39, TextParseUtil (com.opensymphony.xwork.util)</span><br><span class="line">execute:95, ActionChainResult (com.opensymphony.xwork)</span><br><span class="line">executeResult:263, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">invoke:187, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">intercept:21, FlashScopeInterceptor (com.atlassian.confluence.xwork)</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">intercept:35, AroundInterceptor (com.opensymphony.xwork.interceptor) [3]</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">intercept:27, LastModifiedInterceptor (com.atlassian.confluence.core.actions)</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">intercept:44, ConfluenceAutowireInterceptor (com.atlassian.confluence.core)</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">intercept:35, AroundInterceptor (com.opensymphony.xwork.interceptor) [2]</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">invokeAndHandleExceptions:61, TransactionalInvocation (com.atlassian.xwork.interceptors)</span><br><span class="line">invokeInTransaction:51, TransactionalInvocation (com.atlassian.xwork.interceptors)</span><br><span class="line">intercept:50, XWorkTransactionInterceptor (com.atlassian.xwork.interceptors)</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">intercept:61, SetupIncompleteInterceptor (com.atlassian.confluence.xwork)</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">intercept:26, SecurityHeadersInterceptor (com.atlassian.confluence.security.interceptors)</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">intercept:35, AroundInterceptor (com.opensymphony.xwork.interceptor) [1]</span><br><span class="line">invoke:165, DefaultActionInvocation (com.opensymphony.xwork)</span><br><span class="line">execute:115, DefaultActionProxy (com.opensymphony.xwork)</span><br><span class="line">serviceAction:56, ConfluenceServletDispatcher (com.atlassian.confluence.servlet)</span><br><span class="line">service:199, ServletDispatcher (com.opensymphony.webwork.dispatcher)</span><br><span class="line">service:764, HttpServlet (javax.servlet.http)</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="0x03-思路逆向"><a href="#0x03-思路逆向" class="headerlink" title="0x03 思路逆向"></a>0x03 思路逆向</h2><p>关于漏洞如何发现的，个人理解可以拆分成3个阶段</p>
+<ol>
+<li>如何定位到去挖confluence</li>
+<li>如何发现ognl攻击面，也即sink点</li>
+<li>如何从sink点推导出source及path</li>
+</ol>
+<p>这些都是很有意思的点，值得思考。这里也只尝试逆向分析步骤3的思路，步骤1、2太过宽泛了有时间再做探讨。</p>
+<h3 id="sink-到source"><a href="#sink-到source" class="headerlink" title="sink 到source"></a>sink 到source</h3><p>sink 点其实很明显，ognl.getValue，在此基础上如何找到完整的触发链？</p>
+<p>source点在javax.servlet.http.HttpServlet#service，需要对confluence 结构有一定了解，或者要调试下历史的漏洞，应该能定位到这里。</p>
+<p>如何找出中间的链，confluence没有源码，所以tabby 或者 ByteCodeDL？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xmx6g -jar build&#x2F;libs&#x2F;tabby-1.1.0.RELEASE.jar ..&#x2F;confluence&#x2F;atlassian-confluence-7.13.6&#x2F;confluence&#x2F;WEB-INF&#x2F;lib&#x2F; --isJDKProcess</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; confluence CVE-2022-26134</span><br><span class="line">match (source:Method &#123;NAME:&quot;service&quot;&#125;) where source.CLASSNAME &#x3D;~ &quot;.*ServletDispatcher&quot;</span><br><span class="line">match (sink:Method &#123;NAME:&quot;translateVariables&quot;, CLASSNAME:&quot;com.opensymphony.xwork.util.TextParseUtil&quot;&#125;) </span><br><span class="line">call apoc.algo.allSimplePaths(source,sink,&quot;&gt;CALL|ALIAS&quot;,9) yield path </span><br><span class="line">return path</span><br></pre></td></tr></table></figure>
+<p><img src="/images/pasted-214.png" alt="upload successful"></p>
+<p>Y4师傅提到的一些其他的 *Result#execute，可以看到部分也在路径里面。</p>
+<h3 id="sink-点的定位"><a href="#sink-点的定位" class="headerlink" title="sink 点的定位"></a>sink 点的定位</h3><p>Semgrep 对于找sink点，和正则相比有一些优势，不过目前规则也不全。</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">pattern-either:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">pattern:</span> <span class="string">|</span></span><br><span class="line">       <span class="string">ognl.Ognl.getValue(...)</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">pattern:</span> <span class="string">|</span></span><br><span class="line">       <span class="string">ognl.Ognl.setValue(...)</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">pattern:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">$X.translateVariables(...</span> <span class="string">,</span> <span class="string">...)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">semgrep --config=java/lang/security/audit/ognl-injection2.yaml ~/study/java/confluence/confluence-home/jars/</span><br></pre></td></tr></table></figure>
+<p><img src="/images/pasted-218.png" alt="upload successful"></p>
+<p>对于jar类型，如果要实现完全自动化还是比较困难。反编译、自动化运行semgrep规则、再从sink点出发用Tabby找路径。目前也没有好的思路，学习《软件分析》吧。</p>
+<h2 id="0x04-补丁分析"><a href="#0x04-补丁分析" class="headerlink" title="0x04 补丁分析"></a>0x04 补丁分析</h2><p><img src="/images/pasted-215.png" alt="upload successful"><br>只是修了ActionChainResult 中的translateVariables。但是其他的Ognl 点也没找到触发链。</p>
+<h2 id="0x05-小结"><a href="#0x05-小结" class="headerlink" title="0x05 小结"></a>0x05 小结</h2><p>本文简略的跟踪了Confluence CVE-2022-26134 OGNL的漏洞调用流程，并在此基础上探索其OGNL调用链的发现思路。分析了补丁，尝试挖掘其他的触发链，但是无果。基本内容Y4师傅的文章基本都有了，本文没什么新的东西。</p>
+<p>总的来说这个洞原理并不难，st2 的ognl也是经典的漏洞了，但是为什么是黑产走在了技术前沿？纯技术而言，原理不难，但是较难自动化，主动挖掘也需要一定的漏洞历史知识。</p>
+<p>老样子留个坑吧</p>
+<ol>
+<li>只根据补丁，能够独立分析出POC吗？PS：业内谁最先搞出poc的</li>
+<li>怎么会想到到去挖confluence的？</li>
+<li>如何发现OGNL攻击面？</li>
+</ol>
+<p>未完待续。。。</p>
+<h2 id="0x06-参考"><a href="#0x06-参考" class="headerlink" title="0x06 参考"></a>0x06 参考</h2><ul>
+<li>[1]<a target="_blank" rel="noopener" href="https://github.com/vulhub/vulhub/tree/master/confluence/CVE-2022-26134">Confluence Pre-Auth Remote Code Execution via OGNL Injection (CVE-2022-26134) (by:phith0n)</a></li>
+<li>[2]<a target="_blank" rel="noopener" href="https://y4er.com/post/cve-2022-26134-confluence-server-data-center-ognl-rce/">CVE-2022-26134 Confluence Server Data Center OGNL RCE (by:Y4er)</a></li>
+<li>[3]<a target="_blank" rel="noopener" href="https://confluence.atlassian.com/doc/confluence-security-advisory-2022-06-02-1130377146.html">Confluence Security Advisory 2022-06-02</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Confluence</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-JNDI-RMI-LDAP注入绕过逆向分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -571,118 +724,6 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-JVM-Attach" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/06/21/JVM-Attach/">从冰蝎antiAgent看Java Attach机制</a>
-    </h1>
-  
-
-        
-        <a href="/2021/06/21/JVM-Attach/" class="archive-article-date">
-  	<time datetime="2021-06-21T09:24:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>webshell的隐藏与检出一直以来都是攻防的焦点，随着内存马的研究与工具的公开，内存shell已然成为了webshell主流。</p>
-<p>引用【9】中关于攻击的思路</p>
-<blockquote>
-<ol>
-<li>基于Servlet规范的利用，动态注册Servlet规范中的组件，包括Servlet，Filter，Listener，这部分的公开文章比较多，比如：基于tomcat的内存 Webshell 无文件攻击技术（<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7388%EF%BC%89%E3%80%82">https://xz.aliyun.com/t/7388）。</a></li>
-<li>基于特定框架的利用，框架一般对于Servlet又进行了一层封装，动态注册框架的路由，文章：基于内存 Webshell 的无文件攻击技术研究（<a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/198886%EF%BC%89">https://www.anquanke.com/post/id/198886）</a></li>
-<li>基于javaagent修改Servlet处理流程中的字节码，工具：memShell（<a target="_blank" rel="noopener" href="https://github.com/rebeyond/memShell%EF%BC%89">https://github.com/rebeyond/memShell）</a></li>
-</ol>
-</blockquote>
-<p>引用【8】中关于检测的思路</p>
-<blockquote>
-<p>无论是以上哪种攻击方式，从防守方的角度来说，检测的方式都是通过java instrumentation机制，将检测jar包attach到tomcat jvm，检查加载到jvm中的类是否异常。整体检测思路为：</p>
-<ol>
-<li>获取tomcat jvm中所有加载的类</li>
-<li>遍历每个类，判断是否为风险类。我们把可能被攻击方新增/修改内存中的类，标记为风险类（比如实现了filter/servlet的类）</li>
-<li>遍历风险类，检查是否为webshell：</li>
-<li>检查高风险类的class文件是否存在；</li>
-<li>反编译风险类字节码，检查java文件中包含恶意代码</li>
-</ol>
-</blockquote>
-<p>有攻有防，而防御又引发攻击的升级，冰蝎最新版已经加入了反VirtualMachine.Attach功能。</p>
-        
-          <a class="article-more-a" href="/2021/06/21/JVM-Attach/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">冰蝎</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Attach</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
@@ -999,6 +1040,14 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">Groovy1</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Confluence</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">OGNL</a>
               </li>
             
             <div class="clearfix"></div>
