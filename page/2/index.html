@@ -171,6 +171,423 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-CodeQL-CVE-2021-2471" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/11/01/CodeQL-CVE-2021-2471/">CodeQL with CVE-2021-2471</a>
+    </h1>
+  
+
+        
+        <a href="/2021/11/01/CodeQL-CVE-2021-2471/" class="archive-article-date">
+  	<time datetime="2021-11-01T13:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>pyn3rd师傅的《Make JDBC Attack Brilliant Again》中有一个0day是mysql jdbc xxe，thread3am师傅也早就复现出来了，而且还发现了h2的xxe。膜一个，师傅们都太🐂🍺了。很多师傅们也复现了，再讲也没啥意思了，用CodeQL整点新的吧。</p>
+<ol>
+<li><p>CVE-2021-2471 mysql jdbc xxe在HITB ppt里面，没有讲DOMSource XXE这一部分，原因应该是pyn3rd师傅提漏洞还未公开，没写在ppt里面。所以这个洞有两个东西：</p>
+<p> a. DOMSource XXE, 影响所有版本，官方8.0.27中修复掉了</p>
+<p> b. Fabric XXE, 影响5.x, 在5.1.49中修复</p>
+</li>
+<li><p>CodeQL CWE-611有XXE的检测poc，不过source源不支持mysql。</p>
+</li>
+</ol>
+<h2 id="CVE-2021-2471"><a href="#CVE-2021-2471" class="headerlink" title="CVE-2021-2471"></a>CVE-2021-2471</h2><h3 id="DOMSource-XXE"><a href="#DOMSource-XXE" class="headerlink" title="DOMSource XXE"></a>DOMSource XXE</h3><p>漏洞代码在 com.mysql.cj.jdbc.MysqlSQLXML#getSource</p>
+        
+          <a class="article-more-a" href="/2021/11/01/CodeQL-CVE-2021-2471/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Mysql</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XXE</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Fabric</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-XStream反序列化（三）——Tabby CVE之旅" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/">XStream反序列化（三）——Tabby CVE之旅</a>
+    </h1>
+  
+
+        
+        <a href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/" class="archive-article-date">
+  	<time datetime="2021-08-29T09:03:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>月底在即，再不写点东西，每月一篇都要食言了。上个月刚挖的OpenRASP的坑，本打算再研究研究绕过姿势，验证下猜想，也没下文。正好6月份交的XStream SSRF Gadget CVE下来，之前XStream系列草稿箱里也待着之前逆向分析师傅们挖掘的思路&amp;手法，正好编辑编辑，水一篇”如何挖掘XStream Gadgets”。</p>
+<p>首先感谢Wh1t3p1g师傅的Tabby，用起来比gadgetinspector更顺手，找链神器。</p>
+<h2 id="Tabby"><a href="#Tabby" class="headerlink" title="Tabby"></a>Tabby</h2><p>有关Tabby的介绍，详情可以参考【1】中Wh1t3p1g师傅的几个wiki，写的很详细了，这里也不多啰嗦。（这里膜一下Wh1t3p1g师傅）</p>
+<p>Neo4j 查询比较吃cpu，小本本加上idea同时跑吃力，搞台vps跑比较好，但是tabby是通过apoc.load.csv file写Neo4j数据的，相当于限制了本机，因此给下整库的dump和load（当然，直接整个在vps上操作也是ok的）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dump neo4j database</span></span><br><span class="line">neo4j-admin dump --to /tmp/neo4j.dump --database neo4j</span><br><span class="line"><span class="comment"># scp dump file to vps</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># load neo4j dump file</span></span><br><span class="line">./bin/neo4j stop</span><br><span class="line">./bin/neo4j-admin load --from=/root/neo4j.dump --database=neo4j --force</span><br><span class="line">./bin/neo4j start</span><br></pre></td></tr></table></figure>
+        
+          <a class="article-more-a" href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Gadget</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tabby</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">XStream</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-OpenRASP学习笔记（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/07/13/OpenRASP%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/">OpenRASP学习笔记（一）</a>
+    </h1>
+  
+
+        
+        <a href="/2021/07/13/OpenRASP%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
+  	<time datetime="2021-07-13T10:23:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>RASP（Runtime Application self-protection）技术自Gartner在2014年提出，已经有挺长一段时间了。大厂们现在基本也都有自研的RASP、IAST产品。在开源RASP中，应以OpenRASP起步最早，应用也最广。不过因为性能原因，在实际攻防中覆盖面还是有限。</p>
+<p>RASP算是Java安全绕不开的一个技术点，有兴趣对此学习研究一番。参考文章中threedr3am、tr1ple、c0d3p1ut0s几个师傅们对于OpenRASP的原理、技术点都有跟踪和解释，因此本文不再多做类似的阐释，主要针对自己的一些知识盲点、兴趣点，做做研究与笔记。</p>
+<h2 id="OpenRASP的Hook"><a href="#OpenRASP的Hook" class="headerlink" title="OpenRASP的Hook"></a>OpenRASP的Hook</h2><p>关注两点：</p>
+<ol>
+<li>如何Hook的</li>
+<li>Hook了哪些类的哪些方法</li>
+</ol>
+<h3 id="如何Hook"><a href="#如何Hook" class="headerlink" title="如何Hook"></a>如何Hook</h3>
+        
+          <a class="article-more-a" href="/2021/07/13/OpenRASP%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">OpenRASP</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">RASP</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-JVM-Attach" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/21/JVM-Attach/">从冰蝎antiAgent看Java Attach机制</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/21/JVM-Attach/" class="archive-article-date">
+  	<time datetime="2021-06-21T09:24:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>webshell的隐藏与检出一直以来都是攻防的焦点，随着内存马的研究与工具的公开，内存shell已然成为了webshell主流。</p>
+<p>引用【9】中关于攻击的思路</p>
+<blockquote>
+<ol>
+<li>基于Servlet规范的利用，动态注册Servlet规范中的组件，包括Servlet，Filter，Listener，这部分的公开文章比较多，比如：基于tomcat的内存 Webshell 无文件攻击技术（<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7388%EF%BC%89%E3%80%82">https://xz.aliyun.com/t/7388）。</a></li>
+<li>基于特定框架的利用，框架一般对于Servlet又进行了一层封装，动态注册框架的路由，文章：基于内存 Webshell 的无文件攻击技术研究（<a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/198886%EF%BC%89">https://www.anquanke.com/post/id/198886）</a></li>
+<li>基于javaagent修改Servlet处理流程中的字节码，工具：memShell（<a target="_blank" rel="noopener" href="https://github.com/rebeyond/memShell%EF%BC%89">https://github.com/rebeyond/memShell）</a></li>
+</ol>
+</blockquote>
+<p>引用【8】中关于检测的思路</p>
+<blockquote>
+<p>无论是以上哪种攻击方式，从防守方的角度来说，检测的方式都是通过java instrumentation机制，将检测jar包attach到tomcat jvm，检查加载到jvm中的类是否异常。整体检测思路为：</p>
+<ol>
+<li>获取tomcat jvm中所有加载的类</li>
+<li>遍历每个类，判断是否为风险类。我们把可能被攻击方新增/修改内存中的类，标记为风险类（比如实现了filter/servlet的类）</li>
+<li>遍历风险类，检查是否为webshell：</li>
+<li>检查高风险类的class文件是否存在；</li>
+<li>反编译风险类字节码，检查java文件中包含恶意代码</li>
+</ol>
+</blockquote>
+<p>有攻有防，而防御又引发攻击的升级，冰蝎最新版已经加入了反VirtualMachine.Attach功能。</p>
+        
+          <a class="article-more-a" href="/2021/06/21/JVM-Attach/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">冰蝎</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Attach</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-XStream反序列化详解（二）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -270,399 +687,9 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-Xstream反序列化详解（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/">XStream反序列化详解（一）</a>
-    </h1>
-  
-
-        
-        <a href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2021-05-08T09:17:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>XStream 反序列化问题由来已久，从&lt;=1.4.6版本之下的EventHandler利用方式，到20年的CVE-2020-26217，再到21年钟师傅、threedr3am、whit3p1g师傅们不要钱似的6个CVE。它的成因不同于fastjson之类，也有异于原生Java反序列化，很有特点，值得学习。</p>
-<p>本节其实算是Wh1t3p1g师傅《回顾XStream反序列化漏洞》的学习笔记，也试着解释师傅没提到的一些细节问题。</p>
-<h2 id="1-XStream-原理解析"><a href="#1-XStream-原理解析" class="headerlink" title="1. XStream 原理解析"></a>1. XStream 原理解析</h2><h3 id="1-1-源码解析"><a href="#1-1-源码解析" class="headerlink" title="1.1 源码解析"></a>1.1 源码解析</h3><p>参考【3】<br><img src="/images/pasted-136.png" alt="upload successful"></p>
-        
-          <a class="article-more-a" href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">XStream</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Jdbc碎碎念三：内存数据库" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/26/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%B8%89%EF%BC%9A%E5%86%85%E5%AD%98%E6%95%B0%E6%8D%AE%E5%BA%93/">Jdbc碎碎念三：内存数据库</a>
-    </h1>
-  
-
-        
-        <a href="/2021/04/26/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%B8%89%EF%BC%9A%E5%86%85%E5%AD%98%E6%95%B0%E6%8D%AE%E5%BA%93/" class="archive-article-date">
-  	<time datetime="2021-04-26T06:10:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-26</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>继续讨论讨论在jdbc url可控情况下，有哪下攻击手法？</p>
-<ol>
-<li>攻击client思路，典型的就是mysql client，前面讲过</li>
-<li>攻击server思路，内存数据库就是当前server，发现相关介绍文章都比较散，这里尝试探索总结下，看看能不能发现新的姿势</li>
-</ol>
-<h1 id="攻击内存数据库Server"><a href="#攻击内存数据库Server" class="headerlink" title="攻击内存数据库Server"></a>攻击内存数据库Server</h1><h2 id="H2"><a href="#H2" class="headerlink" title="H2"></a>H2</h2><p>pom依赖</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.h2database<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>h2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.4.199<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2021/04/26/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%B8%89%EF%BC%9A%E5%86%85%E5%AD%98%E6%95%B0%E6%8D%AE%E5%BA%93/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Jdbc</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">H2</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">HSQLDB</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Apache-Druid-CVE-2021-26919-漏洞分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">Apache Druid CVE-2021-26919 漏洞分析</a>
-    </h1>
-  
-
-        
-        <a href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-04-21T13:08:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>CVE-2021-26919是一个jdbc 反序列化类型漏洞，用作之前两篇jdbc mysql学习的练手，分析分析。</p>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>已知是jdbc mysql反序列化的问题，可以直接看看官方的修复</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/apache/druid/compare/druid-0.20.1...druid-0.20.2">https://github.com/apache/druid/compare/druid-0.20.1...druid-0.20.2</a><br><img src="/images/pasted-129.png" alt="upload successful"></p>
-<p>具体在这个commit里<br><a target="_blank" rel="noopener" href="https://github.com/apache/druid/commit/48953e3508967f5156c69676432b5d4dd25ea678">https://github.com/apache/druid/commit/48953e3508967f5156c69676432b5d4dd25ea678</a></p>
-<p>代码就不贴了，主要功能是设置了jdbc:mysql &amp; jdbc:postgresql两类driver和对应的参数白名单</p>
-        
-          <a class="article-more-a" href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Druid</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Apache</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Jdbc-碎碎念二：MySQL-反序列化" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">Jdbc 碎碎念二：MySQL 反序列化</a>
-    </h1>
-  
-
-        
-        <a href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="archive-article-date">
-  	<time datetime="2021-04-20T08:08:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>参考【1】中四哥已经讲的很全面也很详细了，简单记录下复现过程吧</p>
-<h2 id="MySQL-反序列化"><a href="#MySQL-反序列化" class="headerlink" title="MySQL 反序列化"></a>MySQL 反序列化</h2><h3 id="autoDeserialize"><a href="#autoDeserialize" class="headerlink" title="autoDeserialize"></a>autoDeserialize</h3><p><img src="/images/pasted-125.png" alt="upload successful"></p>
-<p>如解释，mysql client会自动反序列化server端传回的BLOB类型</p>
-        
-          <a class="article-more-a" href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Jdbc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/">« Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/3/">Next »</a>
+      <a class="extend prev" rel="prev" href="/">« Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/3/">Next »</a>
     </nav>
   
 
@@ -788,6 +815,14 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">CVE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Confluence</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">OGNL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -976,6 +1011,14 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">openssl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">Struts2</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">Velocity</a>
               </li>
             
             <div class="clearfix"></div>
