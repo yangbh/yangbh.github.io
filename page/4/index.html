@@ -171,6 +171,104 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Jdbc碎碎念" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/">Jdbc 碎碎念一：MySQL Client文件读取</a>
+    </h1>
+  
+
+        
+        <a href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/" class="archive-article-date">
+  	<time datetime="2021-04-20T03:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前Get了h2 initsql的骚姿势，于是想总结总结jdbc url可控情况下的利用方法，经典的场景就是jdbc mysql 文件读取和反序列化，正好前不久的Druid CVE-2021-26919的用的就是jdbc mysql反序列化漏洞，学习学习，居然踩一些坑，单独记录下来。</p>
+<p>mysql client任意文件读取漏洞历史悠久，参考【6】中有提到早在13年就有提出，但是作为mysql 正常功能一直保留。直到19年blackhat 张杨和可奕 大佬发现反序列化的利用场景（参考【5】），相关研究达到小高潮，不过多赘述。</p>
+<h2 id="MySQL-Client文件读取漏洞"><a href="#MySQL-Client文件读取漏洞" class="headerlink" title="MySQL Client文件读取漏洞"></a>MySQL Client文件读取漏洞</h2><h3 id="原理：load-local-data"><a href="#原理：load-local-data" class="headerlink" title="原理：load local data"></a>原理：load local data</h3><p>正常的load local data流程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">client：申请跑个sql，内容是&quot;load data local infile &quot;&#x2F;etc&#x2F;passwd&quot; into table test FIELDS TERMINATED BY &#39;\n&#39;;&quot;</span><br><span class="line">server：好的，（识别sql内容），那你把&#x2F;etc&#x2F;passwd文件读取传过来吧</span><br><span class="line">client：好的，（读取本地&#x2F;etc&#x2F;passwd），这是文件内容，请查收</span><br></pre></td></tr></table></figure>
+
+<p>攻击流程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">client：申请跑个sql，内容是&quot;***&quot;（jdbc-mysql-connector默认认证登录完成之后，会有show variables&#x2F;select 参数等行为）</span><br><span class="line">server：好的，（不管sql内容），那你把&#x2F;etc&#x2F;passwd文件读取传过来吧</span><br><span class="line">client：好的，（读取本地&#x2F;etc&#x2F;passwd），这是文件内容，请查收</span><br></pre></td></tr></table></figure>
+        
+          <a class="article-more-a" href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Jdbc</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-JackSon-CVE-2020-36179分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -583,106 +681,6 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-Java内存shell：三方框架" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/">Java内存shell：三方框架</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/" class="archive-article-date">
-  	<time datetime="2020-09-27T02:06:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>前文tomcat的通用servlet内存马已经基本可以覆盖大部分的情况，针对第三方框架，思路也是一样的，姿势不同。观星实验室的师傅们在参考【1】中提到了关于Sping的姿势，这里学习记录下。</p>
-<h2 id="Spring"><a href="#Spring" class="headerlink" title="Spring"></a>Spring</h2><p>具体的背景不赘述，详见参考【1】，几个重点的步骤</p>
-<ol>
-<li>获得当前代码运行时的上下文环境</li>
-<li>手动注册 controller</li>
-<li>controller 中的 Webshell 逻辑</li>
-</ol>
-<p>文中师傅没有给出直接运行的poc，这里给一下</p>
-<h3 id="Show-me-the-code"><a href="#Show-me-the-code" class="headerlink" title="Show me the code"></a>Show me the code</h3>
-        
-          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">内存马</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Spring</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">« Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/5/">Next »</a>
@@ -1015,6 +1013,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">Velocity</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">GadgetInspector</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">污点分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">静态分析</a>
               </li>
             
             <div class="clearfix"></div>

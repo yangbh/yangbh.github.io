@@ -171,6 +171,106 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Java内存shell：三方框架" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/">Java内存shell：三方框架</a>
+    </h1>
+  
+
+        
+        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/" class="archive-article-date">
+  	<time datetime="2020-09-27T02:06:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前文tomcat的通用servlet内存马已经基本可以覆盖大部分的情况，针对第三方框架，思路也是一样的，姿势不同。观星实验室的师傅们在参考【1】中提到了关于Sping的姿势，这里学习记录下。</p>
+<h2 id="Spring"><a href="#Spring" class="headerlink" title="Spring"></a>Spring</h2><p>具体的背景不赘述，详见参考【1】，几个重点的步骤</p>
+<ol>
+<li>获得当前代码运行时的上下文环境</li>
+<li>手动注册 controller</li>
+<li>controller 中的 Webshell 逻辑</li>
+</ol>
+<p>文中师傅没有给出直接运行的poc，这里给一下</p>
+<h3 id="Show-me-the-code"><a href="#Show-me-the-code" class="headerlink" title="Show me the code"></a>Show me the code</h3>
+        
+          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">内存马</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Spring</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Java内存shell：javaagent" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -575,99 +675,6 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-JNDI：JNDI-RMI 注入及绕过JDK高版本限制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/">JNDI：JNDI-RMI 注入及绕过JDK高版本限制</a>
-    </h1>
-  
-
-        
-        <a href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2020-07-16T12:47:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-16</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>fastjson 配合jndi注入攻击，现在已经是很常见的姿势了。前文RMI 1中略微提到jndi-rmi 攻击client的思路，这里详细补充下。</p>
-<p>其实JNDI-RMI注入的核心是JNDI注入，RMI协议只是jndi支持的其中一种，其他还有很多。这里不做深入JNDI安全背景解释，只是因为和RMI略有关系，所以作为RMI系列只是简要跟进分析下。</p>
-        
-          <a class="article-more-a" href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/4/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/6/">Next »</a>
@@ -1000,6 +1007,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">Velocity</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">GadgetInspector</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">污点分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">静态分析</a>
               </li>
             
             <div class="clearfix"></div>

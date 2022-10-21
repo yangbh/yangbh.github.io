@@ -171,6 +171,114 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Tabby技术分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">GadgetInspector 工具分析</a>
+    </h1>
+  
+
+        
+        <a href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2022-09-14T03:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>开始啃骨头了。。。</p>
+<h2 id="0x01-背景知识"><a href="#0x01-背景知识" class="headerlink" title="0x01 背景知识"></a>0x01 背景知识</h2><p>不了解算法原理基础上，去直接啃GI源码，真的是一件很困难的事情，难得有师傅们的经验总结，站在师傅们的肩膀上记录下GI的学习心得。</p>
+<h3 id="时间线"><a href="#时间线" class="headerlink" title="时间线"></a>时间线</h3><ul>
+<li>2018年Black Hat公布<a target="_blank" rel="noopener" href="https://i.blackhat.com/us-18/Thu-August-9/us-18-Haken-Automated-Discovery-of-Deserialization-Gadget-Chains.pdf">GadgetInspector</a></li>
+<li>2019年Longofo师傅<a target="_blank" rel="noopener" href="https://paper.seebug.org/1034/#step2-passthrough_1">《Java 反序列化工具 gadgetinspector 初窥》</a>，详细跟踪了除ASM之外的知识点，重点是逆拓扑排序</li>
+<li>2020年threedr3am<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7058#toc-4">《java反序列化利用链自动挖掘工具gadgetinspector源码浅析》</a>，重点分析了Longofo师傅未提到的ASM</li>
+<li>2022年su18师傅<a target="_blank" rel="noopener" href="https://su18.org/post/gadgetor/">《高效挖掘反序列化漏洞——GadgetInspector改造》</a>，提到了GI的不足以及改进思路</li>
+</ul>
+<p>当然，还有其他的许多师傅关于GI的文章，这里没有提到，不赘述。</p>
+        
+          <a class="article-more-a" href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">GadgetInspector</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">污点分析</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">静态分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/程序分析//" class="article-tag-list-link color5">程序分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Struts2系列四：Confluence CVE-2021-26084" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -313,47 +421,6 @@ ga('send', 'pageview');
 </li>
 </ul>
 <p>模板的逻辑是如何实现的呢？</p>
-<h2 id="0x02-JSP"><a href="#0x02-JSP" class="headerlink" title="0x02 JSP"></a>0x02 JSP</h2><h3 id="2-1-JSP-Demo"><a href="#2-1-JSP-Demo" class="headerlink" title="2.1 JSP Demo"></a>2.1 JSP Demo</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;%<span class="meta">@taglib</span> prefix=<span class="string">&quot;s&quot;</span> uri=<span class="string">&quot;/struts-tags&quot;</span> %&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">  &lt;head&gt;</span><br><span class="line">    &lt;title&gt;S2-001 Demo&lt;/title&gt;</span><br><span class="line">  &lt;/head&gt;</span><br><span class="line">  &lt;body&gt;</span><br><span class="line">  &lt;h2&gt;S2-001 Demo&lt;/h2&gt;</span><br><span class="line">  &lt;s:form action=<span class="string">&quot;login&quot;</span>&gt;</span><br><span class="line">    &lt;s:textfield name=<span class="string">&quot;username&quot;</span> label=<span class="string">&quot;username&quot;</span> /&gt;</span><br><span class="line">    &lt;s:textfield name=<span class="string">&quot;password&quot;</span> label=<span class="string">&quot;password&quot;</span> /&gt;</span><br><span class="line">    &lt;s:submit&gt;&lt;/s:submit&gt;</span><br><span class="line">  &lt;/s:form&gt;</span><br><span class="line">  &lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-2-原理解析"><a href="#2-2-原理解析" class="headerlink" title="2.2 原理解析"></a>2.2 原理解析</h3><h4 id="2-2-1-编译"><a href="#2-2-1-编译" class="headerlink" title="2.2.1 编译"></a>2.2.1 编译</h4><p>众所周知，jsp 运行时会被编译成class。细节如何</p>
-<ul>
-<li>何时进行的编译？</li>
-<li>如何进行的编译？</li>
-</ul>
-<p>通常情况，是在第一次请求的时候，jsp 预编译成java代码，在编译成java字节码，也即class文件，由jsp引擎实现，目录在CATALINA_BASE 目录下。<br>具体是通过JDTCompiler，这里不不深入研究。</p>
-<p>上文的中Demo 最终编译成的class 代码截取如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">index_jsp</span> <span class="keyword">extends</span> <span class="title">HttpJspBase</span> <span class="keyword">implements</span> <span class="title">JspSourceDependent</span>, <span class="title">JspSourceImports</span> </span>&#123;</span><br><span class="line">...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">_jspService</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> IOException, ServletException </span>&#123;</span><br><span class="line">...</span><br><span class="line">        <span class="keyword">if</span> (!<span class="string">&quot;GET&quot;</span>.equals(_jspx_method) &amp;&amp; !<span class="string">&quot;POST&quot;</span>.equals(_jspx_method) &amp;&amp; !<span class="string">&quot;HEAD&quot;</span>.equals(_jspx_method) &amp;&amp; !DispatcherType.ERROR.equals(request.getDispatcherType())) &#123;</span><br><span class="line">...</span><br><span class="line">                response.setContentType(<span class="string">&quot;text/html;charset=UTF-8&quot;</span>);</span><br><span class="line">...</span><br><span class="line">                out.write(<span class="string">&quot;    &lt;title&gt;S2-001 Demo&lt;/title&gt;\n&quot;</span>);</span><br><span class="line">...</span><br><span class="line">                <span class="keyword">if</span> (<span class="keyword">this</span>._jspx_meth_s_005fform_005f0(pageContext)) &#123;</span><br><span class="line">...</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">_jspx_meth_s_005fform_005f0</span><span class="params">(PageContext _jspx_page_context)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">...</span><br><span class="line">            _jspx_th_s_005fform_005f0.setAction(<span class="string">&quot;login&quot;</span>);</span><br><span class="line">...</span><br><span class="line">                    <span class="keyword">if</span> (<span class="keyword">this</span>._jspx_meth_s_005ftextfield_005f0(_jspx_th_s_005fform_005f0, _jspx_page_context)) &#123;</span><br><span class="line">...</span><br><span class="line">                    <span class="keyword">if</span> (<span class="keyword">this</span>._jspx_meth_s_005ftextfield_005f1(_jspx_th_s_005fform_005f0, _jspx_page_context)) &#123;</span><br><span class="line">...</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">_jspx_meth_s_005ftextfield_005f0</span><span class="params">(JspTag _jspx_th_s_005fform_005f0, PageContext _jspx_page_context)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">...</span><br><span class="line">        TextFieldTag _jspx_th_s_005ftextfield_005f0 = (TextFieldTag)<span class="keyword">this</span>._005fjspx_005ftagPool_005fs_005ftextfield_0026_005fname_005flabel_005fnobody.get(TextFieldTag.class);</span><br><span class="line">...</span><br><span class="line">            _jspx_th_s_005ftextfield_005f0.setName(<span class="string">&quot;username&quot;</span>);</span><br><span class="line">            _jspx_th_s_005ftextfield_005f0.setLabel(<span class="string">&quot;username&quot;</span>);</span><br><span class="line">            _jspx_th_s_005ftextfield_005f0.doStartTag();</span><br><span class="line">            <span class="keyword">if</span> (_jspx_th_s_005ftextfield_005f0.doEndTag() == <span class="number">5</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">...</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">_jspx_meth_s_005ftextfield_005f1</span><span class="params">(JspTag _jspx_th_s_005fform_005f0, PageContext _jspx_page_context)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">...</span><br><span class="line">            _jspx_th_s_005ftextfield_005f1.setName(<span class="string">&quot;password&quot;</span>);</span><br><span class="line">            _jspx_th_s_005ftextfield_005f1.setLabel(<span class="string">&quot;password&quot;</span>);</span><br><span class="line">            _jspx_th_s_005ftextfield_005f1.doStartTag();</span><br><span class="line">            <span class="keyword">if</span> (_jspx_th_s_005ftextfield_005f1.doEndTag() == <span class="number">5</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-2-2-Tag-实现"><a href="#2-2-2-Tag-实现" class="headerlink" title="2.2.2 Tag 实现"></a>2.2.2 Tag 实现</h4><p>以_jspx_meth_s_005ftextfield_005f0 为例，最终是通过TextFieldTag class 实现的</p>
-<ul>
-<li>setxxx()：初始化，设置一些参数</li>
-<li>doStartTag()：获取一些组件信息和属性赋值，总之是些初始化的工作</li>
-<li>doEndTag()：在标签解析结束后需要做的事，如调用组件的 end() 方法</li>
-</ul>
-<p><img src="/images/pasted-250.png" alt="upload successful"></p>
-<p>类似的Tag 还有很多，如上面一节中提到的</p>
-<p><img src="/images/pasted-251.png" alt="upload successful"></p>
-<h4 id="ComponentTagSupport"><a href="#ComponentTagSupport" class="headerlink" title="ComponentTagSupport"></a>ComponentTagSupport</h4><ul>
-<li>BodyTagSupport 是servlet Tag 基础类</li>
-<li>StrutsBodyTagSupport 是struts Tag 基础类，有几个直接子类，ComponentTagSupport/ iterators</li>
-<li>ComponentTagSupport，其中几乎所有的struts tag类都继承ComponentTagSupport</li>
-</ul>
-<p>ComponentTagSupport 实现了doStartTag、doEndTag 接口</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Component component;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">doStartTag</span><span class="params">()</span> <span class="keyword">throws</span> JspException </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.component = <span class="keyword">this</span>.getBean(<span class="keyword">this</span>.getStack(), (HttpServletRequest)<span class="keyword">this</span>.pageContext.getRequest(), (HttpServletResponse)<span class="keyword">this</span>.pageContext.getResponse());</span><br><span class="line">    <span class="keyword">this</span>.populateParams();</span><br><span class="line">    <span class="keyword">boolean</span> evalBody = <span class="keyword">this</span>.component.start(<span class="keyword">this</span>.pageContext.getOut());</span><br><span class="line">    <span class="keyword">if</span> (evalBody) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.component.usesBody() ? <span class="number">2</span> : <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">doEndTag</span><span class="params">()</span> <span class="keyword">throws</span> JspException </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.component.end(<span class="keyword">this</span>.pageContext.getOut(), <span class="keyword">this</span>.getBody());</span><br><span class="line">    <span class="keyword">this</span>.component = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">6</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="Component"><a href="#Component" class="headerlink" title="Component"></a>Component</h4><p>ComponentTagSupport 有个属性Component。什么是Component？可以理解为Tag 到html 的实现。Component 和Tag 基本是一一对应的，是ComponentTagSupport#getBean 接口定义的对应关系。例如TextFieldTag </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TextFieldTag</span> <span class="keyword">extends</span> <span class="title">AbstractUITag</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Component <span class="title">getBean</span><span class="params">(ValueStack stack, HttpServletRequest req, HttpServletResponse res)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> TextField(stack, req, res);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/pasted-252.png" alt="upload successful"></p>
-<h4 id="UIBean"><a href="#UIBean" class="headerlink" title="UIBean"></a>UIBean</h4><p>UIBean 继承基础类Component，它的evaluateParams 方法实现了对html 元素属性进行赋值。这里是S2-001 漏洞产生的原因，本文不过多扩展，后文再详细跟踪。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">end</span><span class="params">(Writer writer, String body)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.evaluateParams();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.end(writer, body, <span class="keyword">false</span>);</span><br><span class="line">        <span class="keyword">this</span>.mergeTemplate(writer, <span class="keyword">this</span>.buildTemplateName(<span class="keyword">this</span>.template, <span class="keyword">this</span>.getDefaultTemplate()));</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception var7) &#123;</span><br><span class="line">        LOG.error(<span class="string">&quot;error when rendering&quot;</span>, var7);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.popComponentStack();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="0x03-Velocity"><a href="#0x03-Velocity" class="headerlink" title="0x03 Velocity"></a>0x03 Velocity</h2><p>与JSP 编译成class 不一样，Velocity 是实时通过ConfluenceVelocityServlet 进行处理的。大致过程是解析成AST，再计算每个AST节点。</p>
-<h3 id="3-1-Velocity-Demo"><a href="#3-1-Velocity-Demo" class="headerlink" title="3.1 Velocity Demo"></a>3.1 Velocity Demo</h3><p>背景知识不详细展开，具体可以参考官方文档【5】，或者文档【4】。直接看个最基础的例子：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># Person.java</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Persion</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">## hello.vm</span><br><span class="line">#set ($iAmVariable=&quot;good!&quot;)</span><br><span class="line">#set ($Person.name=&quot;kkk&quot;)</span><br><span class="line"></span><br><span class="line">Welcome $&#123;name&#125; to velocity.com</span><br><span class="line">today is $&#123;date&#125;.</span><br><span class="line"></span><br><span class="line">#foreach ($&#123;i&#125; in $&#123;list&#125;)</span><br><span class="line">    $&#123;i&#125;</span><br><span class="line">#end</span><br><span class="line"></span><br><span class="line">$&#123;Person.name&#125;</span><br></pre></td></tr></table></figure>
         
           <a class="article-more-a" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/#more">more >></a>
         
@@ -596,101 +663,6 @@ ga('send', 'pageview');
       		 
         		<li class="article-tag-list-item">
         			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-JNDI-RMI-LDAP注入绕过逆向分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/">JNDI-RMI 注入的EL 绕过思路分析</a>
-    </h1>
-  
-
-        
-        <a href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-12-17T06:11:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-17</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="/images/pasted-203.png" alt="upload successful"></p>
-<p>上面的JNDI 注入的JDK 版本限制已经耳熟能详了，针对JNDI-RMI 的tomcat EL 绕过姿势也被经常提起，本文尝试回溯这一姿势的发现过程。</p>
-<h2 id="JNDI-RMI-注入"><a href="#JNDI-RMI-注入" class="headerlink" title="JNDI-RMI 注入"></a>JNDI-RMI 注入</h2><h3 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h3><p>必须了解两个重要的类</p>
-<ul>
-<li>com.sun.jndi.rmi.registry.RegistryContext： JNDI-RMI接口</li>
-<li>java.rmi.registry.Registry： RMI 接口</li>
-</ul>
-<p>通常攻击场景下，Registry是作为RMI服务端，RegistryContext是作为攻击的client端，也就是vuln。</p>
-        
-          <a class="article-more-a" href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
         		</li>
       		
 		</ul>
@@ -1058,6 +1030,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">Velocity</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">GadgetInspector</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">污点分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">静态分析</a>
               </li>
             
             <div class="clearfix"></div>
