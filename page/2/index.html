@@ -171,109 +171,6 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-Struts2系列二：Velocity 模板" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/">Struts2系列二：JSP/Velocity模板</a>
-    </h1>
-  
-
-        
-        <a href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/" class="archive-article-date">
-  	<time datetime="2022-07-13T09:56:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>模板引擎注入也算是通用的漏洞类型了，不论是python/java，出现过的cve例子也不少。JSP/FreeMarker/Velocity 作为Struts2 的默认模板引擎，分析分析其实现原理，为以后的漏洞分析作铺垫。</p>
-<h2 id="0x01-背景知识"><a href="#0x01-背景知识" class="headerlink" title="0x01 背景知识"></a>0x01 背景知识</h2><h3 id="Struts2-Tag"><a href="#Struts2-Tag" class="headerlink" title="Struts2 Tag"></a>Struts2 Tag</h3><p>Tag是struts 模板元素的基础单位。建议先阅读参考【6】中《Tag Developers Guide》。</p>
-<p>Tag 有以下几类</p>
-<ul>
-<li>通用tag<ul>
-<li>控制流 tag， 例如 if、else</li>
-<li>数据tag， 例如include、set、url</li>
-</ul>
-</li>
-<li>UI tag，例如 from、text、div<ul>
-<li>Form tag，例如 checkbox、checkbox、head</li>
-<li>非Form tag，例如actonerror、actionmessage</li>
-</ul>
-</li>
-</ul>
-<p>模板的逻辑是如何实现的呢？</p>
-        
-          <a class="article-more-a" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Velocity</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
     <article id="post-Struts2系列一：OGNL 表达式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -692,6 +589,103 @@ ga('send', 'pageview');
 
 
   
+    <article id="post-XStream反序列化（三）——Tabby CVE之旅" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/">XStream反序列化（三）——Tabby CVE之旅</a>
+    </h1>
+  
+
+        
+        <a href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/" class="archive-article-date">
+  	<time datetime="2021-08-29T09:03:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>月底在即，再不写点东西，每月一篇都要食言了。上个月刚挖的OpenRASP的坑，本打算再研究研究绕过姿势，验证下猜想，也没下文。正好6月份交的XStream SSRF Gadget CVE下来，之前XStream系列草稿箱里也待着之前逆向分析师傅们挖掘的思路&amp;手法，正好编辑编辑，水一篇”如何挖掘XStream Gadgets”。</p>
+<p>首先感谢Wh1t3p1g师傅的Tabby，用起来比gadgetinspector更顺手，找链神器。</p>
+<h2 id="Tabby"><a href="#Tabby" class="headerlink" title="Tabby"></a>Tabby</h2><p>有关Tabby的介绍，详情可以参考【1】中Wh1t3p1g师傅的几个wiki，写的很详细了，这里也不多啰嗦。（这里膜一下Wh1t3p1g师傅）</p>
+<p>Neo4j 查询比较吃cpu，小本本加上idea同时跑吃力，搞台vps跑比较好，但是tabby是通过apoc.load.csv file写Neo4j数据的，相当于限制了本机，因此给下整库的dump和load（当然，直接整个在vps上操作也是ok的）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dump neo4j database</span></span><br><span class="line">neo4j-admin dump --to /tmp/neo4j.dump --database neo4j</span><br><span class="line"><span class="comment"># scp dump file to vps</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># load neo4j dump file</span></span><br><span class="line">./bin/neo4j stop</span><br><span class="line">./bin/neo4j-admin load --from=/root/neo4j.dump --database=neo4j --force</span><br><span class="line">./bin/neo4j start</span><br></pre></td></tr></table></figure>
+        
+          <a class="article-more-a" href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Gadget</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tabby</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">XStream</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">« Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/3/">Next »</a>
@@ -1036,10 +1030,6 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">静态分析</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
               </li>
              
               <li class="article-tag-list-item">
