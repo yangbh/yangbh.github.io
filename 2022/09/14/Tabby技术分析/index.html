@@ -6,11 +6,11 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://m0d9.me">
-  <title>GadgetInspector 工具分析 | m0d9&#39;s blog</title>
+  <title>GadgetInspector 源码分析 | m0d9&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="开始啃骨头了。。。 0x01 背景知识不了解算法原理基础上，去直接啃GI源码，真的是一件很困难的事情，难得有师傅们的经验总结，站在师傅们的肩膀上记录下GI的学习心得。 时间线 2018年Black Hat公布GadgetInspector 2019年Longofo师傅《Java 反序列化工具 gadgetinspector 初窥》，详细跟踪了除ASM之外的知识点，重点是逆拓扑排序 2020年thr">
 <meta property="og:type" content="article">
-<meta property="og:title" content="GadgetInspector 工具分析">
+<meta property="og:title" content="GadgetInspector 源码分析">
 <meta property="og:url" content="http://m0d9.me/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="m0d9&#39;s blog">
 <meta property="og:description" content="开始啃骨头了。。。 0x01 背景知识不了解算法原理基础上，去直接啃GI源码，真的是一件很困难的事情，难得有师傅们的经验总结，站在师傅们的肩膀上记录下GI的学习心得。 时间线 2018年Black Hat公布GadgetInspector 2019年Longofo师傅《Java 反序列化工具 gadgetinspector 初窥》，详细跟踪了除ASM之外的知识点，重点是逆拓扑排序 2020年thr">
@@ -26,7 +26,7 @@
 <meta property="og:image" content="http://m0d9.me/images/pasted-271.png">
 <meta property="og:image" content="http://m0d9.me/images/pasted-273.png">
 <meta property="article:published_time" content="2022-09-14T03:00:00.000Z">
-<meta property="article:modified_time" content="2022-10-21T08:03:32.056Z">
+<meta property="article:modified_time" content="2022-10-24T09:06:06.594Z">
 <meta property="article:author" content="m0d9">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="GadgetInspector">
@@ -195,7 +195,7 @@ ga('send', 'pageview');
         
   
     <h1 class="article-title" itemprop="name">
-      GadgetInspector 工具分析
+      GadgetInspector 源码分析
     </h1>
   
 
@@ -334,7 +334,7 @@ ga('send', 'pageview');
 <td>0</td>
 </tr>
 </tbody></table>
-<h4 id="2-2-1-结果表示约定"><a href="#2-2-1-结果表示约定" class="headerlink" title="2.2.1 结果表示约定"></a>2.2.1 结果表示约定</h4><p>简单来讲，这一步是计算所有的方法的污点参数污播规则。</p>
+<h4 id="2-2-1-污点传播函数表示约定"><a href="#2-2-1-污点传播函数表示约定" class="headerlink" title="2.2.1 污点传播函数表示约定"></a>2.2.1 污点传播函数表示约定</h4><p>简单来讲，这一步是计算所有的方法的污点参数污播规则。</p>
 <p>例如：r = o.m(p0,…)</p>
 <p>注意这里的前提：</p>
 <ul>
@@ -357,10 +357,7 @@ ga('send', 'pageview');
 <li>Assumption #2: All branch conditions are satisfiable</li>
 </ul>
 <blockquote>
-<p>** 思考 **</p>
-<ol>
-<li>如果方法内部有调用，是怎么处理的？答案是逆拓扑排序和ASM程序间污点跟踪</li>
-</ol>
+<p><strong>思考</strong>：<br>如果方法内部还有调用，要怎么处理？</p>
 </blockquote>
 <h4 id="2-2-2-逆拓扑排序"><a href="#2-2-2-逆拓扑排序" class="headerlink" title="2.2.2 逆拓扑排序"></a>2.2.2 逆拓扑排序</h4><p>为了保证正在分析的函数，其内部调用的函数都是分析过的，或者无其他内部函数，需要对methods 进行逆拓扑排序，Longofo师傅讲的很仔细了，这里不赘述，直接引用师傅的结论。</p>
 <p>原始的Call Graph：</p>
@@ -374,11 +371,22 @@ ga('send', 'pageview');
 <li>解决环的问题</li>
 </ol>
 <p>生成这张大逆拓扑排序图之后，接着就进行遍历，计算其污点传播。</p>
-<blockquote>
-<p>疑问：dfsTsort 的实现貌似有些问题，不是每个method 都有生成passthrough？</p>
+<h4 id="2-2-3-过程内污点分析的实现"><a href="#2-2-3-过程内污点分析的实现" class="headerlink" title="2.2.3 过程内污点分析的实现"></a>2.2.3 过程内污点分析的实现</h4><p>这块threedr3am师傅有详细讲解，具体在PassthroughDataflowMethodVisitor&amp; TaintTrackingMethodVisitor 内，这里也只是简要理解其算法。</p>
+<p>这块需要两点知识</p>
+<ul>
+<li>JVM </li>
+<li>ASM 的一些基础知识。</li>
+</ul>
+<h5 id="1-JVM"><a href="#1-JVM" class="headerlink" title="1. JVM"></a>1. JVM</h5><blockquote>
+<p>JAVA的运行时将方法调用信息保存在栈里，并为每个方法调用创建一个栈帧。一个栈帧内部包含着下面几个元素：</p>
+<ul>
+<li>局部变量表</li>
+<li>操作数栈</li>
+<li>方法返回地址</li>
+<li>动态链<br>这里我们重点关注局部变量表和操作数栈。局部变量表保存一个方法中的局部变量，我们可以用索引序号的方法读写局部变量表。而操作数栈只能通过push和pop的方式进行操作。对于一个实例方法调用，局部变量表里面从0位开始按序保存着实例对象，方法参数，新定义的局部变量。在运行时，JAVA将局部变量表里面的变量加载到操作数栈上，然后经过运算，得到的结果放到操作数栈顶端，再由其他指令保存回局部变量表。所以说JAVA的局部污点分析，实际就是分析局部变量表和操作数栈之间的数据流动。</li>
+</ul>
 </blockquote>
-<h4 id="2-2-3-过程内污点分析"><a href="#2-2-3-过程内污点分析" class="headerlink" title="2.2.3 过程内污点分析"></a>2.2.3 过程内污点分析</h4><p>这块threedr3am师傅有详细讲解，具体在PassthroughDataflowMethodVisitor&amp; TaintTrackingMethodVisitor 内，这里也只是简要理解其算法。</p>
-<h5 id="ASM-Visitor"><a href="#ASM-Visitor" class="headerlink" title="ASM Visitor"></a>ASM Visitor</h5><p>CI是用ASM来模拟方法的调用，入参、返回，从而达到程序内污点跟踪。</p>
+<h5 id="2-ASM-Visitor"><a href="#2-ASM-Visitor" class="headerlink" title="2. ASM Visitor"></a>2. ASM Visitor</h5><p>GadgetInspector 是用ASM来模拟方法的调用，入参、返回，从而达到程序内污点跟踪。</p>
 <p>接口类</p>
 <ul>
 <li><p>asm.ClassVisitor</p>
@@ -403,16 +411,17 @@ ga('send', 'pageview');
 <ol>
 <li><p>把TaintTrackingMethodVisitor 当做用asm模拟了jvm的执行过程即可。</p>
 </li>
-<li><p>只需要分析PassthroughDataflowMethodVisitor 中关于stackVars、localVars的操作：</p>
+<li><p>只需要分析PassthroughDataflowMethodVisitor 中关于stackVars(操作数栈)、localVars(局部变量表)的操作：</p>
 <ul>
-<li>visitCode，将(0,p(this)=0),(1,p(arg1)),…加入临时变量localVars，其中p为污点占位</li>
-<li>visitFieldInsn，如果影响this.field，则通过setStackTaint(0, taint) 设置stackVars污点</li>
-<li>visitMethodInsn，通过getStackTaint(retSize-1).addAll(resultTaint) 设置stackVars的污点</li>
+<li>visitCode（在进入方法的第一时间），将(0,p(this)=0),(1,p(ag1)),…，那么需要将参数加入临时变量localVars，其中的p为污点占位</li>
+<li>visitFieldInsn（调用字段），如果调用了this.field，则通过setStackTaint(0, taint) 设置stackVars污点</li>
+<li>visitMethodInsn（方法调用），通过getStackTaint(retSize-1).addAll(resultTaint) 设置stackVars的污点</li>
 <li>visitInsn return的时候，取当前栈上的最新的为污点分析结果。</li>
 </ul>
 </li>
 </ol>
 <p>注意这里 ，stackVars 用的ArrayList实现的，因此pop 和push看起来会比较晦涩，可以直接把stackVars当作栈来看待，不过get 获取的是倒过来的即可。<br>例如visitMethodInsn中的getStackTaint(retSize-1).addAll(resultTaint)，就可以理解为把最新的那个栈元素重新赋值，这样会好理解很多。</p>
+<p>这里只是简单解释下流程，在后文CallGraphDiscovery 中在详细解释。</p>
 <!-- 
 
 > **思考**
@@ -508,33 +517,66 @@ ga('send', 'pageview');
 </ul>
 </li>
 </ul>
-<h5 id="TaintTrackingMethodVisitor"><a href="#TaintTrackingMethodVisitor" class="headerlink" title="TaintTrackingMethodVisitor"></a>TaintTrackingMethodVisitor</h5><p>visitCode</p>
-<pre><code>localVars 增加this, arg1, arg0, ...，内容暂时为空</code></pre>
-<p>visitVarInsn 在方法体内字节码操作变量时，会被调用</p>
-<pre><code>Load 将localVars中push到stack
-STORE 将stack中pop并赋值给LocalVars</code></pre>
-<p>visitFieldInsn</p>
-<pre><code>get    时push入栈，结果在stackVars中
-put 时pop出栈</code></pre>
-<p>visitMethodInsn</p>
-<pre><code>&gt; 疑问：此时参数已经在栈内了，哪里入栈的？是LDC/DUP之类指令
-
-argTaint是参数的污点表，是从栈中pop取得
-resultTaint 是最终的返回值污染情况
-
-如果被调用的函数为java.io.ObjectInputStream#defaultReadObject, 那么localVars\[0\] 设为argTaint\[0\]，localVars\[0\]是this
-如果被调用函数在内置的PASSTHROUGH_DATAFLOW 中，那么resultTaint 加上所有的污染点id
-如果被调用函数在passthroughDataflow 中，那么同样resultTaint 加上所有的污染点id
-如果参数0，也就是this，是java.util.Collection/java.util.Map 接口的实现，那么也认为argTaint\[0\]包含所有的参数污点，并且如果返回值是return的话，那么resultTaint也要加入这些污点参数。
-
-最后将resultTaint 入栈</code></pre>
-<h5 id="PassthroughDataflowMethodVisitor"><a href="#PassthroughDataflowMethodVisitor" class="headerlink" title="PassthroughDataflowMethodVisitor"></a>PassthroughDataflowMethodVisitor</h5><p>visitCode<br>    localVars this, arg1, arg0, …中赋值，值为当前id</p>
-<p>visitFieldInsn<br>    get GETFIELD时，如果是非Transient，那么可以当作污点，把在TaintTrackingMethodVisitor中push入栈的结果打上taint标，内容为0（因为this id为0）</p>
-<p>visitMethodInsn<br>    可以当作是TaintTrackingMethodVisitor的补充，丰富resultTaint<br>    具体做法是如果是构造函数，那么resultTaint取之依赖this，否则还是设成空。<br>    接着获取调用的函数的passthrough，获得它的return 和 参数关系，然后通过argTaint获取参数的实际污染情况，最终加入resultTaint<br>    最后调用父类的visitMethodInsn，将resultTaint 合并</p>
-<h5 id="CallGraph-ModelGeneratorMethodVisitor"><a href="#CallGraph-ModelGeneratorMethodVisitor" class="headerlink" title="CallGraph#ModelGeneratorMethodVisitor"></a>CallGraph#ModelGeneratorMethodVisitor</h5><p>visitCode<br>    localVars this, arg1, arg0, …中赋值，值为arg0，arg1，arg2…</p>
-<p>visitFieldInsn<br>    get GETFIELD时，如果是非Transient，那么可以当作污点，把在TaintTrackingMethodVisitor中push入栈的结果打上taint标，内容为fieldname，如果已经存在，则用.拼接</p>
-<p>visitMethodInsn<br>    对于每一个参数，通过getStackTaint 获取该的参数的污点信息。</p>
-<h4 id="2-3-2-passthrough-gt-callgraph"><a href="#2-3-2-passthrough-gt-callgraph" class="headerlink" title="2.3.2 passthrough-&gt;callgraph"></a>2.3.2 passthrough-&gt;callgraph</h4><p>有了以上的了解，再来理解Lengo师傅的例子</p>
+<p>下面详细解释一下三个ASM MethodVisitor 对应的具体localVars、stackVars 上的操作</p>
+<ul>
+<li>TaintTrackingMethodVisitor</li>
+<li>PassthroughDataflowMethodVisitor</li>
+<li>CallGraph#ModelGeneratorMethodVisitor</li>
+</ul>
+<h5 id="1-TaintTrackingMethodVisitor"><a href="#1-TaintTrackingMethodVisitor" class="headerlink" title="1. TaintTrackingMethodVisitor"></a>1. TaintTrackingMethodVisitor</h5><ul>
+<li><p>visitCode</p>
+<p>localVars 增加this, arg1, arg0, …，内容暂时为空</p>
+</li>
+<li><p>visitVarInsn 在方法体内字节码操作变量时，会被调用</p>
+<p>Load 将localVars中push到stack<br>STORE 将stack中pop并赋值给LocalVars</p>
+</li>
+<li><p>visitFieldInsn</p>
+<p>get 时push入栈，结果在stackVars中<br>put 时pop出栈</p>
+</li>
+<li><p>visitMethodInsn</p>
+<p>处理调用返回</p>
+</li>
+</ul>
+<blockquote>
+<p>疑问：<br>此时参数已经在栈内了，哪里入栈的？是LDC/DUP之类指令</p>
+</blockquote>
+<p>具体的处理过程中，有两个变量：</p>
+<ul>
+<li>argTaint是参数的污点表，是从栈中pop取得</li>
+<li>resultTaint 是最终的返回值污染情况</li>
+</ul>
+<p>具体的逻辑：</p>
+<ul>
+<li><p>如果被调用的函数为java.io.ObjectInputStream#defaultReadObject, 那么localVars[0] 设为argTaint[0]，localVars[0]是this</p>
+</li>
+<li><p>如果被调用函数在内置的PASSTHROUGH_DATAFLOW 中，那么resultTaint 加上所有的污染点id</p>
+</li>
+<li><p>如果被调用函数在passthroughDataflow 中，那么同样resultTaint 加上所有的污染点id</p>
+</li>
+<li><p>如果参数0，也就是this，是java.util.Collection/java.util.Map 接口的实现，那么也认为argTaint[0]包含所有的参数污点，并且如果返回值是return的话，那么resultTaint也要加入这些污点参数。</p>
+</li>
+<li><p>最后将resultTaint 入栈</p>
+</li>
+</ul>
+<h5 id="2-PassthroughDataflowMethodVisitor"><a href="#2-PassthroughDataflowMethodVisitor" class="headerlink" title="2. PassthroughDataflowMethodVisitor"></a>2. PassthroughDataflowMethodVisitor</h5><ul>
+<li><p>visitCode</p>
+<p>localVars this, arg1, arg0, …中赋值，值为当前id</p>
+</li>
+<li><p>visitFieldInsn</p>
+<p>get GETFIELD时，如果是非Transient，那么可以当作污点，把在TaintTrackingMethodVisitor中push入栈的结果打上taint标，内容为0（因为this id为0）</p>
+</li>
+<li><p>visitMethodInsn<br>可以当作是TaintTrackingMethodVisitor的补充，丰富resultTaint<br>具体做法是如果是构造函数，那么resultTaint取之依赖this，否则还是设成空。<br>接着获取调用的函数的passthrough，获得它的return 和 参数关系，然后通过argTaint获取参数的实际污染情况，最终加入resultTaint<br>最后调用父类的visitMethodInsn，将resultTaint 合并  </p>
+</li>
+</ul>
+<h5 id="3-CallGraph-ModelGeneratorMethodVisitor"><a href="#3-CallGraph-ModelGeneratorMethodVisitor" class="headerlink" title="3. CallGraph#ModelGeneratorMethodVisitor"></a>3. CallGraph#ModelGeneratorMethodVisitor</h5><ul>
+<li><p>visitCode<br>  localVars this, arg1, arg0, …中赋值，值为arg0，arg1，arg2…</p>
+</li>
+<li><p>visitFieldInsn<br>  get GETFIELD时，如果是非Transient，那么可以当作污点，把在TaintTrackingMethodVisitor中push入栈的结果打上taint标，内容为fieldname，如果已经存在，则用.拼接</p>
+</li>
+<li><p>visitMethodInsn<br>  对于每一个参数，通过getStackTaint 获取该的参数的污点信息。</p>
+</li>
+</ul>
+<h4 id="2-3-2-passthrough-gt-callgraph"><a href="#2-3-2-passthrough-gt-callgraph" class="headerlink" title="2.3.2 passthrough-&gt;callgraph"></a>2.3.2 passthrough-&gt;callgraph</h4><p>有了以上个ASM MethodVisitor的了解，再结合Lengo师傅的例子具体走一遍分析流程：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ParentClass</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> MyObject obj;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">parentMethod</span><span class="params">(Object arg)</span></span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        TestObject obj1 = <span class="keyword">new</span> TestObject();</span><br><span class="line">        Object obj2 = obj1.childMethod1(arg);</span><br><span class="line">        <span class="keyword">this</span>.obj.childMethod(obj2); </span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>假设</p>
@@ -601,7 +643,17 @@ resultTaint 是最终的返回值污染情况
 <h4 id="2-5-2-sinks"><a href="#2-5-2-sinks" class="headerlink" title="2.5.2 sinks"></a>2.5.2 sinks</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isSink</span><span class="params">(MethodReference.Handle method, <span class="keyword">int</span> argIndex, InheritanceMap inheritanceMap)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/io/FileInputStream&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;&lt;init&gt;&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/io/FileOutputStream&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;&lt;init&gt;&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/nio/file/Files&quot;</span>)</span><br><span class="line">        &amp;&amp; (method.getName().equals(<span class="string">&quot;newInputStream&quot;</span>)</span><br><span class="line">            || method.getName().equals(<span class="string">&quot;newOutputStream&quot;</span>)</span><br><span class="line">            || method.getName().equals(<span class="string">&quot;newBufferedReader&quot;</span>)</span><br><span class="line">            || method.getName().equals(<span class="string">&quot;newBufferedWriter&quot;</span>))) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/lang/Runtime&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;exec&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    if (method.getClassReference().getName().equals(&quot;java/lang/Class&quot;)</span></span><br><span class="line"><span class="comment">            &amp;&amp; method.getName().equals(&quot;forName&quot;)) &#123;</span></span><br><span class="line"><span class="comment">        return true;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">    if (method.getClassReference().getName().equals(&quot;java/lang/Class&quot;)</span></span><br><span class="line"><span class="comment">            &amp;&amp; method.getName().equals(&quot;getMethod&quot;)) &#123;</span></span><br><span class="line"><span class="comment">        return true;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="comment">// If we can invoke an arbitrary method, that&#x27;s probably interesting (though this doesn&#x27;t assert that we</span></span><br><span class="line">    <span class="comment">// can control its arguments). Conversely, if we can control the arguments to an invocation but not what</span></span><br><span class="line">    <span class="comment">// method is being invoked, we don&#x27;t mark that as interesting.</span></span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/lang/reflect/Method&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;invoke&quot;</span>) &amp;&amp; argIndex == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/net/URLClassLoader&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;newInstance&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/lang/System&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;exit&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/lang/Shutdown&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;exit&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/lang/Runtime&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;exit&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/nio/file/Files&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;newOutputStream&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/lang/ProcessBuilder&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;&lt;init&gt;&quot;</span>) &amp;&amp; argIndex &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (inheritanceMap.isSubclassOf(method.getClassReference(), <span class="keyword">new</span> ClassReference.Handle(<span class="string">&quot;java/lang/ClassLoader&quot;</span>))</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;&lt;init&gt;&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;java/net/URL&quot;</span>) &amp;&amp; method.getName().equals(<span class="string">&quot;openStream&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Some groovy-specific sinks</span></span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;org/codehaus/groovy/runtime/InvokerHelper&quot;</span>)</span><br><span class="line">            &amp;&amp; method.getName().equals(<span class="string">&quot;invokeMethod&quot;</span>) &amp;&amp; argIndex == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (inheritanceMap.isSubclassOf(method.getClassReference(), <span class="keyword">new</span> ClassReference.Handle(<span class="string">&quot;groovy/lang/MetaClass&quot;</span>))</span><br><span class="line">            &amp;&amp; Arrays.asList(<span class="string">&quot;invokeMethod&quot;</span>, <span class="string">&quot;invokeConstructor&quot;</span>, <span class="string">&quot;invokeStaticMethod&quot;</span>).contains(method.getName())) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// This jython-specific sink effectively results in RCE</span></span><br><span class="line">    <span class="keyword">if</span> (method.getClassReference().getName().equals(<span class="string">&quot;org/python/core/PyCode&quot;</span>) &amp;&amp; method.getName().equals(<span class="string">&quot;call&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h4 id="2-5-3-Demo流程"><a href="#2-5-3-Demo流程" class="headerlink" title="2.5.3 Demo流程"></a>2.5.3 Demo流程</h4><p>还是借用Longofo师傅的图更直观<br><img src="/images/pasted-271.png" alt="upload successful"></p>
-<ol>
+<h5 id="BSF流程"><a href="#BSF流程" class="headerlink" title="BSF流程"></a>BSF流程</h5><ol>
+<li>source 进入methodsToExplore</li>
+<li>处理source，查找source 相关的callgraph：source-cmed1，source-cmed2，source-cmed3。判断，source-cmed1非sink<ul>
+<li>source-cmed1 add进入methodsToExplore 队尾</li>
+<li>cmed1 进入exploredMethods白名单</li>
+<li>cmed2，cmed3 类似</li>
+</ul>
+</li>
+<li>处理source-cmed1，查找cmed1相关的callgraph：cmed1-cmed4， cmed1-cmed5，重复步骤2</li>
+</ol>
+<h5 id="传播流程"><a href="#传播流程" class="headerlink" title="传播流程"></a>传播流程</h5><ol>
 <li>从source出发，source this可控，也即taintArg：0</li>
 <li>callgraph中，取出source-method1 参数污染对应关系0-&gt;0，那么method1 的arg0被污染，也即taintArg：0</li>
 <li>callgraph中，取出method1-method5 参数污染对应关系0-&gt;2，那么method5的taintArg：2</li>
@@ -623,13 +675,8 @@ resultTaint 是最终的返回值污染情况
 <li>[3] <a target="_blank" rel="noopener" href="https://github.com/kezibei/Urldns">https://github.com/kezibei/Urldns(by:珂字辈)</a></li>
 <li>[4] <a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7058">java反序列化利用链自动挖掘工具gadgetinspector源码浅析(by:threedr3am)</a></li>
 <li>[5] <a target="_blank" rel="noopener" href="https://paper.seebug.org/1034/">Java 反序列化工具 gadgetinspector 初窥(by:Longofo)</a></li>
-<li>[6] <a target="_blank" rel="noopener" href="https://fynch3r.github.io/GadgetInspector%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">GadgetInspector源码分析(by:fynch3r)</a></li>
-<li>[7] <a target="_blank" rel="noopener" href="https://github.com/knownsec/KCon/raw/master/2022/tabby%20java%20code%20review%20like%20a%20pro%E3%80%90KCon2022%E3%80%91.pdf">KCON: tabby java code review like a pro (by:wh1t3p1g)</a></li>
-<li>[8] <a target="_blank" rel="noopener" href="http://tttang.com/archive/1696/">tabby原理分析(by:cokeBeer)</a></li>
-<li>[9] <a target="_blank" rel="noopener" href="https://tttang.com/archive/1647/">使用tabby分析Spring Data MongoDB SpEL漏洞(by:Xiaopan233)</a></li>
-<li>[10] <a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/234537">如何高效的挖掘Java反序列化利用链？(by:wh1t3p1g)</a></li>
-<li>[11] <a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/251814">如何高效地捡漏反序列化利用链？(by:wh1t3p1g)</a></li>
-<li>[12] <a target="_blank" rel="noopener" href="https://www.kingkk.com/2020/01/gadgetinspector%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/">gadgetinspector源码浅析(by:kingkk)</a></li>
+<li>[6] <a target="_blank" rel="noopener" href="https://fynch3r.github.io/GadgetInspector%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">GadgetInspector源码分析(by:fynch3r)</a><br>(<a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/251814">https://www.anquanke.com/post/id/251814</a>)</li>
+<li>[7] <a target="_blank" rel="noopener" href="https://www.kingkk.com/2020/01/gadgetinspector%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/">gadgetinspector源码浅析(by:kingkk)</a></li>
 </ul>
 
       
@@ -690,6 +737,15 @@ resultTaint 是最终的返回值污染情况
   
 <nav id="article-nav">
   
+    <a href="/2022/09/27/CS/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          CobaltStrike CVE-2022-39197 漏洞分析
+        
+      </div>
+    </a>
+  
   
     <a href="/2022/07/20/Struts2%E7%B3%BB%E5%88%97%E5%9B%9B%EF%BC%9AConfluence%20CVE-2021-26084/" id="article-nav-older" class="article-nav-link-wrap">
       <div class="article-nav-title">Confluence CVE-2021-26084 Velocity模板二次注入</div>
@@ -719,7 +775,7 @@ resultTaint 是最终的返回值污染情况
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E8%83%8C%E6%99%AF%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">0x01 背景知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E7%BA%BF"><span class="toc-number">1.1.</span> <span class="toc-text">时间线</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E7%AE%97%E6%B3%95%E8%A7%A3%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">0x02 算法解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-MethodDiscovery"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 MethodDiscovery</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-PassthroughDiscovery"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 PassthroughDiscovery</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-1-%E7%BB%93%E6%9E%9C%E8%A1%A8%E7%A4%BA%E7%BA%A6%E5%AE%9A"><span class="toc-number">2.2.1.</span> <span class="toc-text">2.2.1 结果表示约定</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-%E9%80%86%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F"><span class="toc-number">2.2.2.</span> <span class="toc-text">2.2.2 逆拓扑排序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-3-%E8%BF%87%E7%A8%8B%E5%86%85%E6%B1%A1%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-number">2.2.3.</span> <span class="toc-text">2.2.3 过程内污点分析</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#ASM-Visitor"><span class="toc-number">2.2.3.1.</span> <span class="toc-text">ASM Visitor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3"><span class="toc-number">2.2.3.2.</span> <span class="toc-text">简单理解</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-CallGraphDiscovery"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 CallGraphDiscovery</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-1-ASM-%E8%AF%A6%E7%BB%86%E6%B5%81%E7%A8%8B"><span class="toc-number">2.3.1.</span> <span class="toc-text">2.3.1 ASM 详细流程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#TaintTrackingMethodVisitor"><span class="toc-number">2.3.1.1.</span> <span class="toc-text">TaintTrackingMethodVisitor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#PassthroughDataflowMethodVisitor"><span class="toc-number">2.3.1.2.</span> <span class="toc-text">PassthroughDataflowMethodVisitor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#CallGraph-ModelGeneratorMethodVisitor"><span class="toc-number">2.3.1.3.</span> <span class="toc-text">CallGraph#ModelGeneratorMethodVisitor</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-2-passthrough-gt-callgraph"><span class="toc-number">2.3.2.</span> <span class="toc-text">2.3.2 passthrough-&gt;callgraph</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-SourceDiscovery"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 SourceDiscovery</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-GadgetChainDiscovery"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 GadgetChainDiscovery</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-1-BSF-%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2"><span class="toc-number">2.5.1.</span> <span class="toc-text">2.5.1 BSF 广度优先搜索</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-2-sinks"><span class="toc-number">2.5.2.</span> <span class="toc-text">2.5.2 sinks</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-3-Demo%E6%B5%81%E7%A8%8B"><span class="toc-number">2.5.3.</span> <span class="toc-text">2.5.3 Demo流程</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-Pratise"><span class="toc-number">3.</span> <span class="toc-text">0x03 Pratise</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E6%80%9D%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">0x04 思考</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-callgraph-%E5%AF%B9%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E7%9A%84%E5%A4%84%E7%90%86"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 callgraph 对静态方法的处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">0x05 总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-%E5%8F%82%E8%80%83"><span class="toc-number">6.</span> <span class="toc-text">0x06 参考</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E8%83%8C%E6%99%AF%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">0x01 背景知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E7%BA%BF"><span class="toc-number">1.1.</span> <span class="toc-text">时间线</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E7%AE%97%E6%B3%95%E8%A7%A3%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">0x02 算法解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-MethodDiscovery"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 MethodDiscovery</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-PassthroughDiscovery"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 PassthroughDiscovery</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-1-%E6%B1%A1%E7%82%B9%E4%BC%A0%E6%92%AD%E5%87%BD%E6%95%B0%E8%A1%A8%E7%A4%BA%E7%BA%A6%E5%AE%9A"><span class="toc-number">2.2.1.</span> <span class="toc-text">2.2.1 污点传播函数表示约定</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-%E9%80%86%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F"><span class="toc-number">2.2.2.</span> <span class="toc-text">2.2.2 逆拓扑排序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-3-%E8%BF%87%E7%A8%8B%E5%86%85%E6%B1%A1%E7%82%B9%E5%88%86%E6%9E%90%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.2.3.</span> <span class="toc-text">2.2.3 过程内污点分析的实现</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-JVM"><span class="toc-number">2.2.3.1.</span> <span class="toc-text">1. JVM</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-ASM-Visitor"><span class="toc-number">2.2.3.2.</span> <span class="toc-text">2. ASM Visitor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3"><span class="toc-number">2.2.3.3.</span> <span class="toc-text">简单理解</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-CallGraphDiscovery"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 CallGraphDiscovery</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-1-ASM-%E8%AF%A6%E7%BB%86%E6%B5%81%E7%A8%8B"><span class="toc-number">2.3.1.</span> <span class="toc-text">2.3.1 ASM 详细流程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-TaintTrackingMethodVisitor"><span class="toc-number">2.3.1.1.</span> <span class="toc-text">1. TaintTrackingMethodVisitor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-PassthroughDataflowMethodVisitor"><span class="toc-number">2.3.1.2.</span> <span class="toc-text">2. PassthroughDataflowMethodVisitor</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-CallGraph-ModelGeneratorMethodVisitor"><span class="toc-number">2.3.1.3.</span> <span class="toc-text">3. CallGraph#ModelGeneratorMethodVisitor</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-2-passthrough-gt-callgraph"><span class="toc-number">2.3.2.</span> <span class="toc-text">2.3.2 passthrough-&gt;callgraph</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-SourceDiscovery"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 SourceDiscovery</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-GadgetChainDiscovery"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 GadgetChainDiscovery</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-1-BSF-%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2"><span class="toc-number">2.5.1.</span> <span class="toc-text">2.5.1 BSF 广度优先搜索</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-2-sinks"><span class="toc-number">2.5.2.</span> <span class="toc-text">2.5.2 sinks</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-3-Demo%E6%B5%81%E7%A8%8B"><span class="toc-number">2.5.3.</span> <span class="toc-text">2.5.3 Demo流程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#BSF%E6%B5%81%E7%A8%8B"><span class="toc-number">2.5.3.1.</span> <span class="toc-text">BSF流程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%A0%E6%92%AD%E6%B5%81%E7%A8%8B"><span class="toc-number">2.5.3.2.</span> <span class="toc-text">传播流程</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-Pratise"><span class="toc-number">3.</span> <span class="toc-text">0x03 Pratise</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E6%80%9D%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">0x04 思考</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-callgraph-%E5%AF%B9%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E7%9A%84%E5%A4%84%E7%90%86"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 callgraph 对静态方法的处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">0x05 总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-%E5%8F%82%E8%80%83"><span class="toc-number">6.</span> <span class="toc-text">0x06 参考</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -1079,6 +1135,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">静态分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IAST</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
               </li>
             
             <div class="clearfix"></div>

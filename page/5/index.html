@@ -171,6 +171,319 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Apache-Druid-CVE-2021-25646-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/">Apache Druid CVE-2021-25646 漏洞分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-02-19T03:16:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-02-19</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Litch1大佬的这个洞有意思，终于有时间分析下，记录下分析过程</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p><a target="_blank" rel="noopener" href="https://archive.apache.org/dist/druid/">https://archive.apache.org/dist/druid/</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$wget</span> https://archive.apache.org/dist/druid/0.20.0/apache-druid-0.20.0-bin.tar.gz &amp;&amp; tar -xzvf apache-druid-0.20.0-bin.tar.gz</span><br></pre></td></tr></table></figure>
+<p>根据参考，修改conf/druid/single-server/micro-quickstart/coordinator-overlord/jvm.config，末尾增加调试参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xdebug -Xnoagent -Djava.compiler&#x3D;NONE -Xrunjdwp:transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;n,address&#x3D;5005</span><br></pre></td></tr></table></figure>
+        
+          <a class="article-more-a" href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Druid</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-pyAntiSSRF" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/12/25/pyAntiSSRF/">pyAntiSSRF：python SSRF防御SDK</a>
+    </h1>
+  
+
+        
+        <a href="/2020/12/25/pyAntiSSRF/" class="archive-article-date">
+  	<time datetime="2020-12-25T02:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-12-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>发现居然没有特别好用的python防御ssrf好用的pip库，造个轮子</p>
+<ul>
+<li>支持pip简单安装</li>
+<li>支持 py2&amp;py3</li>
+<li>直接通过参数引用，直接hijack最常用的requests库，不引入第三方函数</li>
+<li>支持防御DNS rebinding</li>
+</ul>
+<h2 id="SSRF原理及防御"><a href="#SSRF原理及防御" class="headerlink" title="SSRF原理及防御"></a>SSRF原理及防御</h2><p>ssrf攻击及防御这里不延伸，可参考【1】，p神讲的挺明白了，提两点</p>
+<ol>
+<li>原文没涉及到dns rebinding的防御，其实防御思路也很简单，只进行1次dns请求即可</li>
+<li>循环hijack requests这个思路提到过，但是不是最优解，其实直接hijack requests.sessions.Session.request即可，所有的requests get/post最终都调用的这个函数</li>
+</ol>
+<p>具体没啥可说的，看代码【2】吧</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p><code>pip install pyAntiSSRF</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. import &amp; patch requests库</span></span><br><span class="line"><span class="keyword">import</span> pyAntiSSRF</span><br><span class="line">pyAntiSSRF.patchRequests()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 通过参数anti_ssrf（get/post/request函数都支持，默认不开启），控制是否开启ssrf防御，如果开启且目标ip是内网，则会抛出异常</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="comment"># custom requests usage</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># patch requests by hijack requests.sessions.Session.request, default disable</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>, anti_ssrf=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># raise Exception</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>, anti_ssrf=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+        
+          <a class="article-more-a" href="/2020/12/25/pyAntiSSRF/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">ssrf</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">anti</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">tools</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">pip</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Python安全//" class="article-tag-list-link color4">Python安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Python安全/工具//" class="article-tag-list-link color3">工具</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Java内存shell：Tomcat回显" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/">Java内存shell：Tomcat回显</a>
+    </h1>
+  
+
+        
+        <a href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/" class="archive-article-date">
+  	<time datetime="2020-10-10T06:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Tomcat回显 与 Java内存shell有什么关系？</p>
+<p>在java漏洞利用中如何获取到执行结果？这是Tomcat回显的最原始需求，具体可以参考【4】中的许多手法，这里不展开</p>
+<p>其中提到一种思路，获取response，然后直接操作response以http形式返回。而Java内存shell中，很重要的一点就是获取request从而获取上下文cotext，其中获取request的思路相似通用可借鉴。</p>
+<h2 id="历史背景"><a href="#历史背景" class="headerlink" title="历史背景"></a>历史背景</h2><p>参考【1】中李三师傅总结了之前比较经典的tomcat回显方式，写的很好，直接复用：</p>
+        
+          <a class="article-more-a" href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Tomcat</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">回显</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Java内存shell：三方框架" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -377,307 +690,9 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-Java内存shell：servlet" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/">Java内存shell：servlet</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/" class="archive-article-date">
-  	<time datetime="2020-09-27T01:58:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近在学习Java内存shell相关知识，总结沉淀几篇文章，权当学习笔记了。</p>
-<h2 id="Java内存webshell史"><a href="#Java内存webshell史" class="headerlink" title="Java内存webshell史"></a>Java内存webshell史</h2><p>直接引用c0ny1师傅的总结，写的太好了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">其实内存马由来已久，早在17年n1nty师傅的《Tomcat源码调试笔记-看不见的shell》中已初见端倪，但一直不温不火。后经过rebeyong师傅使用agent技术加持后，拓展了内存马的使用场景，然终停留在奇技淫巧上。在各类hw洗礼之后，文件shell明显气数已尽。内存马以救命稻草的身份重回大众视野。特别是今年在shiro的回显研究之后，引发了无数安全研究员对内存webshell的研究，其中涌现出了LandGrey师傅构造的Spring controller内存马。至此内存马开枝散叶发展出了三大类型：</span><br><span class="line"></span><br><span class="line">1. servlet-api类</span><br><span class="line">	filter型</span><br><span class="line">	servlet型</span><br><span class="line">2. spring类</span><br><span class="line">	拦截器</span><br><span class="line">	controller型</span><br><span class="line">3. Java Instrumentation类</span><br><span class="line">	agent型</span><br><span class="line"></span><br><span class="line">内存马这坛深巷佳酒，一时间流行于市井与弄堂之间。上至安全研究员下至普通客户，人尽皆知。正值hw来临之际，不难推测届时必将是内存马横行天下之日。而各大安全厂商却迟迟未见动静。所谓表面风平浪静，实则暗流涌动。或许一场内存马的围剿计划正慢慢展开。作为攻击方向的研究人员，没有对手就制造对手,攻防互换才能提升内存马技术的发展。</span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">内存马</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">shell</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">servlet</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-工具分析：TemplatesImpl链与代码执行" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/">ysoserial工具分析：TemplatesImpl链与代码执行</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" class="archive-article-date">
-  	<time datetime="2020-09-25T02:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>ysoserial的payload只看过Groovy和CommonsCollections1，就一直以为ysoserial是简单的通过最终调用Runtime.getRuntime().exec(cmd)来实现各种利用链的命令执行的，太年轻。。。</p>
-<p>本文以CommonsCollections2为例，主要介绍：</p>
-<ol>
-<li>ysoserial通过TemplatesImpl实现的通用命令执行打包</li>
-<li>如何实现代码执行（非命令执行）</li>
-</ol>
-        
-          <a class="article-more-a" href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">ysoserial</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">TemplatesImpl</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全/Ysoserial//" class="article-tag-list-link color5">Ysoserial</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-JNDI-LDAP 注入及高版本JDK限制——上" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/">JNDI：JNDI-LDAP 注入及高版本JDK限制</a>
-    </h1>
-  
-
-        
-        <a href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/" class="archive-article-date">
-  	<time datetime="2020-07-23T02:43:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-23</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>引用参考【1】</p>
-<blockquote>
-<p>除了RMI服务之外，JNDI还可以对接LDAP服务，LDAP也能返回JNDI Reference对象，利用过程与上面RMI Reference基本一致，只是lookup()中的URL为一个LDAP地址：ldap://xxx/xxx，由攻击者控制的LDAP服务端返回一个恶意的JNDI Reference对象。并且LDAP服务的Reference远程加载Factory类不受上一点中 com.sun.jndi.rmi.object.trustURLCodebase、com.sun.jndi.cosnaming.object.trustURLCodebase等属性的限制，所以适用范围更广。</p>
-</blockquote>
-<blockquote>
-<p>不过在2018年10月，Java最终也修复了这个利用点，对LDAP Reference远程工厂类的加载增加了限制，在Oracle JDK 11.0.1、8u191、7u201、6u211之后 com.sun.jndi.ldap.object.trustURLCodebase 属性的默认值被调整为false，还对应的分配了一个漏洞编号CVE-2018-3149。</p>
-</blockquote>
-<p>不赘述JNDI相关背景，本节主要复现JNDI-LDAP注入，以及如何绕过高版本jdk上的限制</p>
-        
-          <a class="article-more-a" href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">LDAP</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/4/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/6/">Next »</a>
+      <a class="extend prev" rel="prev" href="/page/4/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/6/">Next »</a>
     </nav>
   
 
@@ -1019,6 +1034,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">静态分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IAST</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
               </li>
             
             <div class="clearfix"></div>

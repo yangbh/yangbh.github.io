@@ -171,6 +171,317 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Tabby-工具分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/10/22/Tabby-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90/">Tabby 源码分析</a>
+    </h1>
+  
+
+        
+        <a href="/2022/10/22/Tabby-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2022-10-22T08:27:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-10-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="0x01-背景"><a href="#0x01-背景" class="headerlink" title="0x01 背景"></a>0x01 背景</h2><p>与GadgetInspector 类似，Tabby 也是通过污点分析来实现的Gadget Chain挖掘。不同的是</p>
+<ul>
+<li>Tabby 用soot 来做的静态污点分析，GadgetInspector 是用的ASM 模拟来做的污点跟踪</li>
+<li>用了Neo4j来做CPG 的查询与展示，要灵活很多</li>
+<li>优化了污点传播关系</li>
+</ul>
+<p>据说Tabby 一开始是wh1t3p1g师傅的毕设，不过当时没放出tabby-path-finder，因此一直没太关注Tabby 污点分析这块，都是用手动白名单来做过滤的。KCon上师傅的PPT，收获很多，学习总结下。这里主要关注</p>
+<ol>
+<li>Tabby 污点传播规则</li>
+<li>Tabby soot 污点分析的实现</li>
+<li>Tabby Neo4j 搜索实现</li>
+</ol>
+<p>注：本文需要对soot 有一定了解，参考fynch3r 师傅的参考【3】。</p>
+<h2 id="0x02-Soot-数据流分析"><a href="#0x02-Soot-数据流分析" class="headerlink" title="0x02 Soot 数据流分析"></a>0x02 Soot 数据流分析</h2><p>四步走：</p>
+<p><img src="/images/pasted-320.png" alt="upload successful"></p>
+        
+          <a class="article-more-a" href="/2022/10/22/Tabby-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tabby</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">污点分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/程序分析//" class="article-tag-list-link color5">程序分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-DongTai-IAST-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/10/18/DongTai-IAST-%E5%88%86%E6%9E%90/">DongTai IAST Java Agent分析</a>
+    </h1>
+  
+
+        
+        <a href="/2022/10/18/DongTai-IAST-%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2022-10-18T02:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-10-18</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="0x1-背景知识"><a href="#0x1-背景知识" class="headerlink" title="0x1 背景知识"></a>0x1 背景知识</h2><p>IAST 概念虽然很早就提出了，但是在实际使用情况中，因为其生产无侵入性与漏误报情况，实际使用效果还是不过的。</p>
+<h3 id="1-1-IAST"><a href="#1-1-IAST" class="headerlink" title="1.1 IAST"></a>1.1 IAST</h3><ul>
+<li>DAST (Dynamic Application Security Testing)</li>
+<li>IAST (Interactive Application Security Testing)</li>
+<li>RASP（Runtime Application Self-protection）</li>
+<li>SAST (Static Application Security Testing)</li>
+</ul>
+<p>属IAST 最模糊，与三者都有纠缠。</p>
+<h3 id="1-2-主动-与-被动"><a href="#1-2-主动-与-被动" class="headerlink" title="1.2 主动 与 被动"></a>1.2 主动 与 被动</h3><h4 id="1-2-1-主动IAST"><a href="#1-2-1-主动IAST" class="headerlink" title="1.2.1 主动IAST"></a>1.2.1 主动IAST</h4><p>主动IAST很简单，可以简单理解为 动态IAST = DAST + RASP</p>
+<p><img src="/images/pasted-294.png" alt="upload successful"></p>
+        
+          <a class="article-more-a" href="/2022/10/18/DongTai-IAST-%E5%88%86%E6%9E%90/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">IAST</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">DongTai</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-CS" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/09/27/CS/">CobaltStrike CVE-2022-39197 漏洞分析</a>
+    </h1>
+  
+
+        
+        <a href="/2022/09/27/CS/" class="archive-article-date">
+  	<time datetime="2022-09-27T08:36:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>CobaltStrike 作为流行的cs控制工具，当CVE-2022-39197 公布后，居然可以RCE ，这对红蓝双方带来的影响自然不言而喻。</p>
+<h2 id="0x01-背景"><a href="#0x01-背景" class="headerlink" title="0x01 背景"></a>0x01 背景</h2><p>这个漏洞可能是继Spring4Shell 之后的又一Java 🔥漏洞。漏洞是由beichen 师傅发现的，然后java小王子浅蓝师傅没过多久就卷出来了，接着pandan师傅、漂亮鼠师傅陆续都复现了，直到整个java安全圈都有在分析这个漏洞。</p>
+<p>这个漏洞是很值得分析的：</p>
+<ul>
+<li>CobaltStrike RCE，这个不用多说，攻防互换，每一种反制手段都极其罕见</li>
+<li>是Java Swing GUI 的漏洞，GUI 的RCE 凤毛麟角，很是珍贵</li>
+<li>是通用漏洞，比如 CobaltStrike 用到的Apache bakit</li>
+<li>据说beichen有jdk的链，期待</li>
+</ul>
+<blockquote>
+<p>赛博群名言：只要知道有洞，就会被群友卷出来。</p>
+</blockquote>
+<p>知道有漏洞，再去定向分析，已经是开卷考试了。但是分析过程仍然坎坷、复杂，因此对beichen 师傅认真膜一个，能从一个set点坚持找到对应的利用链，真的是很需要耐心和细心。</p>
+        
+          <a class="article-more-a" href="/2022/09/27/CS/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">CobaltStrike</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
     <article id="post-Tabby技术分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -178,7 +489,7 @@ ga('send', 'pageview');
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">GadgetInspector 工具分析</a>
+      <a class="article-title" href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">GadgetInspector 源码分析</a>
     </h1>
   
 
@@ -385,322 +696,9 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-Struts2系列二：Velocity 模板" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/">Struts2系列二：JSP/Velocity模板</a>
-    </h1>
-  
-
-        
-        <a href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/" class="archive-article-date">
-  	<time datetime="2022-07-13T09:56:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>模板引擎注入也算是通用的漏洞类型了，不论是python/java，出现过的cve例子也不少。JSP/FreeMarker/Velocity 作为Struts2 的默认模板引擎，分析分析其实现原理，为以后的漏洞分析作铺垫。</p>
-<h2 id="0x01-背景知识"><a href="#0x01-背景知识" class="headerlink" title="0x01 背景知识"></a>0x01 背景知识</h2><h3 id="Struts2-Tag"><a href="#Struts2-Tag" class="headerlink" title="Struts2 Tag"></a>Struts2 Tag</h3><p>Tag是struts 模板元素的基础单位。建议先阅读参考【6】中《Tag Developers Guide》。</p>
-<p>Tag 有以下几类</p>
-<ul>
-<li>通用tag<ul>
-<li>控制流 tag， 例如 if、else</li>
-<li>数据tag， 例如include、set、url</li>
-</ul>
-</li>
-<li>UI tag，例如 from、text、div<ul>
-<li>Form tag，例如 checkbox、checkbox、head</li>
-<li>非Form tag，例如actonerror、actionmessage</li>
-</ul>
-</li>
-</ul>
-<p>模板的逻辑是如何实现的呢？</p>
-        
-          <a class="article-more-a" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Velocity</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Struts2系列一：OGNL 表达式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/">Struts2系列一：OGNL 表达式</a>
-    </h1>
-  
-
-        
-        <a href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="archive-article-date">
-  	<time datetime="2022-07-11T08:27:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近在复盘confluence CVE-2022-26134 这个漏洞，发现根本原因还是Struts2 架构的问题，这块的知识点挺多，不是一篇文章能解释清楚的，因此准备搞个系列，理理Struts2 架构相关的漏洞及原理。</p>
-<ul>
-<li>Ognl</li>
-<li>velocity</li>
-<li>Struts2</li>
-<li>Confluence</li>
-</ul>
-<h2 id="Ox01-基础知识"><a href="#Ox01-基础知识" class="headerlink" title="Ox01 基础知识"></a>Ox01 基础知识</h2><p>参考【1】中R17a 已经有整理了相关的OGNL相关基础知识，这里不做深入介绍，简单罗列下知识点。</p>
-<ol>
-<li>expression 表达式、相关语法    </li>
-<li>context 上下文</li>
-<li>root 对象</li>
-</ol>
-<h2 id="0x02-原理"><a href="#0x02-原理" class="headerlink" title="0x02 原理"></a>0x02 原理</h2><h3 id="2-1-生成AST树"><a href="#2-1-生成AST树" class="headerlink" title="2.1 生成AST树"></a>2.1 生成AST树</h3><p>以以下poc为例</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ognl.getValue(<span class="string">&quot;@java.lang.Runtime@getRuntime().exec(&#x27;open -a Calculator&#x27;)&quot;</span>, context, context.getRoot());</span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Confluence-CVE-2022-26134-OGNL-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/">Confluence CVE-2022-26134 OGNL 分析</a>
-    </h1>
-  
-
-        
-        <a href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2022-06-10T06:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-06-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <!-- 日拱一卒，功不唐捐。-->
-
-<p>发现半年没写文章了。。。</p>
-<h2 id="0x01-环境搭建"><a href="#0x01-环境搭建" class="headerlink" title="0x01 环境搭建"></a>0x01 环境搭建</h2><p>P🐮的Vulhub 有镜像了，不过调试接口没有开出来，这里稍微补充下。</p>
-<p>在vulhub/confluence/CVE2022-26134 目录下</p>
-<ol>
-<li>新建Dockerfile</li>
-</ol>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> vulhub/confluence:<span class="number">7.13</span>.<span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed <span class="string">&quot;106 iCATALINA_OPTS=\&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \$\&#123;CATALINA_OPTS\&#125;\&quot;&quot;</span> -i /opt/atlassian/confluence/bin/setenv.sh</span></span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>更新docker-compose.yml</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">build:</span> <span class="string">.</span></span><br><span class="line"><span class="comment"># image: vulhub/confluence:7.13.6</span></span><br><span class="line"><span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;8090:8090&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;5005:5005&quot;</span></span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Confluence</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
     </nav>
   
 
@@ -1042,6 +1040,18 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">静态分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IAST</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
               </li>
             
             <div class="clearfix"></div>
