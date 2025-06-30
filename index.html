@@ -45,7 +45,7 @@ ga('send', 'pageview');
 
   
 
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container" q-class="show:isCtnShow">
@@ -171,465 +171,409 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-Tabby-工具分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Vanna-CVE-2025-47277-看CodeQL-Python-实现（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2022/10/22/Tabby-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90/">Tabby 源码分析</a>
+      <a class="article-title" href="/2025/06/16/Vanna-CVE-2025-47277-%E7%9C%8BCodeQL-Python-%E5%AE%9E%E7%8E%B0%EF%BC%88%E4%B8%80%EF%BC%89/">Vanna CVE-2025-47277 看CodeQL Python 方法映射</a>
     </h1>
   
 
         
-        <a href="/2022/10/22/Tabby-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2022-10-22T08:27:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-10-22</time>
+        <a href="/2025/06/16/Vanna-CVE-2025-47277-%E7%9C%8BCodeQL-Python-%E5%AE%9E%E7%8E%B0%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
+  	<time datetime="2025-06-16T10:53:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-06-16</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="0x01-背景"><a href="#0x01-背景" class="headerlink" title="0x01 背景"></a>0x01 背景</h2><p>与GadgetInspector 类似，Tabby 也是通过污点分析来实现的Gadget Chain挖掘。不同的是</p>
-<ul>
-<li>Tabby 用soot 来做的静态污点分析，GadgetInspector 是用的ASM 模拟来做的污点跟踪</li>
-<li>用了Neo4j来做CPG 的查询与展示，要灵活很多</li>
-<li>优化了污点传播关系</li>
-</ul>
-<p>据说Tabby 一开始是wh1t3p1g师傅的毕设，不过当时没放出tabby-path-finder，因此一直没太关注Tabby 污点分析这块，都是用手动白名单来做过滤的。KCon上师傅的PPT，收获很多，学习总结下。这里主要关注</p>
+        <h2 id="1-漏洞原理"><a href="#1-漏洞原理" class="headerlink" title="1. 漏洞原理"></a>1. 漏洞原理</h2><p>漏洞并不复杂，整个链也不长</p>
+<p>source：<br><a target="_blank" rel="noopener" href="https://github.com/vanna-ai/vanna/blob/a72b842d420cf1fa061e5f97d45ea08051651ebb/src/vanna/flask/__init__.py#L441">https://github.com/vanna-ai/vanna/blob/a72b842d420cf1fa061e5f97d45ea08051651ebb/src/vanna/flask/__init__.py#L441</a> </p>
+<p><img src="/images/pasted-925.png" alt="upload successful"></p>
+<p>sink：<br><a target="_blank" rel="noopener" href="https://github.com/vanna-ai/vanna/blob/4da8dea0ce14a0d1db5a0692a7921d873be91c5f/src/vanna/base/base.py#L2088">https://github.com/vanna-ai/vanna/blob/4da8dea0ce14a0d1db5a0692a7921d873be91c5f/src/vanna/base/base.py#L2088</a> </p>
+        
+          <a class="article-more-a" href="/2025/06/16/Vanna-CVE-2025-47277-%E7%9C%8BCodeQL-Python-%E5%AE%9E%E7%8E%B0%EF%BC%88%E4%B8%80%EF%BC%89/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/CodeQL//" class="article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-CodeQL-类型追踪" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2025/06/10/CodeQL-%E7%B1%BB%E5%9E%8B%E8%BF%BD%E8%B8%AA/">CodeQL Python 类型追踪</a>
+    </h1>
+  
+
+        
+        <a href="/2025/06/10/CodeQL-%E7%B1%BB%E5%9E%8B%E8%BF%BD%E8%B8%AA/" class="archive-article-date">
+  	<time datetime="2025-06-10T12:56:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-06-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在分析CodeQL Python 污点分析时候发现，有用到shared 的新模块typetracking。从前面Python 的Extractor 分析中，我们知道它的DB 内是没有类型信息的，没有类型信息是怎么做污点呢？</p>
+<p>Java 是在编译的时候创建的DB，这一过程中可以拿到了AST 节点对应的类型信息，例如call 节点函数信息，可以直接关联callable，知道调的是哪个函数。但是纯AST 要怎么做？</p>
+<p>联想之前做Java 反射Patch 的时候，印象中也需要用到类型跟踪,但是是自己实现的，改动颇大，不知道这个typetracking 是否能够更优雅的解决，分析下。</p>
+<p><img src="/images/pasted-923.png" alt="upload successful"></p>
+        
+          <a class="article-more-a" href="/2025/06/10/CodeQL-%E7%B1%BB%E5%9E%8B%E8%BF%BD%E8%B8%AA/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/CodeQL//" class="article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-CodeQL-Python-Extractor-源码分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2025/05/26/CodeQL-Python-Extractor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">CodeQL Python Extractor 源码分析</a>
+    </h1>
+  
+
+        
+        <a href="/2025/05/26/CodeQL-Python-Extractor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2025-05-26T08:51:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-05-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近定位python codeql 的一个cve 复现，发现涉及到extractor 的逻辑，正好之前也有跟踪过java 的经验，应该大差不差，记录下。</p>
+<h2 id="1-架构"><a href="#1-架构" class="headerlink" title="1. 架构"></a>1. 架构</h2><p><img src="/images/pasted-890.png" alt="upload successful"></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/github/codeql/blob/main/python/extractor/README.md#2-The-actual-Python-extractor">https://github.com/github/codeql/blob/main/python/extractor/README.md#2-The-actual-Python-extractor</a></p>
+        
+          <a class="article-more-a" href="/2025/05/26/CodeQL-Python-Extractor-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Extractor</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/CodeQL//" class="article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Apache-Kylin-CVE-2022-24697--漏洞分析与CodeQL-验证" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2024/06/17/Apache-Kylin-CVE-2022-24697--%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E4%B8%8ECodeQL-%E9%AA%8C%E8%AF%81/">Apache Kylin CVE-2022-24697/CVE-2022-43396 漏洞分析与CodeQL 验证</a>
+    </h1>
+  
+
+        
+        <a href="/2024/06/17/Apache-Kylin-CVE-2022-24697--%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E4%B8%8ECodeQL-%E9%AA%8C%E8%AF%81/" class="archive-article-date">
+  	<time datetime="2024-06-17T13:09:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-06-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>在官方漏洞报告中，说CVE-2022-43396是CVE-2022-24697的绕过。实际情况却是：两个漏洞均是发送在 Kylin 的 cube build 功能中，但CVE-2022-24697是参数可控；CVE-2022-43396是命令可控。</p>
+</blockquote>
+<p>下文以CVE-2022-24697 为例，主要目的是跟踪下数据流，看看能否用CodeQL 复现。</p>
+<h2 id="1-漏洞概况"><a href="#1-漏洞概况" class="headerlink" title="1. 漏洞概况"></a>1. 漏洞概况</h2><blockquote>
+<p>影响版本：<br>Kylin 2.x &amp; Kylin 3.x &amp; 4.x should upgrade to 4.0.2</p>
+</blockquote>
+<h2 id="2-漏洞分析"><a href="#2-漏洞分析" class="headerlink" title="2. 漏洞分析"></a>2. 漏洞分析</h2><h3 id="2-1-漏洞环境搭建"><a href="#2-1-漏洞环境搭建" class="headerlink" title="2.1 漏洞环境搭建"></a>2.1 漏洞环境搭建</h3><p>同前文，不赘述</p>
+        
+          <a class="article-more-a" href="/2024/06/17/Apache-Kylin-CVE-2022-24697--%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E4%B8%8ECodeQL-%E9%AA%8C%E8%AF%81/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Kylin</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Apache-Kylin-历史漏洞分析与CodeQL-回归验证" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2024/06/11/Apache-Kylin-%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E4%B8%8ECodeQL-%E5%9B%9E%E5%BD%92%E9%AA%8C%E8%AF%81/">Apache Kylin CVE-2021-45456/CVE-2022-44621 漏洞分析与CodeQL 验证</a>
+    </h1>
+  
+
+        
+        <a href="/2024/06/11/Apache-Kylin-%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E4%B8%8ECodeQL-%E5%9B%9E%E5%BD%92%E9%AA%8C%E8%AF%81/" class="archive-article-date">
+  	<time datetime="2024-06-11T11:52:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-06-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>CVE-2021-45456 漏洞是rest api 接口参数project 存在命令注入，CVE-2022-44621 漏洞是jobid 参数存在命令注入，原理相似，这里以分析CVE-2021-45456 为例，跟踪下这两个漏洞。</p>
+<h2 id="1-漏洞概况"><a href="#1-漏洞概况" class="headerlink" title="1. 漏洞概况"></a>1. 漏洞概况</h2><p>影响版本：4.0.0</p>
+<blockquote>
+<p>Mitigation:<br>Users of Kylin 4.0.0 should upgrade to 4.0.1 or apply patch <a target="_blank" rel="noopener" href="https://github.com/apache/kylin/pull/1781">https://github.com/apache/kylin/pull/1781</a>.</p>
+</blockquote>
+<blockquote>
+<p>Credit:<br>These issues were discovered and reported by GHSL team member @pwntester (Alvaro Muñoz).</p>
+</blockquote>
+<p>描述：project 参数存在命令拼接</p>
+<h2 id="2-漏洞分析"><a href="#2-漏洞分析" class="headerlink" title="2. 漏洞分析"></a>2. 漏洞分析</h2><h3 id="2-1-漏洞环境搭建"><a href="#2-1-漏洞环境搭建" class="headerlink" title="2.1 漏洞环境搭建"></a>2.1 漏洞环境搭建</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">docker pull apachekylin/apache-kylin-standalone:4.0.0</span><br><span class="line"></span><br><span class="line">docker run -d \</span><br><span class="line">-m 8G \</span><br><span class="line">-p 7070:7070 \</span><br><span class="line">-p 8088:8088 \</span><br><span class="line">-p 50070:50070 \</span><br><span class="line">-p 8032:8032 \</span><br><span class="line">-p 8042:8042 \</span><br><span class="line">-p 2181:2181 \</span><br><span class="line">-p 5005:5005 \</span><br><span class="line">apachekylin/apache-kylin-standalone:4.0.0</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-漏洞原理分析"><a href="#2-2-漏洞原理分析" class="headerlink" title="2.2 漏洞原理分析"></a>2.2 漏洞原理分析</h3><p>很简单的命令拼接漏洞，如下</p>
 <ol>
-<li>Tabby 污点传播规则</li>
-<li>Tabby soot 污点分析的实现</li>
-<li>Tabby Neo4j 搜索实现</li>
+<li>DiagnosisController#dumpProjectDiagnosisInfo<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Get diagnosis information for project</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RequestMapping(value = &quot;/project/&#123;project&#125;/download&quot;, method = &#123; RequestMethod.GET &#125;, produces = &#123;</span></span><br><span class="line"><span class="meta">        &quot;application/json&quot; &#125;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">dumpProjectDiagnosisInfo</span><span class="params">(<span class="meta">@PathVariable</span> String project, <span class="keyword">final</span> HttpServletRequest request,</span></span><br><span class="line"><span class="params">        <span class="keyword">final</span> HttpServletResponse response)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">AutoDeleteDirectory</span> <span class="variable">diagDir</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AutoDeleteDirectory</span>(<span class="string">&quot;diag_project&quot;</span>, <span class="string">&quot;&quot;</span>)) &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">filePath</span> <span class="operator">=</span> dgService.dumpProjectDiagnosisInfo(project, diagDir.getFile());</span><br><span class="line">        setDownloadResponse(filePath, response);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">InternalErrorException</span>(<span class="string">&quot;Failed to dump project diagnosis info. &quot;</span> + e.getMessage(), e);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ol>
-<p>注：本文需要对soot 有一定了解，参考fynch3r 师傅的参考【3】。</p>
-<h2 id="0x02-Soot-数据流分析"><a href="#0x02-Soot-数据流分析" class="headerlink" title="0x02 Soot 数据流分析"></a>0x02 Soot 数据流分析</h2><p>四步走：</p>
-<p><img src="/images/pasted-320.png" alt="upload successful"></p>
-        
-          <a class="article-more-a" href="/2022/10/22/Tabby-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tabby</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">污点分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全/程序分析//" class="article-tag-list-link color5">程序分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-DongTai-IAST-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/10/18/DongTai-IAST-%E5%88%86%E6%9E%90/">DongTai IAST Java Agent分析</a>
-    </h1>
-  
-
-        
-        <a href="/2022/10/18/DongTai-IAST-%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2022-10-18T02:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-10-18</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="0x1-背景知识"><a href="#0x1-背景知识" class="headerlink" title="0x1 背景知识"></a>0x1 背景知识</h2><p>IAST 概念虽然很早就提出了，但是在实际使用情况中，因为其生产无侵入性与漏误报情况，实际使用效果还是不过的。</p>
-<h3 id="1-1-IAST"><a href="#1-1-IAST" class="headerlink" title="1.1 IAST"></a>1.1 IAST</h3><ul>
-<li>DAST (Dynamic Application Security Testing)</li>
-<li>IAST (Interactive Application Security Testing)</li>
-<li>RASP（Runtime Application Self-protection）</li>
-<li>SAST (Static Application Security Testing)</li>
-</ul>
-<p>属IAST 最模糊，与三者都有纠缠。</p>
-<h3 id="1-2-主动-与-被动"><a href="#1-2-主动-与-被动" class="headerlink" title="1.2 主动 与 被动"></a>1.2 主动 与 被动</h3><h4 id="1-2-1-主动IAST"><a href="#1-2-1-主动IAST" class="headerlink" title="1.2.1 主动IAST"></a>1.2.1 主动IAST</h4><p>主动IAST很简单，可以简单理解为 动态IAST = DAST + RASP</p>
-<p><img src="/images/pasted-294.png" alt="upload successful"></p>
-        
-          <a class="article-more-a" href="/2022/10/18/DongTai-IAST-%E5%88%86%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">IAST</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">DongTai</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Tabby技术分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">GadgetInspector 源码分析</a>
-    </h1>
-  
-
-        
-        <a href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2022-09-14T03:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>开始啃骨头了。。。</p>
-<h2 id="0x01-背景知识"><a href="#0x01-背景知识" class="headerlink" title="0x01 背景知识"></a>0x01 背景知识</h2><p>不了解算法原理基础上，去直接啃GI源码，真的是一件很困难的事情，难得有师傅们的经验总结，站在师傅们的肩膀上记录下GI的学习心得。</p>
-<h3 id="时间线"><a href="#时间线" class="headerlink" title="时间线"></a>时间线</h3><ul>
-<li>2018年Black Hat公布<a target="_blank" rel="noopener" href="https://i.blackhat.com/us-18/Thu-August-9/us-18-Haken-Automated-Discovery-of-Deserialization-Gadget-Chains.pdf">GadgetInspector</a></li>
-<li>2019年Longofo师傅<a target="_blank" rel="noopener" href="https://paper.seebug.org/1034/#step2-passthrough_1">《Java 反序列化工具 gadgetinspector 初窥》</a>，详细跟踪了除ASM之外的知识点，重点是逆拓扑排序</li>
-<li>2020年threedr3am<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7058#toc-4">《java反序列化利用链自动挖掘工具gadgetinspector源码浅析》</a>，重点分析了Longofo师傅未提到的ASM</li>
-<li>2022年su18师傅<a target="_blank" rel="noopener" href="https://su18.org/post/gadgetor/">《高效挖掘反序列化漏洞——GadgetInspector改造》</a>，提到了GI的不足以及改进思路</li>
-</ul>
-<p>当然，还有其他的许多师傅关于GI的文章，这里没有提到，不赘述。</p>
-        
-          <a class="article-more-a" href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">GadgetInspector</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">污点分析</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">静态分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全/程序分析//" class="article-tag-list-link color5">程序分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Struts2系列四：Confluence CVE-2021-26084" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/07/20/Struts2%E7%B3%BB%E5%88%97%E5%9B%9B%EF%BC%9AConfluence%20CVE-2021-26084/">Confluence CVE-2021-26084 Velocity模板二次注入</a>
-    </h1>
-  
-
-        
-        <a href="/2022/07/20/Struts2%E7%B3%BB%E5%88%97%E5%9B%9B%EF%BC%9AConfluence%20CVE-2021-26084/" class="archive-article-date">
-  	<time datetime="2022-07-20T08:27:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Confluence CVE-2021-26084 是前台能够触发的RCE，CVSS9.8，危害不小。漏洞原因是因为Velocity 写得有问题导致可以Ognl注入，这种模板问题导致的漏洞挺少见，但是很适用，值得分析。</p>
-<h2 id="0x01-环境搭建"><a href="#0x01-环境搭建" class="headerlink" title="0x01 环境搭建"></a>0x01 环境搭建</h2><p>P🐮的Vulhub 有镜像，参考【2】，同样调试接口没有开出来，可以参考之前的《Confluence CVE-2022-26134 OGNL 分析》一文搭建环境。</p>
-<ol>
-<li><p>新建Dockerfile</p>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> vulhub/confluence:<span class="number">7.4</span>.<span class="number">10</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed <span class="string">&quot;67 iCATALINA_OPTS=\&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \$\&#123;CATALINA_OPTS\&#125;\&quot;&quot;</span> -i /opt/atlassian/confluence/bin/setenv.sh</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>更新docker-compose.yml</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">build:</span> <span class="string">.</span></span><br><span class="line"><span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;8090:8090&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;5005:5005&quot;</span></span><br></pre></td></tr></table></figure>
-
-</li>
-</ol>
-        
-          <a class="article-more-a" href="/2022/07/20/Struts2%E7%B3%BB%E5%88%97%E5%9B%9B%EF%BC%9AConfluence%20CVE-2021-26084/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Confluence</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Struts2系列二：Velocity 模板" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/">Struts2系列二：JSP/Velocity模板</a>
-    </h1>
-  
-
-        
-        <a href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/" class="archive-article-date">
-  	<time datetime="2022-07-13T09:56:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>模板引擎注入也算是通用的漏洞类型了，不论是python/java，出现过的cve例子也不少。JSP/FreeMarker/Velocity 作为Struts2 的默认模板引擎，分析分析其实现原理，为以后的漏洞分析作铺垫。</p>
-<h2 id="0x01-背景知识"><a href="#0x01-背景知识" class="headerlink" title="0x01 背景知识"></a>0x01 背景知识</h2><h3 id="Struts2-Tag"><a href="#Struts2-Tag" class="headerlink" title="Struts2 Tag"></a>Struts2 Tag</h3><p>Tag是struts 模板元素的基础单位。建议先阅读参考【6】中《Tag Developers Guide》。</p>
-<p>Tag 有以下几类</p>
 <ul>
-<li>通用tag<ul>
-<li>控制流 tag， 例如 if、else</li>
-<li>数据tag， 例如include、set、url</li>
+<li>project 参数存在命令拼接</li>
 </ul>
-</li>
-<li>UI tag，例如 from、text、div<ul>
-<li>Form tag，例如 checkbox、checkbox、head</li>
-<li>非Form tag，例如actonerror、actionmessage</li>
-</ul>
-</li>
-</ul>
-<p>模板的逻辑是如何实现的呢？</p>
         
-          <a class="article-more-a" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/#more">more >></a>
+          <a class="article-more-a" href="/2024/06/11/Apache-Kylin-%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E4%B8%8ECodeQL-%E5%9B%9E%E5%BD%92%E9%AA%8C%E8%AF%81/#more">more >></a>
         
       
 
@@ -643,11 +587,11 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Velocity</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Kylin</a>
         		</li>
       		
 		</ul>
@@ -659,7 +603,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        			<a href="/categories/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
         		</li>
       		
 		</ul>
@@ -697,7 +641,7 @@ ga('send', 'pageview');
   
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/2/">Next »</a>
     </nav>
   
 
@@ -709,7 +653,7 @@ ga('send', 'pageview');
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2022 m0d9
+    		&copy; 2025 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -1042,11 +986,67 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">IAST</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kafka</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Jaas</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CVE-2020-9297</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">BeanValidation</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Dubbo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-33246</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RocketMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Tai-e</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ActiveMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-22518</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-46604</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Extractor</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kylin</a>
               </li>
             
             <div class="clearfix"></div>

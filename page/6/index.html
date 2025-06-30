@@ -45,7 +45,7 @@ ga('send', 'pageview');
 
   
 
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container" q-class="show:isCtnShow">
@@ -171,34 +171,43 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-工具分析：TemplatesImpl链与代码执行" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Struts2系列一：OGNL 表达式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/">ysoserial工具分析：TemplatesImpl链与代码执行</a>
+      <a class="article-title" href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/">Struts2系列一：OGNL 表达式</a>
     </h1>
   
 
         
-        <a href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" class="archive-article-date">
-  	<time datetime="2020-09-25T02:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-25</time>
+        <a href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="archive-article-date">
+  	<time datetime="2022-07-11T08:27:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-11</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>ysoserial的payload只看过Groovy和CommonsCollections1，就一直以为ysoserial是简单的通过最终调用Runtime.getRuntime().exec(cmd)来实现各种利用链的命令执行的，太年轻。。。</p>
-<p>本文以CommonsCollections2为例，主要介绍：</p>
+        <p>最近在复盘confluence CVE-2022-26134 这个漏洞，发现根本原因还是Struts2 架构的问题，这块的知识点挺多，不是一篇文章能解释清楚的，因此准备搞个系列，理理Struts2 架构相关的漏洞及原理。</p>
+<ul>
+<li>Ognl</li>
+<li>velocity</li>
+<li>Struts2</li>
+<li>Confluence</li>
+</ul>
+<h2 id="Ox01-基础知识"><a href="#Ox01-基础知识" class="headerlink" title="Ox01 基础知识"></a>Ox01 基础知识</h2><p>参考【1】中R17a 已经有整理了相关的OGNL相关基础知识，这里不做深入介绍，简单罗列下知识点。</p>
 <ol>
-<li>ysoserial通过TemplatesImpl实现的通用命令执行打包</li>
-<li>如何实现代码执行（非命令执行）</li>
+<li>expression 表达式、相关语法    </li>
+<li>context 上下文</li>
+<li>root 对象</li>
 </ol>
+<h2 id="0x02-原理"><a href="#0x02-原理" class="headerlink" title="0x02 原理"></a>0x02 原理</h2><h3 id="2-1-生成AST树"><a href="#2-1-生成AST树" class="headerlink" title="2.1 生成AST树"></a>2.1 生成AST树</h3><p>以以下poc为例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ognl.getValue(<span class="string">&quot;@java.lang.Runtime@getRuntime().exec(&#x27;open -a Calculator&#x27;)&quot;</span>, context, context.getRoot());</span><br></pre></td></tr></table></figure>
         
-          <a class="article-more-a" href="/2020/09/25/%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%EF%BC%9ATemplatesImpl%E9%93%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/#more">more >></a>
+          <a class="article-more-a" href="/2022/07/11/Struts2%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9AOGNL%20%E8%A1%A8%E8%BE%BE%E5%BC%8F/#more">more >></a>
         
       
 
@@ -212,15 +221,11 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">ysoserial</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">TemplatesImpl</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
         		</li>
       		
 		</ul>
@@ -236,7 +241,7 @@ ga('send', 'pageview');
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全/Ysoserial//" class="article-tag-list-link color5">Ysoserial</a>
+        			<a href="/categories/Java安全/Struts2//" class="article-tag-list-link color3">Struts2</a>
         		</li>
       		
 		</ul>
@@ -272,36 +277,45 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-JNDI-LDAP 注入及高版本JDK限制——上" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Confluence-CVE-2022-26134-OGNL-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/">JNDI：JNDI-LDAP 注入及高版本JDK限制</a>
+      <a class="article-title" href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/">Confluence CVE-2022-26134 OGNL 分析</a>
     </h1>
   
 
         
-        <a href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/" class="archive-article-date">
-  	<time datetime="2020-07-23T02:43:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-23</time>
+        <a href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2022-06-10T06:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-06-10</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>引用参考【1】</p>
-<blockquote>
-<p>除了RMI服务之外，JNDI还可以对接LDAP服务，LDAP也能返回JNDI Reference对象，利用过程与上面RMI Reference基本一致，只是lookup()中的URL为一个LDAP地址：ldap://xxx/xxx，由攻击者控制的LDAP服务端返回一个恶意的JNDI Reference对象。并且LDAP服务的Reference远程加载Factory类不受上一点中 com.sun.jndi.rmi.object.trustURLCodebase、com.sun.jndi.cosnaming.object.trustURLCodebase等属性的限制，所以适用范围更广。</p>
-</blockquote>
-<blockquote>
-<p>不过在2018年10月，Java最终也修复了这个利用点，对LDAP Reference远程工厂类的加载增加了限制，在Oracle JDK 11.0.1、8u191、7u201、6u211之后 com.sun.jndi.ldap.object.trustURLCodebase 属性的默认值被调整为false，还对应的分配了一个漏洞编号CVE-2018-3149。</p>
-</blockquote>
-<p>不赘述JNDI相关背景，本节主要复现JNDI-LDAP注入，以及如何绕过高版本jdk上的限制</p>
+        <!-- 日拱一卒，功不唐捐。-->
+
+<p>发现半年没写文章了。。。</p>
+<h2 id="0x01-环境搭建"><a href="#0x01-环境搭建" class="headerlink" title="0x01 环境搭建"></a>0x01 环境搭建</h2><p>P🐮的Vulhub 有镜像了，不过调试接口没有开出来，这里稍微补充下。</p>
+<p>在vulhub/confluence/CVE2022-26134 目录下</p>
+<ol>
+<li>新建Dockerfile</li>
+</ol>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> vulhub/confluence:<span class="number">7.13</span>.<span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed <span class="string">&quot;106 iCATALINA_OPTS=\&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \$\&#123;CATALINA_OPTS\&#125;\&quot;&quot;</span> -i /opt/atlassian/confluence/bin/setenv.sh</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>更新docker-compose.yml</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">build:</span> <span class="string">.</span></span><br><span class="line"><span class="comment"># image: vulhub/confluence:7.13.6</span></span><br><span class="line"><span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;8090:8090&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;5005:5005&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
         
-          <a class="article-more-a" href="/2020/07/23/JNDI-LDAP%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E9%AB%98%E7%89%88%E6%9C%ACJDK%E9%99%90%E5%88%B6%E2%80%94%E2%80%94%E4%B8%8A/#more">more >></a>
+          <a class="article-more-a" href="/2022/06/10/Confluence-CVE-2022-26134-OGNL-%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -315,107 +329,109 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Confluence</a>
         		</li>
       		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-JNDI-RMI-LDAP注入绕过逆向分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/">JNDI-RMI 注入的EL 绕过思路分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-12-17T06:11:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="/images/pasted-203.png" alt="upload successful"></p>
+<p>上面的JNDI 注入的JDK 版本限制已经耳熟能详了，针对JNDI-RMI 的tomcat EL 绕过姿势也被经常提起，本文尝试回溯这一姿势的发现过程。</p>
+<h2 id="JNDI-RMI-注入"><a href="#JNDI-RMI-注入" class="headerlink" title="JNDI-RMI 注入"></a>JNDI-RMI 注入</h2><h3 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h3><p>必须了解两个重要的类</p>
+<ul>
+<li>com.sun.jndi.rmi.registry.RegistryContext： JNDI-RMI接口</li>
+<li>java.rmi.registry.Registry： RMI 接口</li>
+</ul>
+<p>通常攻击场景下，Registry是作为RMI服务端，RegistryContext是作为攻击的client端，也就是vuln。</p>
+        
+          <a class="article-more-a" href="/2021/12/17/JNDI-RMI-LDAP%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">LDAP</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-JNDI：JNDI-RMI 注入及绕过JDK高版本限制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/">JNDI：JNDI-RMI 注入及绕过JDK高版本限制</a>
-    </h1>
-  
-
-        
-        <a href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2020-07-16T12:47:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-16</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>fastjson 配合jndi注入攻击，现在已经是很常见的姿势了。前文RMI 1中略微提到jndi-rmi 攻击client的思路，这里详细补充下。</p>
-<p>其实JNDI-RMI注入的核心是JNDI注入，RMI协议只是jndi支持的其中一种，其他还有很多。这里不做深入JNDI安全背景解释，只是因为和RMI略有关系，所以作为RMI系列只是简要跟进分析下。</p>
-        
-          <a class="article-more-a" href="/2020/07/16/JNDI%EF%BC%9AJNDI-RMI%20%E6%B3%A8%E5%85%A5%E5%8F%8A%E7%BB%95%E8%BF%87JDK%E9%AB%98%E7%89%88%E6%9C%AC%E9%99%90%E5%88%B6/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
         		</li>
       		
@@ -464,36 +480,38 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-RMI：绕过JEP290——下" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-CodeQL-CVE-2021-2471" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/">RMI：绕过JEP290——下</a>
+      <a class="article-title" href="/2021/11/01/CodeQL-CVE-2021-2471/">CodeQL with CVE-2021-2471</a>
     </h1>
   
 
         
-        <a href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/" class="archive-article-date">
-  	<time datetime="2020-07-15T03:52:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-15</time>
+        <a href="/2021/11/01/CodeQL-CVE-2021-2471/" class="archive-article-date">
+  	<time datetime="2021-11-01T13:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-01</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>前文留了个坑，8u231之后还出现了限制与绕过，填个坑</p>
-<p>本节的思路：</p>
+        <p>pyn3rd师傅的《Make JDBC Attack Brilliant Again》中有一个0day是mysql jdbc xxe，thread3am师傅也早就复现出来了，而且还发现了h2的xxe。膜一个，师傅们都太🐂🍺了。很多师傅们也复现了，再讲也没啥意思了，用CodeQL整点新的吧。</p>
 <ol>
-<li>回顾JEP290 bypass的原理</li>
-<li>8u231的限制，老的JRMP绕过方式为何不行了</li>
-<li>An Trinh的绕过方式</li>
-<li>8u241的限制</li>
+<li><p>CVE-2021-2471 mysql jdbc xxe在HITB ppt里面，没有讲DOMSource XXE这一部分，原因应该是pyn3rd师傅提漏洞还未公开，没写在ppt里面。所以这个洞有两个东西：</p>
+<p> a. DOMSource XXE, 影响所有版本，官方8.0.27中修复掉了</p>
+<p> b. Fabric XXE, 影响5.x, 在5.1.49中修复</p>
+</li>
+<li><p>CodeQL CWE-611有XXE的检测poc，不过source源不支持mysql。</p>
+</li>
 </ol>
+<h2 id="0x01-CVE-2021-2471"><a href="#0x01-CVE-2021-2471" class="headerlink" title="0x01 CVE-2021-2471"></a>0x01 CVE-2021-2471</h2><h3 id="1-1-DOMSource-XXE"><a href="#1-1-DOMSource-XXE" class="headerlink" title="1.1 DOMSource XXE"></a>1.1 DOMSource XXE</h3><p>漏洞代码在 com.mysql.cj.jdbc.MysqlSQLXML#getSource</p>
         
-          <a class="article-more-a" href="/2020/07/15/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%8B/#more">more >></a>
+          <a class="article-more-a" href="/2021/11/01/CodeQL-CVE-2021-2471/#more">more >></a>
         
       
 
@@ -507,19 +525,23 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Mysql</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XXE</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">enableReplace</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Fabric</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
         		</li>
       		
 		</ul>
@@ -531,7 +553,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        			<a href="/categories/CodeQL//" class="article-tag-list-link color2">CodeQL</a>
         		</li>
       		
 		</ul>
@@ -567,36 +589,34 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-RMI：绕过JEP290——中" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-XStream反序列化（三）——Tabby CVE之旅" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/">RMI：绕过JEP290——中</a>
+      <a class="article-title" href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/">XStream反序列化（三）——Tabby CVE之旅</a>
     </h1>
   
 
         
-        <a href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/" class="archive-article-date">
-  	<time datetime="2020-07-11T03:35:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-07-11</time>
+        <a href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/" class="archive-article-date">
+  	<time datetime="2021-08-29T09:03:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-29</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本节主要解释前文留下的问题：</p>
-<p>只是建立了恶意JRMP的连接，但是没执行bind，为什么可以打成功？</p>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>流程比较复杂，先直接给结论，绕过JEP290的原理是</p>
-<ol>
-<li>利用JEP290白名单内的类，覆盖掉registerRefs（此时未建立JRMP连接）</li>
-<li>Registry 处理bind请求，最后会触发DGC逻辑，DGC向registerRefs里保存的Server发送dirty请求</li>
-<li>DGC底层使用的是StreamRemoteCall.executeCall进行io的传输，executeCall发送完之后，会根据对方的反馈进行不同的操作，当对方返回一定条件时（初步判断是对方RMI Exception），会直接序列化InputStream，造成反序列化漏洞</li>
-</ol>
+        <p>月底在即，再不写点东西，每月一篇都要食言了。上个月刚挖的OpenRASP的坑，本打算再研究研究绕过姿势，验证下猜想，也没下文。正好6月份交的XStream SSRF Gadget CVE下来，之前XStream系列草稿箱里也待着之前逆向分析师傅们挖掘的思路&amp;手法，正好编辑编辑，水一篇”如何挖掘XStream Gadgets”。</p>
+<p>首先感谢Wh1t3p1g师傅的Tabby，用起来比gadgetinspector更顺手，找链神器。</p>
+<h2 id="Tabby"><a href="#Tabby" class="headerlink" title="Tabby"></a>Tabby</h2><p>有关Tabby的介绍，详情可以参考【1】中Wh1t3p1g师傅的几个wiki，写的很详细了，这里也不多啰嗦。（这里膜一下Wh1t3p1g师傅）</p>
+<p>Neo4j 查询比较吃cpu，小本本加上idea同时跑吃力，搞台vps跑比较好，但是tabby是通过apoc.load.csv file写Neo4j数据的，相当于限制了本机，因此给下整库的dump和load（当然，直接整个在vps上操作也是ok的）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dump neo4j database</span></span><br><span class="line">neo4j-admin dump --to /tmp/neo4j.dump --database neo4j</span><br><span class="line"><span class="comment"># scp dump file to vps</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># load neo4j dump file</span></span><br><span class="line">./bin/neo4j stop</span><br><span class="line">./bin/neo4j-admin load --from=/root/neo4j.dump --database=neo4j --force</span><br><span class="line">./bin/neo4j start</span><br></pre></td></tr></table></figure>
         
-          <a class="article-more-a" href="/2020/07/11/RMI%EF%BC%9A%E7%BB%95%E8%BF%87JEP290%E2%80%94%E2%80%94%E4%B8%AD/#more">more >></a>
+          <a class="article-more-a" href="/2021/08/29/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89%E2%80%94%E2%80%94Tabby%20CVE%E4%B9%8B%E6%97%85/#more">more >></a>
         
       
 
@@ -610,15 +630,15 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Gadget</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RMI</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Tabby</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">JEP290</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">XStream</a>
         		</li>
       		
 		</ul>
@@ -668,7 +688,7 @@ ga('send', 'pageview');
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/5/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/7/">Next »</a>
+      <a class="extend prev" rel="prev" href="/page/5/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/7/">Next »</a>
     </nav>
   
 
@@ -680,7 +700,7 @@ ga('send', 'pageview');
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2022 m0d9
+    		&copy; 2025 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -1013,11 +1033,67 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">IAST</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kafka</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Jaas</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CVE-2020-9297</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">BeanValidation</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Dubbo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-33246</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RocketMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Tai-e</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ActiveMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-22518</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-46604</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Extractor</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kylin</a>
               </li>
             
             <div class="clearfix"></div>

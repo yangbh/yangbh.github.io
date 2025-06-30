@@ -45,7 +45,7 @@ ga('send', 'pageview');
 
   
 
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body>
   <div id="container" q-class="show:isCtnShow">
@@ -171,352 +171,52 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-pyAntiSSRF" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-GadgetInspector-工具分析与改进" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/12/25/pyAntiSSRF/">pyAntiSSRF：python SSRF防御SDK</a>
+      <a class="article-title" href="/2022/09/23/GadgetInspector-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%E4%B8%8E%E6%94%B9%E8%BF%9B/">GadgetInspector 分析与改进</a>
     </h1>
   
 
         
-        <a href="/2020/12/25/pyAntiSSRF/" class="archive-article-date">
-  	<time datetime="2020-12-25T02:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-12-25</time>
+        <a href="/2022/09/23/GadgetInspector-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%E4%B8%8E%E6%94%B9%E8%BF%9B/" class="archive-article-date">
+  	<time datetime="2022-09-23T07:35:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-23</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>发现居然没有特别好用的python防御ssrf好用的pip库，造个轮子</p>
+        <p>书接上回，上一节中我们分析了GI的工作流程，</p>
 <ul>
-<li>支持pip简单安装</li>
-<li>支持 py2&amp;py3</li>
-<li>直接通过参数引用，直接hijack最常用的requests库，不引入第三方函数</li>
-<li>支持防御DNS rebinding</li>
+<li>ASM 框架的vistor 遍历机制：类、方法、接口实现关系表的构建</li>
+<li>Passthrough 程序内污点分析的实现：ASM和逆拓扑排序</li>
+<li>Callgraph 程序间污点分析的实现：利用passthrough生成ret污点</li>
+<li>GadegetChain BSF实现</li>
 </ul>
-<h2 id="SSRF原理及防御"><a href="#SSRF原理及防御" class="headerlink" title="SSRF原理及防御"></a>SSRF原理及防御</h2><p>ssrf攻击及防御这里不延伸，可参考【1】，p神讲的挺明白了，提两点</p>
-<ol>
-<li>原文没涉及到dns rebinding的防御，其实防御思路也很简单，只进行1次dns请求即可</li>
-<li>循环hijack requests这个思路提到过，但是不是最优解，其实直接hijack requests.sessions.Session.request即可，所有的requests get/post最终都调用的这个函数</li>
-</ol>
-<p>具体没啥可说的，看代码【2】吧</p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p><code>pip install pyAntiSSRF</code></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. import &amp; patch requests库</span></span><br><span class="line"><span class="keyword">import</span> pyAntiSSRF</span><br><span class="line">pyAntiSSRF.patchRequests()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 通过参数anti_ssrf（get/post/request函数都支持，默认不开启），控制是否开启ssrf防御，如果开启且目标ip是内网，则会抛出异常</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="comment"># custom requests usage</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># patch requests by hijack requests.sessions.Session.request, default disable</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>, anti_ssrf=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># raise Exception</span></span><br><span class="line">requests.get(<span class="string">&quot;http://10.10.10.10/&quot;</span>, anti_ssrf=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2020/12/25/pyAntiSSRF/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">ssrf</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">anti</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">tools</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">pip</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Python安全//" class="article-tag-list-link color4">Python安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Python安全/工具//" class="article-tag-list-link color3">工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Java内存shell：Tomcat回显" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/">Java内存shell：Tomcat回显</a>
-    </h1>
-  
-
-        
-        <a href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/" class="archive-article-date">
-  	<time datetime="2020-10-10T06:19:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-10-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Tomcat回显 与 Java内存shell有什么关系？</p>
-<p>在java漏洞利用中如何获取到执行结果？这是Tomcat回显的最原始需求，具体可以参考【4】中的许多手法，这里不展开</p>
-<p>其中提到一种思路，获取response，然后直接操作response以http形式返回。而Java内存shell中，很重要的一点就是获取request从而获取上下文cotext，其中获取request的思路相似通用可借鉴。</p>
-<h2 id="历史背景"><a href="#历史背景" class="headerlink" title="历史背景"></a>历史背景</h2><p>参考【1】中李三师傅总结了之前比较经典的tomcat回显方式，写的很好，直接复用：</p>
-        
-          <a class="article-more-a" href="/2020/10/10/Java%E5%86%85%E5%AD%98shell%EF%BC%9ATomcat%E5%9B%9E%E6%98%BE/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Tomcat</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">回显</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Java内存shell：三方框架" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/">Java内存shell：三方框架</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/" class="archive-article-date">
-  	<time datetime="2020-09-27T02:06:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>前文tomcat的通用servlet内存马已经基本可以覆盖大部分的情况，针对第三方框架，思路也是一样的，姿势不同。观星实验室的师傅们在参考【1】中提到了关于Sping的姿势，这里学习记录下。</p>
-<h2 id="Spring"><a href="#Spring" class="headerlink" title="Spring"></a>Spring</h2><p>具体的背景不赘述，详见参考【1】，几个重点的步骤</p>
-<ol>
-<li>获得当前代码运行时的上下文环境</li>
-<li>手动注册 controller</li>
-<li>controller 中的 Webshell 逻辑</li>
-</ol>
-<p>文中师傅没有给出直接运行的poc，这里给一下</p>
-<h3 id="Show-me-the-code"><a href="#Show-me-the-code" class="headerlink" title="Show me the code"></a>Show me the code</h3>
-        
-          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9A%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">内存马</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Spring</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-  
-    <article id="post-Java内存shell：javaagent" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/">Java内存shell：javaagent</a>
-    </h1>
-  
-
-        
-        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/" class="archive-article-date">
-  	<time datetime="2020-09-27T02:05:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>rebeyond 师傅在参考【1】中提出利用javaagent 永久注入tomcat进程的方案，有几个重要的技术点</p>
-<ol>
-<li>javaagent技术</li>
-<li>javassist技术</li>
-<li>tomcat ApplicationFilterChain.internalDoFilter方法</li>
-<li>ShutdownHook 钩子</li>
-</ol>
-<h2 id="javassist技术"><a href="#javassist技术" class="headerlink" title="javassist技术"></a>javassist技术</h2><blockquote>
-<p>Java 字节码以二进制的形式存储在 .class 文件中，每一个 .class 文件包含一个 Java 类或接口。Javaassist 就是一个用来 处理 Java 字节码的类库。它可以在一个已经编译好的类中添加新的方法，或者是修改已有的方法，并且不需要对字节码方面有深入的了解。同时也可以去生成一个新的类对象，通过完全手动的方式。</p>
+<p>在此基础上，主要针对以下问题再深入分析分析：</p>
+<ul>
+<li>su18师傅与Lango师傅都有提到的一些问题及改进点</li>
+<li>Java的反射、多态问题是如何处理的等等</li>
+<li>已知链的覆盖及漏报情况</li>
+</ul>
+<p>先来过一遍su18师傅提到的几个改进点</p>
+<h2 id="0x01-su18师傅的改进点"><a href="#0x01-su18师傅的改进点" class="headerlink" title="0x01 su18师傅的改进点"></a>0x01 su18师傅的改进点</h2><h3 id="1-1-继承方法"><a href="#1-1-继承方法" class="headerlink" title="1.1 继承方法"></a>1.1 继承方法</h3><blockquote>
+<p>前提知识：当一个类的方法A.method1 污点可以传播给B.method2，那么A的子类subA，如果subA没有重写method1，那么subA.method1 也可以把污点传播给B.method2。</p>
 </blockquote>
-<p>javassist 相关文档可以参考【2】和【3】，以简单的javassist demo<br>为例</p>
+<p>这个很好理解，但是在GI的整个过程中</p>
+<ol>
+<li>在CallGraph 阶段，ASM在遍历class的时候，只会找出所有的A.method call B.method，生成对应的关系</li>
+<li>在GadgetChain 阶段，也只会遍历接口方法的具体实现</li>
+</ol>
+<p>并没有做类似的传播。</p>
+<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>【<a target="_blank" rel="noopener" href="https://github.com/threedr3am/gadgetinspector">来自 threedr3am 师傅的版本</a>】</p>
         
-          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Ajavaagent/#more">more >></a>
+          <a class="article-more-a" href="/2022/09/23/GadgetInspector-%E5%B7%A5%E5%85%B7%E5%88%86%E6%9E%90%E4%B8%8E%E6%94%B9%E8%BF%9B/#more">more >></a>
         
       
 
@@ -530,19 +230,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">内存shell</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">javassist</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">javaagent</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">GadgetInspector</a>
         		</li>
       		
 		</ul>
@@ -554,7 +242,7 @@ ga('send', 'pageview');
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        			<a href="/categories/程序分析//" class="article-tag-list-link color5">程序分析</a>
         		</li>
       		
 		</ul>
@@ -590,31 +278,37 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-Java内存shell：servlet" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-Tabby技术分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/">Java内存shell：servlet</a>
+      <a class="article-title" href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">GadgetInspector 源码分析</a>
     </h1>
   
 
         
-        <a href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/" class="archive-article-date">
-  	<time datetime="2020-09-27T01:58:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-09-27</time>
+        <a href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2022-09-14T03:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-14</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>最近在学习Java内存shell相关知识，总结沉淀几篇文章，权当学习笔记了。</p>
-<h2 id="Java内存webshell史"><a href="#Java内存webshell史" class="headerlink" title="Java内存webshell史"></a>Java内存webshell史</h2><p>直接引用c0ny1师傅的总结，写的太好了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">其实内存马由来已久，早在17年n1nty师傅的《Tomcat源码调试笔记-看不见的shell》中已初见端倪，但一直不温不火。后经过rebeyong师傅使用agent技术加持后，拓展了内存马的使用场景，然终停留在奇技淫巧上。在各类hw洗礼之后，文件shell明显气数已尽。内存马以救命稻草的身份重回大众视野。特别是今年在shiro的回显研究之后，引发了无数安全研究员对内存webshell的研究，其中涌现出了LandGrey师傅构造的Spring controller内存马。至此内存马开枝散叶发展出了三大类型：</span><br><span class="line"></span><br><span class="line">1. servlet-api类</span><br><span class="line">	filter型</span><br><span class="line">	servlet型</span><br><span class="line">2. spring类</span><br><span class="line">	拦截器</span><br><span class="line">	controller型</span><br><span class="line">3. Java Instrumentation类</span><br><span class="line">	agent型</span><br><span class="line"></span><br><span class="line">内存马这坛深巷佳酒，一时间流行于市井与弄堂之间。上至安全研究员下至普通客户，人尽皆知。正值hw来临之际，不难推测届时必将是内存马横行天下之日。而各大安全厂商却迟迟未见动静。所谓表面风平浪静，实则暗流涌动。或许一场内存马的围剿计划正慢慢展开。作为攻击方向的研究人员，没有对手就制造对手,攻防互换才能提升内存马技术的发展。</span><br></pre></td></tr></table></figure>
+        <p>开始啃骨头了。。。</p>
+<h2 id="0x01-背景知识"><a href="#0x01-背景知识" class="headerlink" title="0x01 背景知识"></a>0x01 背景知识</h2><p>不了解算法原理基础上，去直接啃GI源码，真的是一件很困难的事情，难得有师傅们的经验总结，站在师傅们的肩膀上记录下GI的学习心得。</p>
+<h3 id="时间线"><a href="#时间线" class="headerlink" title="时间线"></a>时间线</h3><ul>
+<li>2018年Black Hat公布<a target="_blank" rel="noopener" href="https://i.blackhat.com/us-18/Thu-August-9/us-18-Haken-Automated-Discovery-of-Deserialization-Gadget-Chains.pdf">GadgetInspector</a></li>
+<li>2019年Longofo师傅<a target="_blank" rel="noopener" href="https://paper.seebug.org/1034/#step2-passthrough_1">《Java 反序列化工具 gadgetinspector 初窥》</a>，详细跟踪了除ASM之外的知识点，重点是逆拓扑排序</li>
+<li>2020年threedr3am<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7058#toc-4">《java反序列化利用链自动挖掘工具gadgetinspector源码浅析》</a>，重点分析了Longofo师傅未提到的ASM</li>
+<li>2022年su18师傅<a target="_blank" rel="noopener" href="https://su18.org/post/gadgetor/">《高效挖掘反序列化漏洞——GadgetInspector改造》</a>，提到了GI的不足以及改进思路</li>
+</ul>
+<p>当然，还有其他的许多师傅关于GI的文章，这里没有提到，不赘述。</p>
         
-          <a class="article-more-a" href="/2020/09/27/Java%E5%86%85%E5%AD%98shell%EF%BC%9Aservlet/#more">more >></a>
+          <a class="article-more-a" href="/2022/09/14/Tabby%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more">more >></a>
         
       
 
@@ -632,15 +326,128 @@ ga('send', 'pageview');
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">内存马</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">GadgetInspector</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">shell</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">污点分析</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">servlet</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">静态分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/程序分析//" class="article-tag-list-link color5">程序分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Struts2系列三：Struts2历史漏洞" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/07/25/Struts2%E7%B3%BB%E5%88%97%E4%B8%89%EF%BC%9AStruts2%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E/">Struts2系列三：Struts2历史漏洞001-009</a>
+    </h1>
+  
+
+        
+        <a href="/2022/07/25/Struts2%E7%B3%BB%E5%88%97%E4%B8%89%EF%BC%9AStruts2%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E/" class="archive-article-date">
+  	<time datetime="2022-07-25T08:01:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Struts2 框架虽然现在使用者很少了，但是作为一代传说，很值得分析一下。参考【8】中Qu3een 提到Spring4shell 的原理与struts2 类加载器漏洞利用方式类似，其实Confluence CVE-2021-26084 模板二次注入也和struts2 有关，因此决定系统性的梳理struts2 漏洞系列。</p>
+<p>许多师傅们也都分析过了，参考文章中su18师傅的5篇、Qu3een师傅长篇，很详细也有深度，总结的很好。纸上得来终觉浅，本文主要还是准备作为学习笔记，其中与师傅们相似的内容就不过多赘述了。</p>
+<h2 id="0x01-前言"><a href="#0x01-前言" class="headerlink" title="0x01 前言"></a>0x01 前言</h2><p>环境搭建推荐参考【8】中xhycccc 师傅的Struts2-Vuln-Demo 项目，基于IEDA 搭建的源码环境。本文中，准备每个漏洞按以下几点来进行。</p>
+<ul>
+<li>漏洞描述：这里不赘述，可以参考【8】中Qu3een师傅的整理</li>
+<li>漏洞影响：同上</li>
+<li>漏洞分析：按知识点来分析，师傅们主动跟踪调试的过程就不复述了</li>
+<li>漏洞修复：师傅们都穿插在文章中，单独这里也统一做个小节</li>
+<li>漏洞小结：自己理解的漏洞重点，做个小结</li>
+</ul>
+<h2 id="0x02-S2-001"><a href="#0x02-S2-001" class="headerlink" title="0x02 S2-001"></a>0x02 S2-001</h2><blockquote>
+<p>影响版本：WebWork 2.1 (with altSyntax enabled), WebWork 2.2.0 - WebWork 2.2.5, Struts 2.0.0 - Struts 2.0.8<br>参考链接：<a target="_blank" rel="noopener" href="https://cwiki.apache.org/confluence/display/WW/S2-001">https://cwiki.apache.org/confluence/display/WW/S2-001</a><br>描述：由于在 variable translation 的过程中，使用了 while(true) 来进行字符串的处理和表达式的解析，导致攻击者可以在可控的能解析的内容中通过添加 “%{}” 来使应用程序进行二次表达式解析，这就导致了ognl注入，也就是所谓的RCE漏洞。官方将这种解析方式描述为递归，实际上不是传统意义上的递归，只是循环解析。</p>
+</blockquote>
+<h3 id="2-1-背景知识"><a href="#2-1-背景知识" class="headerlink" title="2.1 背景知识"></a>2.1 背景知识</h3><p>几个struts 前提知识点：</p>
+<ul>
+<li>altSyntax: 在开启时，支持对标签中的 OGNL 表达式进行解析并执行。altSyntax 功能在处理标签时，对 OGNL 表达式的解析能力实际上是依赖于开源组件 XWork。</li>
+<li>default stack<ul>
+<li>root: CompoundRoot<ul>
+<li>Action: 为当前struts action 对象</li>
+<li>Provider</li>
+</ul>
+</li>
+<li>context</li>
+</ul>
+</li>
+</ul>
+        
+          <a class="article-more-a" href="/2022/07/25/Struts2%E7%B3%BB%E5%88%97%E4%B8%89%EF%BC%9AStruts2%E5%8E%86%E5%8F%B2%E6%BC%8F%E6%B4%9E/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
         		</li>
       		
 		</ul>
@@ -653,6 +460,223 @@ ga('send', 'pageview');
 			 
         		<li class="article-tag-list-item">
         			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/Struts2//" class="article-tag-list-link color3">Struts2</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Struts2系列四：Confluence CVE-2021-26084" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/07/20/Struts2%E7%B3%BB%E5%88%97%E5%9B%9B%EF%BC%9AConfluence%20CVE-2021-26084/">Confluence CVE-2021-26084 Velocity模板二次注入</a>
+    </h1>
+  
+
+        
+        <a href="/2022/07/20/Struts2%E7%B3%BB%E5%88%97%E5%9B%9B%EF%BC%9AConfluence%20CVE-2021-26084/" class="archive-article-date">
+  	<time datetime="2022-07-20T08:27:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Confluence CVE-2021-26084 是前台能够触发的RCE，CVSS9.8，危害不小。漏洞原因是因为Velocity 写得有问题导致可以Ognl注入，这种模板问题导致的漏洞挺少见，但是很适用，值得分析。</p>
+<h2 id="0x01-环境搭建"><a href="#0x01-环境搭建" class="headerlink" title="0x01 环境搭建"></a>0x01 环境搭建</h2><p>P🐮的Vulhub 有镜像，参考【2】，同样调试接口没有开出来，可以参考之前的《Confluence CVE-2022-26134 OGNL 分析》一文搭建环境。</p>
+<ol>
+<li><p>新建Dockerfile</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> vulhub/confluence:<span class="number">7.4</span>.<span class="number">10</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed <span class="string">&quot;67 iCATALINA_OPTS=\&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \$\&#123;CATALINA_OPTS\&#125;\&quot;&quot;</span> -i /opt/atlassian/confluence/bin/setenv.sh</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>更新docker-compose.yml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">build:</span> <span class="string">.</span></span><br><span class="line"><span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;8090:8090&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;5005:5005&quot;</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+        
+          <a class="article-more-a" href="/2022/07/20/Struts2%E7%B3%BB%E5%88%97%E5%9B%9B%EF%BC%9AConfluence%20CVE-2021-26084/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Confluence</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">OGNL</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/漏洞分析//" class="article-tag-list-link color5">漏洞分析</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+  
+    <article id="post-Struts2系列二：Velocity 模板" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/">Struts2系列二：JSP/Velocity模板</a>
+    </h1>
+  
+
+        
+        <a href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/" class="archive-article-date">
+  	<time datetime="2022-07-13T09:56:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>模板引擎注入也算是通用的漏洞类型了，不论是python/java，出现过的cve例子也不少。JSP/FreeMarker/Velocity 作为Struts2 的默认模板引擎，分析分析其实现原理，为以后的漏洞分析作铺垫。</p>
+<h2 id="0x01-背景知识"><a href="#0x01-背景知识" class="headerlink" title="0x01 背景知识"></a>0x01 背景知识</h2><h3 id="Struts2-Tag"><a href="#Struts2-Tag" class="headerlink" title="Struts2 Tag"></a>Struts2 Tag</h3><p>Tag是struts 模板元素的基础单位。建议先阅读参考【6】中《Tag Developers Guide》。</p>
+<p>Tag 有以下几类</p>
+<ul>
+<li>通用tag<ul>
+<li>控制流 tag， 例如 if、else</li>
+<li>数据tag， 例如include、set、url</li>
+</ul>
+</li>
+<li>UI tag，例如 from、text、div<ul>
+<li>Form tag，例如 checkbox、checkbox、head</li>
+<li>非Form tag，例如actonerror、actionmessage</li>
+</ul>
+</li>
+</ul>
+<p>模板的逻辑是如何实现的呢？</p>
+        
+          <a class="article-more-a" href="/2022/07/13/Struts2%E7%B3%BB%E5%88%97%E4%BA%8C%EF%BC%9AVelocity%20%E6%A8%A1%E6%9D%BF/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Struts2</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Velocity</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全//" class="article-tag-list-link color2">Java安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Java安全/Struts2//" class="article-tag-list-link color3">Struts2</a>
         		</li>
       		
 		</ul>
@@ -690,7 +714,7 @@ ga('send', 'pageview');
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/4/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/6/">Next »</a>
+      <a class="extend prev" rel="prev" href="/page/4/">« Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/6/">Next »</a>
     </nav>
   
 
@@ -702,7 +726,7 @@ ga('send', 'pageview');
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2022 m0d9
+    		&copy; 2025 m0d9
     	</div>
       	<div class="footer-right">
       		<!-- <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten -->
@@ -1035,11 +1059,67 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">CobaltStrike</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">IAST</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">DongTai</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kafka</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Jaas</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CVE-2020-9297</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">BeanValidation</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Dubbo</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-33246</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RocketMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Tai-e</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ActiveMQ</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-22518</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">CVE-2023-46604</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Extractor</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Kylin</a>
               </li>
             
             <div class="clearfix"></div>
